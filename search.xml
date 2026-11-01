@@ -305,6 +305,17 @@
       </tags>
   </entry>
   <entry>
+    <title>Android Studio 常见问题</title>
+    <url>/2017/05/21/Android-Studio-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Android基本概念和語法</title>
     <url>/2016/10/16/Android%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%92%8C%E8%AA%9E%E6%B3%95/</url>
     <content><![CDATA[<h2 id="1-什么是Intent"><a href="#1-什么是Intent" class="headerlink" title="1. 什么是Intent?"></a>1. 什么是Intent?</h2><p>Intent的中文意思是“意图，意向”，在Android中提供了Intent机制来协助应用间的交互与通讯，Intent负责对应用中一次操作的动作、动作涉及数据、附加数据进行描述，Android则根据此Intent的描述，负责找到对应的组件，将 Intent传递给调用的组件，并完成组件的调用。Intent不仅可用于应用程序之间，也可用于应用程序内部的Activity&#x2F;Service之间的交互。</p>
@@ -473,14 +484,21 @@
       </tags>
   </entry>
   <entry>
-    <title>Android Studio 常见问题</title>
-    <url>/2017/05/21/Android-Studio-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[]]></content>
+    <title>Android开发中的空指针异常</title>
+    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
+    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
+
+<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
+]]></content>
       <categories>
         <category>mobile development</category>
       </categories>
       <tags>
         <tag>Android</tag>
+        <tag>空指针异常</tag>
       </tags>
   </entry>
   <entry>
@@ -541,24 +559,6 @@
         <tag>ListView</tag>
         <tag>正則匹配</tag>
         <tag>ZXing</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Android开发中的空指针异常</title>
-    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
-    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
-
-<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
-]]></content>
-      <categories>
-        <category>mobile development</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>空指针异常</tag>
       </tags>
   </entry>
   <entry>
@@ -704,90 +704,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Gprinter打印机驱动安装及设置</title>
-    <url>/2016/10/15/Gprinter%E6%89%93%E5%8D%B0%E6%9C%BA%E9%A9%B1%E5%8A%A8%E5%AE%89%E8%A3%85%E5%8F%8A%E8%AE%BE%E7%BD%AE/</url>
-    <content><![CDATA[<h2 id="驱动安装"><a href="#驱动安装" class="headerlink" title="驱动安装"></a>驱动安装</h2><ol>
-<li>找到驱动文件根目录下的Drivers文件夹并进入，双击“PrnInst.exe”，进入安装向导欢迎界面，如下图所示。</li>
-</ol>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step01.jpg" alt="Step 1">
-</p>
-
-<ol start="2">
-<li>点击“下一步”，进入选项界面，如下图所示</li>
-</ol>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step02.jpg" alt="Step 1">
-</p>
-
-<ol start="3">
-<li>点击“安装打印机”，进入“选择打印机界面”，如图所示，选择“GP-9034T”,点击“下一步”。</li>
-</ol>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step03.jpg" alt="Step 1">
-</p>
-
-<ol start="4">
-<li>进入打印机名称、端口和语言设置界面，端口选择“USB001”,语言默认简体中文，和名称一样默认，点击完成即可完成安装。</li>
-</ol>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step04.jpg" alt="Step 1">
-</p>
-
-<h2 id="驱动设置"><a href="#驱动设置" class="headerlink" title="驱动设置"></a>驱动设置</h2><ol>
-<li>进入系统设备和打印机，右击“Gprinter”打印机，选择“打印机首选项”，进入打印机首选项设置界面，如下图所示；</li>
-</ol>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step05.jpg" alt="Step 1">
-</p>
-
-<ol start="2">
-<li>在“选项”Tab页面，打印速度设为5cm&#x2F;s，打印浓度设为9，标签格式选择cm,宽度设为5，高度设为3，点击应用按钮；</li>
-</ol>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step06.jpg" alt="Step 1">
-</p>
-
-<ol start="3">
-<li>进入高级设置Tab页，感测器类型选择“间距”，介质设置为“缺省设置”，选项选择“撕纸”，点击应用按钮；</li>
-</ol>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step07.jpg" alt="Step 1">
-</p>
-
-<ol start="4">
-<li>进入“抖动Tab页”，抖动类型选择“无”，点击应用按钮；到此设置完成，点击确定按钮，保存所有设置。</li>
-</ol>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step08.jpg" alt="Step 1">
-</p>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>Gprinter</tag>
-        <tag>打印机</tag>
-        <tag>驱动</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Fiddler常見問題</title>
-    <url>/2016/10/16/Fiddler%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C/</url>
-    <content><![CDATA[<h2 id="无法显示会话结果"><a href="#无法显示会话结果" class="headerlink" title="无法显示会话结果"></a>无法显示会话结果</h2><p>可能是编码原因，一般Fiddler也会提示：</p>
-<blockquote>
-<p>“Response body is encoded. Click to decoded”</p>
-</blockquote>
-<p>只需点击提示按钮即可显示get到的信息，或者选择对应的Session，右击选择“decode selected session”即可。</p>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>Fiddler</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Fexo</title>
     <url>/2016/10/22/Fexo/</url>
     <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Fexo是Hexo的一款极简主题之一</p>
@@ -860,6 +776,90 @@
       <tags>
         <tag>Fexo</tag>
         <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Fiddler常見問題</title>
+    <url>/2016/10/16/Fiddler%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C/</url>
+    <content><![CDATA[<h2 id="无法显示会话结果"><a href="#无法显示会话结果" class="headerlink" title="无法显示会话结果"></a>无法显示会话结果</h2><p>可能是编码原因，一般Fiddler也会提示：</p>
+<blockquote>
+<p>“Response body is encoded. Click to decoded”</p>
+</blockquote>
+<p>只需点击提示按钮即可显示get到的信息，或者选择对应的Session，右击选择“decode selected session”即可。</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Fiddler</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Gprinter打印机驱动安装及设置</title>
+    <url>/2016/10/15/Gprinter%E6%89%93%E5%8D%B0%E6%9C%BA%E9%A9%B1%E5%8A%A8%E5%AE%89%E8%A3%85%E5%8F%8A%E8%AE%BE%E7%BD%AE/</url>
+    <content><![CDATA[<h2 id="驱动安装"><a href="#驱动安装" class="headerlink" title="驱动安装"></a>驱动安装</h2><ol>
+<li>找到驱动文件根目录下的Drivers文件夹并进入，双击“PrnInst.exe”，进入安装向导欢迎界面，如下图所示。</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step01.jpg" alt="Step 1">
+</p>
+
+<ol start="2">
+<li>点击“下一步”，进入选项界面，如下图所示</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step02.jpg" alt="Step 1">
+</p>
+
+<ol start="3">
+<li>点击“安装打印机”，进入“选择打印机界面”，如图所示，选择“GP-9034T”,点击“下一步”。</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step03.jpg" alt="Step 1">
+</p>
+
+<ol start="4">
+<li>进入打印机名称、端口和语言设置界面，端口选择“USB001”,语言默认简体中文，和名称一样默认，点击完成即可完成安装。</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step04.jpg" alt="Step 1">
+</p>
+
+<h2 id="驱动设置"><a href="#驱动设置" class="headerlink" title="驱动设置"></a>驱动设置</h2><ol>
+<li>进入系统设备和打印机，右击“Gprinter”打印机，选择“打印机首选项”，进入打印机首选项设置界面，如下图所示；</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step05.jpg" alt="Step 1">
+</p>
+
+<ol start="2">
+<li>在“选项”Tab页面，打印速度设为5cm&#x2F;s，打印浓度设为9，标签格式选择cm,宽度设为5，高度设为3，点击应用按钮；</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step06.jpg" alt="Step 1">
+</p>
+
+<ol start="3">
+<li>进入高级设置Tab页，感测器类型选择“间距”，介质设置为“缺省设置”，选项选择“撕纸”，点击应用按钮；</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step07.jpg" alt="Step 1">
+</p>
+
+<ol start="4">
+<li>进入“抖动Tab页”，抖动类型选择“无”，点击应用按钮；到此设置完成，点击确定按钮，保存所有设置。</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step08.jpg" alt="Step 1">
+</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Gprinter</tag>
+        <tag>打印机</tag>
+        <tag>驱动</tag>
       </tags>
   </entry>
   <entry>
@@ -955,6 +955,34 @@
       <tags>
         <tag>Markdown</tag>
         <tag>图片</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RecyclerView的使用</title>
+    <url>/2016/11/20/RecyclerView%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="Rendering-Problems"><a href="#Rendering-Problems" class="headerlink" title="Rendering Problems"></a>Rendering Problems</h3><p>在布局文件中添加 RecyclerView,会出现 Rendering Problems,具体问题如下图所示：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/RecycleView/exception.png" alt="Rendering Problems">
+</p>
+
+<p>详细异常如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java.lang.IllegalStateException: Unable to locate mode 0</span><br><span class="line">	at android.view.DisplayInfo.findMode(DisplayInfo.java:458)</span><br><span class="line">	at android.view.DisplayInfo.getMode(DisplayInfo.java:445)</span><br><span class="line">	at android.view.Display.getRefreshRate(Display.java:648)</span><br><span class="line">	at android.support.v7.widget.RecyclerView.onAttachedToWindow(RecyclerView.java:2392)</span><br><span class="line">	at android.view.View.dispatchAttachedToWindow(View.java:15392)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2953)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.AttachInfo_Accessor.setAttachInfo(AttachInfo_Accessor.java:42)</span><br><span class="line">	at com.android.layoutlib.bridge.impl.RenderSessionImpl.inflate(RenderSessionImpl.java:333)</span><br><span class="line">	at com.android.layoutlib.bridge.Bridge.createSession(Bridge.java:429)</span><br><span class="line">	at com.android.ide.common.rendering.LayoutLibrary.createSession(LayoutLibrary.java:389)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask$2.compute(RenderTask.java:548)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask$2.compute(RenderTask.java:533)</span><br><span class="line">	at com.intellij.openapi.application.impl.ApplicationImpl.runReadAction(ApplicationImpl.java:966)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask.createRenderSession(RenderTask.java:533)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask.lambda$inflate$53(RenderTask.java:659)</span><br><span class="line">	at java.util.concurrent.FutureTask.run(FutureTask.java:266)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)</span><br><span class="line">	at java.lang.Thread.run(Thread.java:745)</span><br></pre></td></tr></table></figure>
+
+<p>我的工程中的 build.gradle dependencies如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile &#x27;com.android.support:appcompat-v7:25.0.0&#x27;</span><br><span class="line">compile &#x27;com.android.support:recyclerview-v7:25.0.0&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>改为如下即可解决问题，貌似是25.0.0的bug</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile &#x27;com.android.support:appcompat-v7:25.0.1&#x27;</span><br><span class="line">compile &#x27;com.android.support:recyclerview-v7:25.0.1&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>Sync Now 之后，问题完美解决</p>
+<p><a href="http://stackoverflow.com/questions/40161934/exception-raised-during-rendering-unable-to-locate-mode-0">参考网址</a></p>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>RecyclerView</tag>
+        <tag>Exception</tag>
       </tags>
   </entry>
   <entry>
@@ -1079,34 +1107,6 @@
       </tags>
   </entry>
   <entry>
-    <title>RecyclerView的使用</title>
-    <url>/2016/11/20/RecyclerView%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="Rendering-Problems"><a href="#Rendering-Problems" class="headerlink" title="Rendering Problems"></a>Rendering Problems</h3><p>在布局文件中添加 RecyclerView,会出现 Rendering Problems,具体问题如下图所示：</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/RecycleView/exception.png" alt="Rendering Problems">
-</p>
-
-<p>详细异常如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java.lang.IllegalStateException: Unable to locate mode 0</span><br><span class="line">	at android.view.DisplayInfo.findMode(DisplayInfo.java:458)</span><br><span class="line">	at android.view.DisplayInfo.getMode(DisplayInfo.java:445)</span><br><span class="line">	at android.view.Display.getRefreshRate(Display.java:648)</span><br><span class="line">	at android.support.v7.widget.RecyclerView.onAttachedToWindow(RecyclerView.java:2392)</span><br><span class="line">	at android.view.View.dispatchAttachedToWindow(View.java:15392)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2953)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.AttachInfo_Accessor.setAttachInfo(AttachInfo_Accessor.java:42)</span><br><span class="line">	at com.android.layoutlib.bridge.impl.RenderSessionImpl.inflate(RenderSessionImpl.java:333)</span><br><span class="line">	at com.android.layoutlib.bridge.Bridge.createSession(Bridge.java:429)</span><br><span class="line">	at com.android.ide.common.rendering.LayoutLibrary.createSession(LayoutLibrary.java:389)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask$2.compute(RenderTask.java:548)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask$2.compute(RenderTask.java:533)</span><br><span class="line">	at com.intellij.openapi.application.impl.ApplicationImpl.runReadAction(ApplicationImpl.java:966)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask.createRenderSession(RenderTask.java:533)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask.lambda$inflate$53(RenderTask.java:659)</span><br><span class="line">	at java.util.concurrent.FutureTask.run(FutureTask.java:266)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)</span><br><span class="line">	at java.lang.Thread.run(Thread.java:745)</span><br></pre></td></tr></table></figure>
-
-<p>我的工程中的 build.gradle dependencies如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile &#x27;com.android.support:appcompat-v7:25.0.0&#x27;</span><br><span class="line">compile &#x27;com.android.support:recyclerview-v7:25.0.0&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>改为如下即可解决问题，貌似是25.0.0的bug</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile &#x27;com.android.support:appcompat-v7:25.0.1&#x27;</span><br><span class="line">compile &#x27;com.android.support:recyclerview-v7:25.0.1&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>Sync Now 之后，问题完美解决</p>
-<p><a href="http://stackoverflow.com/questions/40161934/exception-raised-during-rendering-unable-to-locate-mode-0">参考网址</a></p>
-]]></content>
-      <categories>
-        <category>mobile development</category>
-      </categories>
-      <tags>
-        <tag>RecyclerView</tag>
-        <tag>Exception</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Windows常见问题</title>
     <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
@@ -1216,7 +1216,7 @@
 </ul>
 <ol>
 <li>先输入$ git remote rm origin</li>
-<li>再输入$ git remote add origin <a href="mailto:&#x67;&#x69;&#x74;&#64;&#x63;&#x6e;&#98;&#x2e;&#99;&#x6f;&#111;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
+<li>再输入$ git remote add origin <a href="mailto:&#x67;&#x69;&#116;&#64;&#99;&#x6e;&#98;&#x2e;&#99;&#111;&#111;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
 </ol>
 <h3 id="2-warning-LF-will-be-replaced-by-CRLF"><a href="#2-warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="2. warning: LF will be replaced by CRLF"></a>2. warning: LF will be replaced by CRLF</h3><p>运行如下命令时；</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">warning: LF will be replaced by CRLF in _config.yml.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br></pre></td></tr></table></figure>
@@ -1409,6 +1409,23 @@
       </tags>
   </entry>
   <entry>
+    <title>诗词集</title>
+    <url>/2017/04/26/%E8%AF%97%E8%AF%8D%E9%9B%86/</url>
+    <content><![CDATA[<h2 id="2017年4月26日"><a href="#2017年4月26日" class="headerlink" title="2017年4月26日"></a>2017年4月26日</h2><p>个人生活照寄语</p>
+<p>春有百花秋有月,<br>夏有凉风冬有雪。<br>本无闲事挂心头,<br>处处人间好时节。</p>
+<blockquote>
+<p>改编自宋朝无门慧开禅师所作《无门关》一书</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>life</category>
+      </categories>
+      <tags>
+        <tag>诗词</tag>
+        <tag>life</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>软件开发流程</title>
     <url>/2016/10/15/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/</url>
     <content><![CDATA[<p><em><strong>参考自<a href="http://baike.baidu.com/link?url=cD6VLiJSqMkCLSe-7X6yB5oapMb5aD3_Vgh0PsVGkTaE8pd5rvKXUGEfKpIkZB_xnZyZ1z7Zb9WW5wwnO5mMrCaHgDhu-Nl-k8IQuNeXxyIVEhCHNrxNyrk-84CnGqU44iLJa4F3Vswkm6aYCAYK5a">百度百科</a></strong></em></p>
@@ -1469,23 +1486,6 @@
       <tags>
         <tag>软件开发</tag>
         <tag>流程</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>诗词集</title>
-    <url>/2017/04/26/%E8%AF%97%E8%AF%8D%E9%9B%86/</url>
-    <content><![CDATA[<h2 id="2017年4月26日"><a href="#2017年4月26日" class="headerlink" title="2017年4月26日"></a>2017年4月26日</h2><p>个人生活照寄语</p>
-<p>春有百花秋有月,<br>夏有凉风冬有雪。<br>本无闲事挂心头,<br>处处人间好时节。</p>
-<blockquote>
-<p>改编自宋朝无门慧开禅师所作《无门关》一书</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>life</category>
-      </categories>
-      <tags>
-        <tag>诗词</tag>
-        <tag>life</tag>
       </tags>
   </entry>
 </search>
