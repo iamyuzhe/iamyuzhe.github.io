@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/goldfish.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/goldfish.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha256-4Lad8m4ZWW1Lgb9+sMVLYEfnIh7BjV1NQMEe79Pviks=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"iamyuzhe.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.29.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null,"show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="1. 什么是Intent?Intent的中文意思是“意图，意向”，在Android中提供了Intent机制来协助应用间的交互与通讯，Intent负责对应用中一次操作的动作、动作涉及数据、附加数据进行描述，Android则根据此Intent的描述，负责找到对应的组件，将 Intent传递给调用的组件，并完成组件的调用。Intent不仅可用于应用程序之间，也可用于应用程序内部的Activity&amp;#x2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android基本概念和語法">
+<meta property="og:url" content="https://iamyuzhe.github.io/2016/10/16/Android%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%92%8C%E8%AA%9E%E6%B3%95/index.html">
+<meta property="og:site_name" content="Andrew Yu的个人博客">
+<meta property="og:description" content="1. 什么是Intent?Intent的中文意思是“意图，意向”，在Android中提供了Intent机制来协助应用间的交互与通讯，Intent负责对应用中一次操作的动作、动作涉及数据、附加数据进行描述，Android则根据此Intent的描述，负责找到对应的组件，将 Intent传递给调用的组件，并完成组件的调用。Intent不仅可用于应用程序之间，也可用于应用程序内部的Activity&amp;#x2">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-10-16T01:48:48.000Z">
+<meta property="article:modified_time" content="2026-11-01T13:13:28.013Z">
+<meta property="article:author" content="Andrew Yu">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="語法">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://iamyuzhe.github.io/2016/10/16/Android%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%92%8C%E8%AA%9E%E6%B3%95/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://iamyuzhe.github.io/2016/10/16/Android%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%92%8C%E8%AA%9E%E6%B3%95/","path":"2016/10/16/Android基本概念和語法/","title":"Android基本概念和語法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android基本概念和語法 | Andrew Yu的个人博客</title>
+  
+
+
+
+
+
+
+
+
+  
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Andrew Yu的个人博客" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-search popup-trigger" aria-label="搜索" role="button">
+      <i class="fa fa-search fa-fw fa-lg"></i>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Andrew Yu的个人博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">技术与生活</p>
+  </div>
+
+  <div class="site-nav-toggle" aria-label="切换导航栏" role="button">
+      <i class="fa fa-ellipsis fa-fw fa-lg"></i>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-项目"><a href="/project/" rel="section"><i class="fa fa-code fa-fw"></i>项目</a></li><li class="menu-item menu-item-友链"><a href="/link/" rel="section"><i class="fa fa-link fa-fw"></i>友链</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  
+  <template id="search-popup-template"><div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div></template>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AFIntent"><span class="nav-number">1.</span> <span class="nav-text">1. 什么是Intent?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%BB%80%E4%B9%88%E6%98%AFBundle"><span class="nav-number">2.</span> <span class="nav-text">2. 什么是Bundle?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Intent%E5%A6%82%E4%BD%95%E4%BC%A0%E9%80%92%E6%95%B0%E6%8D%AE%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">3. Intent如何传递数据？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-id%E4%B8%8D%E8%83%BD%E5%9C%A8string-xml%E4%B8%AD%E5%AE%9A%E4%B9%89"><span class="nav-number">4.</span> <span class="nav-text">4. id不能在string.xml中定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-onActivityResult-%E6%96%B9%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">5. onActivityResult()方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-Android-Studio%E5%A6%82%E4%BD%95%E5%AF%BC%E5%85%A5jar%E5%8C%85"><span class="nav-number">6.</span> <span class="nav-text">6. Android Studio如何导入jar包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-SocketException"><span class="nav-number">7.</span> <span class="nav-text">7. SocketException</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E6%B7%BB%E5%8A%A0%E6%9D%83%E9%99%90%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="nav-number">8.</span> <span class="nav-text">8. 添加权限的两种方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-NetworkOnMainThreadException"><span class="nav-number">9.</span> <span class="nav-text">9. NetworkOnMainThreadException</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-gbk%E4%B8%8Egb2312%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">10.</span> <span class="nav-text">10. gbk与gb2312的区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-GridView-%E8%A1%A8%E6%A0%BC%E5%B8%83%E5%B1%80-%EF%BC%9F"><span class="nav-number">11.</span> <span class="nav-text">11. GridView(表格布局)？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-HashMap%E4%B8%8EMap%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">12.</span> <span class="nav-text">12. HashMap与Map区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-SimpleAdapter"><span class="nav-number">13.</span> <span class="nav-text">13. SimpleAdapter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-List-ArrayList-LinkedList%E5%8D%80%E5%88%A5%EF%BC%9F"><span class="nav-number">14.</span> <span class="nav-text">14. List, ArrayList, LinkedList區別？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15-ArrayAdapter%E5%92%8CBaseAdapter%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">15.</span> <span class="nav-text">15. ArrayAdapter和BaseAdapter区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#16-final%E7%B1%BB%E6%9C%89%E4%BB%80%E4%B9%88%E7%89%B9%E5%88%AB%E4%B9%8B%E5%A4%84%EF%BC%9F"><span class="nav-number">16.</span> <span class="nav-text">16. final类有什么特别之处？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#17-CharSequence%E4%B8%8EString%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">17.</span> <span class="nav-text">17. CharSequence与String的区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#18-Display-getWidth-%E5%92%8CDisplay-getHeight-%E5%B7%B2%E8%A2%AB%E5%BA%9F%E5%BC%83"><span class="nav-number">18.</span> <span class="nav-text">18. Display.getWidth()和Display.getHeight()已被废弃</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#19-StringTokenizer%E6%98%AF%E4%BB%80%E4%B9%88%E7%B1%BB%E5%9E%8B%EF%BC%9F"><span class="nav-number">19.</span> <span class="nav-text">19. StringTokenizer是什么类型？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#20-ListView%E5%8D%B4%E6%B2%A1%E6%9C%89%E5%88%B7%E6%96%B0%EF%BC%9F"><span class="nav-number">20.</span> <span class="nav-text">20. ListView却没有刷新？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#21-%E6%B3%A8%E5%86%8C%E4%B8%8A%E4%B8%8B%E6%96%87%E8%8F%9C%E5%8D%95%EF%BC%9F"><span class="nav-number">21.</span> <span class="nav-text">21. 注册上下文菜单？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#22-Handler%E6%80%8E%E4%B9%88%E7%94%A8%EF%BC%9F"><span class="nav-number">22.</span> <span class="nav-text">22. Handler怎么用？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#23-%E8%BF%94%E5%9B%9E%E9%94%AE%E7%9B%91%E5%90%AC%E5%AE%9E%E7%8E%B0"><span class="nav-number">23.</span> <span class="nav-text">23. 返回键监听实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#24-subString-begin-end"><span class="nav-number">24.</span> <span class="nav-text">24. subString(begin,end)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#25-%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F"><span class="nav-number">25.</span> <span class="nav-text">25. 单例模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#26-%E4%B8%8ESD%E5%8D%A1%E6%93%8D%E4%BD%9C%E6%9C%89%E5%85%B3%E7%9A%84%E6%9D%83%E9%99%90"><span class="nav-number">26.</span> <span class="nav-text">26. 与SD卡操作有关的权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#27-FileNotFoundException"><span class="nav-number">27.</span> <span class="nav-text">27. FileNotFoundException</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#28-Android-Studio-Build%E5%A4%B1%E8%B4%A5"><span class="nav-number">28.</span> <span class="nav-text">28. Android Studio Build失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#29-FileNotFoundException"><span class="nav-number">29.</span> <span class="nav-text">29. FileNotFoundException</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#30-%E9%80%89%E6%8B%A9%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%EF%BC%9F"><span class="nav-number">30.</span> <span class="nav-text">30. 选择本地文件？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#31-FileOutputStream%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%EF%BC%9F"><span class="nav-number">31.</span> <span class="nav-text">31. FileOutputStream构造函数？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#32-Java%E5%A6%82%E4%BD%95%E7%BB%88%E6%AD%A2%E7%BA%BF%E7%A8%8B%EF%BC%9F"><span class="nav-number">32.</span> <span class="nav-text">32. Java如何终止线程？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#33-double%E7%B1%BB%E5%9E%8B%E4%BF%9D%E7%95%99%E4%B8%A4%E4%BD%8D%E5%B0%8F%E6%95%B0"><span class="nav-number">33.</span> <span class="nav-text">33. double类型保留两位小数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#34-%E8%8E%B7%E5%8F%96%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F"><span class="nav-number">34.</span> <span class="nav-text">34. 获取本地文件大小</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#35-LayoutInflater%E4%B8%8EMenuInflater"><span class="nav-number">35.</span> <span class="nav-text">35. LayoutInflater与MenuInflater</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#36-FTPClient%E5%BA%93%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">36.</span> <span class="nav-text">36. FTPClient库的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#36-1-FTPFile%E8%8E%B7%E5%BE%97%E6%96%87%E4%BB%B6%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="nav-number">36.1.</span> <span class="nav-text">36.1 FTPFile获得文件的大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#36-2-%E8%BF%9E%E6%8E%A5%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">36.2.</span> <span class="nav-text">36.2 连接服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#36-3-SocketException"><span class="nav-number">36.3.</span> <span class="nav-text">36.3 SocketException</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#36-4-ftp%E5%8F%8D%E9%A6%88%E7%A0%81%EF%BC%9A"><span class="nav-number">36.4.</span> <span class="nav-text">36.4 ftp反馈码：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#36-5-FTPClient-listFiles-%E4%B8%8D%E8%83%BD%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%EF%BC%8C%E8%BF%94%E5%9B%9E%E6%95%B0%E6%8D%AE%E4%B8%BA%E7%A9%BA"><span class="nav-number">36.5.</span> <span class="nav-text">36.5 FTPClient.listFiles()不能获取文件，返回数据为空</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#36-6-ftpClient-changeWorkingDirectory-path-%E5%88%87%E6%8D%A2%E7%9B%AE%E5%BD%95%E5%A4%B1%E8%B4%A5"><span class="nav-number">36.6.</span> <span class="nav-text">36.6 ftpClient.changeWorkingDirectory(path)切换目录失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#36-7-ftpClient-listFiles-path"><span class="nav-number">36.7.</span> <span class="nav-text">36.7 ftpClient.listFiles(path)</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Andrew Yu"
+      src="/images/goldfish.jpg">
+  <p class="site-author-name" itemprop="name">Andrew Yu</p>
+  <div class="site-description" itemprop="description">分享技术，记录生活……</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/category/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tag/">
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iamyuzhe" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iamyuzhe" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://iamyuzhe.github.io/2016/10/16/Android%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%92%8C%E8%AA%9E%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/goldfish.jpg">
+      <meta itemprop="name" content="Andrew Yu">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew Yu的个人博客">
+      <meta itemprop="description" content="分享技术，记录生活……">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android基本概念和語法 | Andrew Yu的个人博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android基本概念和語法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-10-16 09:48:48" itemprop="dateCreated datePublished" datetime="2016-10-16T09:48:48+08:00">2016-10-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mobile-development/" itemprop="url" rel="index"><span itemprop="name">mobile development</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="1-什么是Intent"><a href="#1-什么是Intent" class="headerlink" title="1. 什么是Intent?"></a>1. 什么是Intent?</h2><p>Intent的中文意思是“意图，意向”，在Android中提供了Intent机制来协助应用间的交互与通讯，Intent负责对应用中一次操作的动作、动作涉及数据、附加数据进行描述，Android则根据此Intent的描述，负责找到对应的组件，将 Intent传递给调用的组件，并完成组件的调用。Intent不仅可用于应用程序之间，也可用于应用程序内部的Activity&#x2F;Service之间的交互。</p>
+<h2 id="2-什么是Bundle"><a href="#2-什么是Bundle" class="headerlink" title="2. 什么是Bundle?"></a>2. 什么是Bundle?</h2><p>键值对类</p>
+<h2 id="3-Intent如何传递数据？"><a href="#3-Intent如何传递数据？" class="headerlink" title="3. Intent如何传递数据？"></a>3. Intent如何传递数据？</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">//发送端</span><br><span class="line">Intent intent = new Intent();</span><br><span class="line">intent.setClass(Login.this, MainActivity.class);</span><br><span class="line">Bundle bundle = new Bundle();</span><br><span class="line">bundle.putSerializable(&quot;user&quot;, user);</span><br><span class="line">intent.putExtras(bundle);</span><br><span class="line">this.startActivity(intent);</span><br><span class="line"></span><br><span class="line">//接收端</span><br><span class="line">Intent intent = this.getIntent(); </span><br><span class="line">user=(User)intent.getSerializableExtra(&quot;user&quot;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-id不能在string-xml中定义"><a href="#4-id不能在string-xml中定义" class="headerlink" title="4. id不能在string.xml中定义"></a>4. id不能在string.xml中定义</h2><p>控件id的格式：”@+id&#x2F;id名”</p>
+<h2 id="5-onActivityResult-方法"><a href="#5-onActivityResult-方法" class="headerlink" title="5. onActivityResult()方法"></a>5. onActivityResult()方法</h2><p>在onActivityResult(int requestCode, int resultCode, Intent data)方法中有现成的Intent,即data,无需通过getIntent获取Intent,再通過Intent獲取數據</p>
+<h2 id="6-Android-Studio如何导入jar包"><a href="#6-Android-Studio如何导入jar包" class="headerlink" title="6. Android Studio如何导入jar包"></a>6. Android Studio如何导入jar包</h2><ol>
+<li>复制你需要添加的jar，并将其黏贴到app –&gt; libs文件夹下</li>
+<li>右键点击新添加的jar，在弹出菜单中点击Add As Library</li>
+</ol>
+<h2 id="7-SocketException"><a href="#7-SocketException" class="headerlink" title="7. SocketException"></a>7. SocketException</h2><p>具體異常：<br>java.net.SocketException: socket failed: EACCES (Permission denied)</p>
+<p>说明：缺少网络访问权限 </p>
+<p>解决方案：<br>在AndroidManifest.xml中添加</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-添加权限的两种方式"><a href="#8-添加权限的两种方式" class="headerlink" title="8. 添加权限的两种方式"></a>8. 添加权限的两种方式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//第一种方式</span><br><span class="line">&lt; uses-permission   android:name =”android.permission.INTERNET”  /&gt;  </span><br><span class="line">//第二种方式</span><br><span class="line">&lt; application   android:permission =”android.permission.INTERNET” /&gt;   </span><br></pre></td></tr></table></figure>
+
+<h2 id="9-NetworkOnMainThreadException"><a href="#9-NetworkOnMainThreadException" class="headerlink" title="9. NetworkOnMainThreadException"></a>9. NetworkOnMainThreadException</h2><p>具體異常：<br>android.os.NetworkOnMainThreadException</p>
+<p>说明:不允许在主线程中进行网络访问</p>
+<p>解决方案：将网络访问的操作单独放到一个线程中</p>
+<h2 id="10-gbk与gb2312的区别？"><a href="#10-gbk与gb2312的区别？" class="headerlink" title="10. gbk与gb2312的区别？"></a>10. gbk与gb2312的区别？</h2><p>GB2312是中国规定的汉字编码，也可以说是简体中文的字符集编码;GBK 是 GB2312的扩展 ,除了兼容GB2312外，它还能显示繁体中文，还有日文的假名</p>
+<h2 id="11-GridView-表格布局-？"><a href="#11-GridView-表格布局-？" class="headerlink" title="11. GridView(表格布局)？"></a>11. GridView(表格布局)？</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">android:numColumns=”auto_fit” ，GridView的列数设置为自动</span><br><span class="line">android:columnWidth=”90dp”，每列的宽度，也就是Item的宽度</span><br><span class="line">android:stretchMode=”columnWidth”，缩放与列宽大小同步</span><br></pre></td></tr></table></figure>
+
+<h2 id="12-HashMap与Map区别？"><a href="#12-HashMap与Map区别？" class="headerlink" title="12. HashMap与Map区别？"></a>12. HashMap与Map区别？</h2><p>hashmap是继承map接口的实现类</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;bluh&gt; map1 = new HashMap&lt;bluh&gt;();</span><br><span class="line">HashMap&lt;bluh&gt; map2 = new HashMap&lt;bluh&gt;();</span><br></pre></td></tr></table></figure>
+<p>説明：</p>
+<ol>
+<li>定义为Map之后更灵活 今后才有可能在需要的时候替换为HashMap之外的其它实现如TreeMap等，同时如Joshua Bloch等大师也倡导面向接口编程(code to interfaces)</li>
+<li>有得必有失，第一种的tradeoff就是无法调用HashMap特有的方法</li>
+</ol>
+<h2 id="13-SimpleAdapter"><a href="#13-SimpleAdapter" class="headerlink" title="13. SimpleAdapter"></a>13. SimpleAdapter</h2><p>構造函數：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SimpleAdapter(Context context, List&lt;? extends Map&lt;String, ?&gt;&gt; data, int resource, String[] from, int[] to)</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>SimpleAdapter是扩展性最好的适配器，可以定义各种你想要的布局，而且使用很方便</p>
+</li>
+<li><p>參數含義</p>
+<ul>
+<li>context：上下文，比如this。关联SimpleAdapter运行的视图上下文</li>
+<li>data：Map列表，列表要显示的数据，这部分需要自己实现，如例子中的getData()类型要与上面的一致，每条项目要与from中指定条目一致</li>
+<li>resource：ListView单项布局文件的Id,这个布局就是你自定义的布局了，你想显示什么样子的布局都在这个布局中。这个佈局中必须包括了to中定义的控件id</li>
+<li>from：一个被添加到Map上关联每一个项目列名称的列表，数组里面是列名称</li>
+<li>to：是一个int数组，数组里面的id是自定义布局中各个控件的id，需要与上面的from对应</li>
+</ul>
+</li>
+</ol>
+<h2 id="14-List-ArrayList-LinkedList區別？"><a href="#14-List-ArrayList-LinkedList區別？" class="headerlink" title="14. List, ArrayList, LinkedList區別？"></a>14. List, ArrayList, LinkedList區別？</h2><ol>
+<li>LinkedList: 双向列表：表中的每个节点都包含了对前一个和后一个元素的引用</li>
+<li>ArrayList和LinkedList的大致区别： <ul>
+<li>ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。 </li>
+<li>对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。 </li>
+<li>对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。 </li>
+<li>List是一个接口 ArrayList是List接口下的一个实现类</li>
+</ul>
+</li>
+</ol>
+<h2 id="15-ArrayAdapter和BaseAdapter区别？"><a href="#15-ArrayAdapter和BaseAdapter区别？" class="headerlink" title="15. ArrayAdapter和BaseAdapter区别？"></a>15. ArrayAdapter和BaseAdapter区别？</h2><p>ArrayAdapter是从BaseAdapter派生出来的，具备BaseAdapter的所有功能，但ArrayAdapter更为强大，它实例化时可以直接使用泛型构造，同时ArrayAdapter可以实现像数组一样的操作</p>
+<h2 id="16-final类有什么特别之处？"><a href="#16-final类有什么特别之处？" class="headerlink" title="16. final类有什么特别之处？"></a>16. final类有什么特别之处？</h2><ul>
+<li>final类不能被继承，没有子类，final类中的方法默认是final的。 </li>
+<li>final方法不能被子类的方法覆盖，但可以被继承。 </li>
+<li>final成员变量表示常量，只能被赋值一次，赋值后值不再改变。 </li>
+<li>final不能用于修饰构造方法。</li>
+<li>final变量定义的时候，可以先声明，而不给初值，这中变量也称为final空白，无论什么情况，编译器都确保空白final在使用之前必须被初始化。但是，final空白在final的使用上提供了更大的灵活性，为此，一个类中的final数据成员就可以实现依对象而有所不同，却有保持其恒定不变的特征。</li>
+<li>当函数参数为final类型时，你可以读取使用该参数，但是无法改变该参数的值。</li>
+</ul>
+<h2 id="17-CharSequence与String的区别？"><a href="#17-CharSequence与String的区别？" class="headerlink" title="17. CharSequence与String的区别？"></a>17. CharSequence与String的区别？</h2><p>String 是java中的字符串，它继承于CharSequence。</p>
+<ul>
+<li><p>拓展</p>
+<p>  StringBuilder和StringBuffer都是可变的字符序列。它们都继承于AbstractStringBuilder，实现了CharSequence接口。StringBuilder是非线程安全的，而StringBuffer是线程安全的</p>
+</li>
+</ul>
+<h2 id="18-Display-getWidth-和Display-getHeight-已被废弃"><a href="#18-Display-getWidth-和Display-getHeight-已被废弃" class="headerlink" title="18. Display.getWidth()和Display.getHeight()已被废弃"></a>18. Display.getWidth()和Display.getHeight()已被废弃</h2><p>替代方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DisplayMetrics dm = new DisplayMetrics();</span><br><span class="line">getWindowManager().getDefaultDisplay().getMetrics(dm);</span><br><span class="line">SCREEN_WIDTH = dm.widthPixels;</span><br><span class="line">SCREEN_HEIGHT = dm.heightPixels;</span><br></pre></td></tr></table></figure>
+
+<h2 id="19-StringTokenizer是什么类型？"><a href="#19-StringTokenizer是什么类型？" class="headerlink" title="19. StringTokenizer是什么类型？"></a>19. StringTokenizer是什么类型？</h2><p>用来分隔String的应用类，与split函数相似</p>
+<h2 id="20-ListView却没有刷新？"><a href="#20-ListView却没有刷新？" class="headerlink" title="20. ListView却没有刷新？"></a>20. ListView却没有刷新？</h2><p>ListView中的数据对象始终都只能有一个，不能重新new一个新的List对象</p>
+<h2 id="21-注册上下文菜单？"><a href="#21-注册上下文菜单？" class="headerlink" title="21. 注册上下文菜单？"></a>21. 注册上下文菜单？</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void onCreateContextMenu(ContextMenu menu, View v,</span><br><span class="line">        ContextMenuInfo menuInfo) &#123;</span><br><span class="line">    menu.setHeaderIcon(R.drawable.header);</span><br><span class="line">    switch (v.getId()) &#123;</span><br><span class="line">    case R.id.editText01:</span><br><span class="line">        menu.add(0, MENU1, 0, &quot;菜单项1&quot;);</span><br><span class="line">        menu.add(0, MENU2, 0, &quot;菜单项2&quot;);</span><br><span class="line">        menu.add(0, MENU3, 0, &quot;菜单项3&quot;);</span><br><span class="line">        break;</span><br><span class="line">    case R.id.editText02:</span><br><span class="line">        menu.add(0, MENU4, 0, &quot;菜单项4&quot;);</span><br><span class="line">        menu.add(0, MENU5, 0, &quot;菜单项5&quot;);</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">    //super.onCreateContextMenu(menu, v, menuInfo);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public boolean onContextItemSelected(MenuItem item) &#123;</span><br><span class="line">    switch (item.getItemId()) &#123;</span><br><span class="line">    case MENU1:</span><br><span class="line">    case MENU2:</span><br><span class="line">    case MENU3:</span><br><span class="line">        editText01.append(&quot;\n&quot;+item.getTitle()+&quot;被按下&quot;);</span><br><span class="line">        break;</span><br><span class="line">    case MENU4:</span><br><span class="line">    case MENU5:</span><br><span class="line">        editText02.append(&quot;\n&quot;+item.getTitle()+&quot;被按下&quot;);</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>添加上下文菜单方法：</p>
+</blockquote>
+<blockquote>
+<p>方法簽名：public MenuItem add(int groupId, int itemId, int order, CharSequence title)</p>
+</blockquote>
+<blockquote>
+<p>参数解析：</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>第一个int类型的group ID参数，代表的是组概念，你可以将几个菜单项归为一组，以便更好的以组的方式管理你的菜单按钮。</li>
+<li>第二个int类型的item ID参数，代表的是项目编号。这个参数非常重要，一个item ID对应一个menu中的选项。在后面使用菜单的时候，就靠这个item ID来判断你使用的是哪个选项。</li>
+<li>第三个int类型的order ID参数，代表的是菜单项的显示顺序。默认是0，表示菜单的显示顺序就是按照add的显示顺序来显示。</li>
+<li>第四个String类型的title参数，表示选项中显示的文字。</li>
+</ul>
+</blockquote>
+<h2 id="22-Handler怎么用？"><a href="#22-Handler怎么用？" class="headerlink" title="22. Handler怎么用？"></a>22. Handler怎么用？</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">myHandler = new Handler() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void handleMessage(Message msg) &#123;</span><br><span class="line">            super.handleMessage(msg);</span><br><span class="line">            switch (msg.what) &#123;</span><br><span class="line">                case MESSAGE_UPDATE_UI:</span><br><span class="line">                    do...</span><br><span class="line">                    break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">//发送消息</span><br><span class="line">Message message = new Message();</span><br><span class="line">message.what = MESSAGE_UPDATE_UI;</span><br><span class="line">myHandler.sendMessage(message);</span><br></pre></td></tr></table></figure>
+
+<h2 id="23-返回键监听实现"><a href="#23-返回键监听实现" class="headerlink" title="23. 返回键监听实现"></a>23. 返回键监听实现</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean onKeyDown(int keyCode, KeyEvent event) &#123;</span><br><span class="line">    if (keyCode == KeyEvent.KEYCODE_BACK) &#123;</span><br><span class="line">        doKeyBack();</span><br><span class="line">        return false;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        return super.onKeyDown(keyCode, event);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//注：必须把return super.onKeyDown(keyCode, event)放到else中，或者直接删除，否则重写方法将会无效</span><br></pre></td></tr></table></figure>
+<h2 id="24-subString-begin-end"><a href="#24-subString-begin-end" class="headerlink" title="24. subString(begin,end)"></a>24. subString(begin,end)</h2><p>説明：返回begin到end-1位置的字符串</p>
+<h2 id="25-单例模式"><a href="#25-单例模式" class="headerlink" title="25. 单例模式"></a>25. 单例模式</h2><p>分类：饿汉式，懒汉式，登记式</p>
+<h2 id="26-与SD卡操作有关的权限"><a href="#26-与SD卡操作有关的权限" class="headerlink" title="26. 与SD卡操作有关的权限"></a>26. 与SD卡操作有关的权限</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;!– 在SDCard中创建与删除文件权限 –&gt;</span><br><span class="line">&lt;uses-permission</span><br><span class="line">android:name=”android.permission.MOUNT_UNMOUNT_FILESYSTEMS”/&gt;</span><br><span class="line">&lt;!– 往SDCard写入数据权限 –&gt;</span><br><span class="line">&lt;uses-permission</span><br><span class="line">android:name=”android.permission.WRITE_EXTERNAL_STORAGE”/&gt;</span><br><span class="line">&lt;!– 读取SDCard数据权限 –&gt;</span><br><span class="line">&lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; /&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="27-FileNotFoundException"><a href="#27-FileNotFoundException" class="headerlink" title="27. FileNotFoundException"></a>27. FileNotFoundException</h2><p>具體異常：</p>
+<blockquote>
+<p>java.io.FileNotFoundException: &#x2F;storage&#x2F;emulated&#x2F;0report-1.doc: open failed: EACCES (Permission denied)<br>Caused by: android.system.ErrnoException: open failed: EACCES (Permission denied)</p>
+</blockquote>
+<p>原因：路径问题，Environment.getExternalStorageDirectory().getPath()获得路径结尾不含”&#x2F;“,所以在構造文件路徑時，需在末尾添加“&#x2F;”，再連接文件名</p>
+<p>注：涉及到文件传输时，一定要注意路径，很多时候都是因为路径不对才引起异常等错误。</p>
+<h2 id="28-Android-Studio-Build失败"><a href="#28-Android-Studio-Build失败" class="headerlink" title="28. Android Studio Build失败"></a>28. Android Studio Build失败</h2><p>有时Manifest文件有错误，可能会Build失败。出现cannot resolve symbol R 的错误</p>
+<h2 id="29-FileNotFoundException"><a href="#29-FileNotFoundException" class="headerlink" title="29. FileNotFoundException"></a>29. FileNotFoundException</h2><p>具體異常：</p>
+<blockquote>
+<p>java.io.FileNotFoundException: &#x2F;systemreport-1.doc: open failed: EROFS (Read-only file system)<br>Caused by: android.system.ErrnoException: open failed: EROFS (Read-only file system)</p>
+</blockquote>
+<p>原因：文件夹为只读，檢查文件路徑是否正確</p>
+<h2 id="30-选择本地文件？"><a href="#30-选择本地文件？" class="headerlink" title="30. 选择本地文件？"></a>30. 选择本地文件？</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">//调用系统文件选择器选择文件</span><br><span class="line">private void showFileChooser() &#123;</span><br><span class="line">    Intent intent = new Intent(Intent.ACTION_GET_CONTENT); </span><br><span class="line">    intent.setType(&quot;*/*&quot;); </span><br><span class="line">    intent.addCategory(Intent.CATEGORY_OPENABLE);</span><br><span class="line"> </span><br><span class="line">    try &#123;</span><br><span class="line">        startActivityForResult( Intent.createChooser(intent, &quot;Select a File to Upload&quot;), FILE_SELECT_CODE);</span><br><span class="line">    &#125; catch (android.content.ActivityNotFoundException ex) &#123;</span><br><span class="line">        Toast.makeText(this, &quot;Please install a File Manager.&quot;,  Toast.LENGTH_SHORT).show();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//接收选择的文件</span><br><span class="line">    @Override</span><br><span class="line">protected void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</span><br><span class="line">    super.onActivityResult(requestCode, resultCode, data);</span><br><span class="line">    switch (requestCode) &#123;</span><br><span class="line">        case FILE_SELECT_CODE:</span><br><span class="line">            if (resultCode == RESULT_OK) &#123;</span><br><span class="line">                // Get the Uri of the selected file</span><br><span class="line">                Uri uri = data.getData();</span><br><span class="line">                localPath = FileUtils.getPath(this, uri);</span><br><span class="line">                Toast.makeText(this, &quot;选择文件成功&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line">                Message msg = new Message();</span><br><span class="line">                msg.what = FILE_SELECT_SUCCESS;</span><br><span class="line">                myHandler.sendMessage(msg);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                Toast.makeText(this, &quot;选择文件失败&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//FileUtils类</span><br><span class="line">public class FileUtils &#123;</span><br><span class="line">	public static String getPath(Context context, Uri uri) &#123;</span><br><span class="line"></span><br><span class="line">	    if (&quot;content&quot;.equalsIgnoreCase(uri.getScheme())) &#123;</span><br><span class="line">	        String[] projection = &#123;&quot;_data&quot;&#125;;</span><br><span class="line">	        Cursor cursor = null;</span><br><span class="line"></span><br><span class="line">	        try &#123;</span><br><span class="line">	            cursor = context.getContentResolver().query(uri, projection, null, null, null);</span><br><span class="line">	            int column_index = cursor.getColumnIndexOrThrow(&quot;_data&quot;);</span><br><span class="line">	            if (cursor.moveToFirst()) &#123;</span><br><span class="line">	                return cursor.getString(column_index);</span><br><span class="line">	            &#125;</span><br><span class="line">	        &#125; catch (Exception e) &#123;</span><br><span class="line">	            // Eat it</span><br><span class="line">	        &#125;</span><br><span class="line">	    &#125; else if (&quot;file&quot;.equalsIgnoreCase(uri.getScheme())) &#123;</span><br><span class="line">	        return uri.getPath();</span><br><span class="line">	    &#125;</span><br><span class="line"></span><br><span class="line">	    return null;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="31-FileOutputStream构造函数？"><a href="#31-FileOutputStream构造函数？" class="headerlink" title="31. FileOutputStream构造函数？"></a>31. FileOutputStream构造函数？</h2><p>方法簽名：</p>
+<blockquote>
+<p>FileOutputStream(f, append);</p>
+</blockquote>
+<p>参数解析：</p>
+<p>第一个参数是文件对象，第二个参数是是否追加数据；</p>
+<h2 id="32-Java如何终止线程？"><a href="#32-Java如何终止线程？" class="headerlink" title="32. Java如何终止线程？"></a>32. Java如何终止线程？</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void run() &#123;</span><br><span class="line">	while(flag)&#123; // 通过flag控制</span><br><span class="line">	/* do your no-block task */</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注：Thread中的run()方法，不是start()之后就重复调用run()方法，run()方法也只能运行一次，直到run中的所有方法运行完成</p>
+<h2 id="33-double类型保留两位小数"><a href="#33-double类型保留两位小数" class="headerlink" title="33. double类型保留两位小数"></a>33. double类型保留两位小数</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DecimalFormat df = new DecimalFormat(&quot;#.00&quot;);  </span><br><span class="line">df.format(doubleValue);</span><br></pre></td></tr></table></figure>
+<h2 id="34-获取本地文件大小"><a href="#34-获取本地文件大小" class="headerlink" title="34. 获取本地文件大小"></a>34. 获取本地文件大小</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">long size = 0;</span><br><span class="line">try &#123;</span><br><span class="line">    java.io.File file = new java.io.File(filePath);</span><br><span class="line">    if (file.exists()) &#123;</span><br><span class="line">        FileInputStream fis = new FileInputStream(file);</span><br><span class="line">        size = fis.available();</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">	// file.createNewFile();</span><br><span class="line">        Log.e(&quot;获取文件大小&quot;, &quot;文件不存在!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; catch (IOException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line">return size;</span><br></pre></td></tr></table></figure>
+
+<h2 id="35-LayoutInflater与MenuInflater"><a href="#35-LayoutInflater与MenuInflater" class="headerlink" title="35. LayoutInflater与MenuInflater"></a>35. LayoutInflater与MenuInflater</h2><ul>
+<li>LayoutInflater: 解析定义在layout下的布局文件</li>
+<li>MenuInflater: 解析定义在menu目录下的菜单布局文件</li>
+</ul>
+<h2 id="36-FTPClient库的使用"><a href="#36-FTPClient库的使用" class="headerlink" title="36. FTPClient库的使用"></a>36. FTPClient库的使用</h2><h3 id="36-1-FTPFile获得文件的大小"><a href="#36-1-FTPFile获得文件的大小" class="headerlink" title="36.1 FTPFile获得文件的大小"></a>36.1 FTPFile获得文件的大小</h3><p>获得文件大小：file.getSize(); </p>
+<h3 id="36-2-连接服务器"><a href="#36-2-连接服务器" class="headerlink" title="36.2 连接服务器"></a>36.2 连接服务器</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ftpClient.connect(&quot;服务器名&quot;,端口号);</span><br></pre></td></tr></table></figure>
+
+<h3 id="36-3-SocketException"><a href="#36-3-SocketException" class="headerlink" title="36.3 SocketException"></a>36.3 SocketException</h3><p>具體異常：<br>java.net.SocketException: recvfrom failed: ECONNRESET (Connection reset by peer)</p>
+<p>说明：应该是过度频繁的请求连接导致</p>
+<p>解决方案：ftpClient.setKeepAlive(true);</p>
+<h3 id="36-4-ftp反馈码："><a href="#36-4-ftp反馈码：" class="headerlink" title="36.4 ftp反馈码："></a>36.4 ftp反馈码：</h3><blockquote>
+<p>220 Service ready for new user（新连接的用户的服务已就绪)<br>530 Not logged in.</p>
+</blockquote>
+<h3 id="36-5-FTPClient-listFiles-不能获取文件，返回数据为空"><a href="#36-5-FTPClient-listFiles-不能获取文件，返回数据为空" class="headerlink" title="36.5 FTPClient.listFiles()不能获取文件，返回数据为空"></a>36.5 FTPClient.listFiles()不能获取文件，返回数据为空</h3><p>解决方案：调用FTPClient.listFiles()方法前，先调用FTPClient.enterLocalPassiveMode()<br>enterLocalPassiveMode()的意思是每次数据连接之前，ftp client告诉ftp server开通一个端口来传输数据</p>
+<h3 id="36-6-ftpClient-changeWorkingDirectory-path-切换目录失败"><a href="#36-6-ftpClient-changeWorkingDirectory-path-切换目录失败" class="headerlink" title="36.6 ftpClient.changeWorkingDirectory(path)切换目录失败"></a>36.6 ftpClient.changeWorkingDirectory(path)切换目录失败</h3><p>可能原因： 路徑不支持中文</p>
+<p>解决方案：</p>
+<blockquote>
+<p>ftpClient.changeWorkingDirectory(new String(currentPath.getBytes(“GBK”),”ISO-8859-1”))  </p>
+</blockquote>
+<ul>
+<li><p>注：</p>
+<ol>
+<li>FTP.DEFAULT_CONTROL_ENCODING &#x3D; “ISO-8859-1”,可互换</li>
+<li>getBytes(“GBK”)中的参数”GBK”不能省，否则默认是”UTF-8”</li>
+</ol>
+</li>
+</ul>
+<h3 id="36-7-ftpClient-listFiles-path"><a href="#36-7-ftpClient-listFiles-path" class="headerlink" title="36.7 ftpClient.listFiles(path)"></a>36.7 ftpClient.listFiles(path)</h3><p>path参数不支持中文,解决方案同36.6</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E8%AA%9E%E6%B3%95/" rel="tag"># 語法</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/" rel="prev" title="Windows常见问题">
+                  <i class="fa fa-angle-left"></i> Windows常见问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/10/16/Fiddler%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C/" rel="next" title="Fiddler常見問題">
+                  Fiddler常見問題 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2016 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Andrew Yu</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

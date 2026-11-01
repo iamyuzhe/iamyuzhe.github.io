@@ -1,0 +1,1491 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Agent Skills：让 AI Agent 获得可复用能力的开放规范</title>
+    <url>/2026/11/01/Agent-Skills%E5%BC%80%E6%94%BE%E8%A7%84%E8%8C%83%E4%B8%8E%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<p>大语言模型具备广泛的通用能力，但真正进入工程环境后，往往还缺少三类关键上下文：</p>
+<ul>
+<li>团队实际采用的工具、接口和约束；</li>
+<li>一个任务可靠完成所需的操作顺序；</li>
+<li>从历史故障、评审意见和项目实践中积累的隐性经验。</li>
+</ul>
+<p>Agent Skills 提供了一种轻量、开放的解决方案：把专业知识、工作流程和配套资源组织成可被 AI Agent 按需加载的目录。它不是新的模型，也不是一套重量级插件系统，而是一种以 <code>SKILL.md</code> 为核心的能力封装格式。[cite:1]</p>
+<span id="more"></span>
+
+<h2 id="一、Agent-Skills-是什么"><a href="#一、Agent-Skills-是什么" class="headerlink" title="一、Agent Skills 是什么"></a>一、Agent Skills 是什么</h2><p>一个最小的 Agent Skill 只是一个目录和其中的 <code>SKILL.md</code> 文件：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">my-skill/</span><br><span class="line">├── SKILL.md</span><br><span class="line">├── scripts/</span><br><span class="line">├── references/</span><br><span class="line">└── assets/</span><br></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<ul>
+<li><code>SKILL.md</code> 是唯一必需文件，包含元数据和执行说明；</li>
+<li><code>scripts/</code> 放置可重复执行的脚本；</li>
+<li><code>references/</code> 保存按需读取的详细资料；</li>
+<li><code>assets/</code> 保存模板、图片、Schema 或其他静态资源。</li>
+</ul>
+<p>这种形式有几个直接价值：</p>
+<ol>
+<li><strong>可复用</strong>：一次整理的流程可以反复用于同类任务。</li>
+<li><strong>可审查</strong>：技能内容是普通文件，可以进入版本控制和代码评审。</li>
+<li><strong>可移植</strong>：遵循同一格式的技能可以被不同 Agent 客户端识别。</li>
+<li><strong>可组合</strong>：每个技能聚焦一个连贯的工作单元，复杂任务可以组合多个技能完成。</li>
+</ol>
+<p>Agent Skills 最早由 Anthropic 开发并开放，随后逐渐被更多 Agent 产品采用。[cite:1][cite:9]</p>
+<h2 id="二、核心机制：渐进式披露"><a href="#二、核心机制：渐进式披露" class="headerlink" title="二、核心机制：渐进式披露"></a>二、核心机制：渐进式披露</h2><p>如果 Agent 在启动时读取所有技能的完整内容，大量无关说明会占满上下文窗口。Agent Skills 用“渐进式披露”解决这个问题，将加载过程分成三层：[cite:1][cite:2]</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>加载内容</th>
+<th>加载时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>技能目录</td>
+<td><code>name</code> 和 <code>description</code></td>
+<td>会话开始时</td>
+</tr>
+<tr>
+<td>完整说明</td>
+<td><code>SKILL.md</code> 正文</td>
+<td>技能与当前任务匹配时</td>
+</tr>
+<tr>
+<td>配套资源</td>
+<td>脚本、参考资料、模板</td>
+<td>执行过程中确有需要时</td>
+</tr>
+</tbody></table>
+<p>这意味着 Agent 可以知道“有哪些能力可用”，却不必提前承担全部上下文成本。一个客户端即使安装了几十个技能，当前会话通常也只会加载真正相关的几个。</p>
+<p>该机制也解释了为什么 <code>description</code> 如此重要：在技能正文尚未加载时，它几乎独自承担了技能发现和触发的职责。</p>
+<h2 id="三、SKILL-md-的格式规范"><a href="#三、SKILL-md-的格式规范" class="headerlink" title="三、SKILL.md 的格式规范"></a>三、SKILL.md 的格式规范</h2><p><code>SKILL.md</code> 由 YAML Front Matter 和 Markdown 正文组成：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">name: code-review</span><br><span class="line">description: &gt;</span><br><span class="line">  Review code changes for correctness, security, regressions, and missing</span><br><span class="line"><span class="section">  tests. Use when the user asks to review a patch, commit, or pull request.</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section">## Review process</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> Read the complete diff.</span><br><span class="line"><span class="bullet">2.</span> Identify behavioral changes.</span><br><span class="line"><span class="bullet">3.</span> Report findings by severity with file and line references.</span><br><span class="line"><span class="bullet">4.</span> Call out missing tests and residual risks.</span><br></pre></td></tr></table></figure>
+
+<h3 id="必需字段"><a href="#必需字段" class="headerlink" title="必需字段"></a>必需字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>作用</th>
+<th>主要约束</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>技能唯一名称</td>
+<td>最长 64 个字符；使用小写字母、数字和连字符；与目录名一致</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>能力范围和触发条件</td>
+<td>非空，最长 1024 个字符</td>
+</tr>
+</tbody></table>
+<h3 id="可选字段"><a href="#可选字段" class="headerlink" title="可选字段"></a>可选字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>license</code></td>
+<td>声明许可证或指向许可证文件</td>
+</tr>
+<tr>
+<td><code>compatibility</code></td>
+<td>描述运行环境、系统依赖或网络要求</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>保存作者、版本等自定义字符串元数据</td>
+</tr>
+<tr>
+<td><code>allowed-tools</code></td>
+<td>声明预批准工具，目前仍属于实验字段</td>
+</tr>
+</tbody></table>
+<p>规范建议让主 <code>SKILL.md</code> 保持在 500 行、5000 tokens 以内。更详细的 API 文档、错误码、模板和长示例应该拆入 <code>references/</code> 或 <code>assets/</code>，并在正文中明确说明何时读取。[cite:2]</p>
+<p>技能完成后，可以使用官方参考工具验证目录：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">skills-ref validate ./my-skill</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、创建第一个技能"><a href="#四、创建第一个技能" class="headerlink" title="四、创建第一个技能"></a>四、创建第一个技能</h2><p>官方快速入门使用“掷骰子”作为示例。以项目级技能为例，可以创建：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">.agents/skills/roll-dice/SKILL.md</span><br></pre></td></tr></table></figure>
+
+<p>内容如下：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">name: roll-dice</span><br><span class="line">description: &gt;</span><br><span class="line">  Roll dice using a random number generator. Use when asked to roll a die,</span><br><span class="line"><span class="section">  such as a d6 or d20, or to generate a random dice result.</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line">Run the following command after replacing <span class="code">`&lt;sides&gt;`</span> with the requested</span><br><span class="line">number of sides:</span><br><span class="line"></span><br><span class="line"><span class="code">```bash</span></span><br><span class="line"><span class="code">echo $((RANDOM % &lt;sides&gt; + 1))</span></span><br><span class="line"><span class="code">```</span></span><br></pre></td></tr></table></figure>
+
+<p>当用户提出“掷一个 d20”时，Agent 的行为过程是：</p>
+<ol>
+<li>会话启动时发现 <code>roll-dice</code> 的名称和描述；</li>
+<li>判断请求与描述匹配，加载完整 <code>SKILL.md</code>；</li>
+<li>将 <code>&lt;sides&gt;</code> 替换为 <code>20</code> 并执行命令；</li>
+<li>返回 1 到 20 之间的结果。</li>
+</ol>
+<p>这个不足 20 行的示例体现了技能的本质：技能并不替 Agent 完成任务，而是向 Agent 提供完成任务所需的可靠方法。[cite:3]</p>
+<h2 id="五、怎样写出有效的技能"><a href="#五、怎样写出有效的技能" class="headerlink" title="五、怎样写出有效的技能"></a>五、怎样写出有效的技能</h2><h3 id="从真实经验中提炼"><a href="#从真实经验中提炼" class="headerlink" title="从真实经验中提炼"></a>从真实经验中提炼</h3><p>最常见的误区，是让模型仅凭通用知识生成一个看似完整的技能。这样的技能通常充满“妥善处理异常”“遵循最佳实践”等正确但无用的表述。</p>
+<p>高价值技能应来自真实材料：</p>
+<ul>
+<li>已经成功完成的任务及其操作顺序；</li>
+<li>用户或评审者曾经给出的纠正；</li>
+<li>项目 Runbook、接口规范和配置文件；</li>
+<li>Code Review 评论、Issue 和历史修复；</li>
+<li>真实故障及其恢复过程。</li>
+</ul>
+<p>如果某条说明不能降低 Agent 犯错的概率，它通常就不值得占用上下文。</p>
+<h3 id="控制技能边界"><a href="#控制技能边界" class="headerlink" title="控制技能边界"></a>控制技能边界</h3><p>技能边界类似函数职责：</p>
+<ul>
+<li>太窄，会让一个任务被拆成大量微型技能，增加加载和协调成本；</li>
+<li>太宽，会导致触发条件模糊，正文中充斥与当前任务无关的分支。</li>
+</ul>
+<p>合适的技能应该覆盖一个完整、连贯、可以独立验证的工作单元。例如“查询数据库并格式化结果”可以是一个技能，而把数据库管理、备份、迁移和性能调优全部塞进去通常过于宽泛。</p>
+<h3 id="根据任务风险调整控制强度"><a href="#根据任务风险调整控制强度" class="headerlink" title="根据任务风险调整控制强度"></a>根据任务风险调整控制强度</h3><p>并非所有步骤都需要同样严格：</p>
+<ul>
+<li>对代码评审、方案分析等开放任务，说明目标、关注点和原因，允许 Agent 根据上下文选择方法；</li>
+<li>对数据库迁移、生产发布等脆弱任务，给出明确顺序、固定命令、验证门禁和停止条件；</li>
+<li>多个方案都可行时，提供一个默认方案，再简要说明何时使用替代方案。</li>
+</ul>
+<h3 id="使用高价值结构"><a href="#使用高价值结构" class="headerlink" title="使用高价值结构"></a>使用高价值结构</h3><p>实践中最有效的几类结构包括：</p>
+<ul>
+<li><strong>Gotchas</strong>：记录违反直觉、容易反复踩坑的事实；</li>
+<li><strong>输出模板</strong>：直接展示期望结构，而不是只用文字描述；</li>
+<li><strong>检查清单</strong>：帮助 Agent 跟踪多阶段工作；</li>
+<li><strong>验证循环</strong>：执行、验证、修复，再次验证；</li>
+<li><strong>Plan-Validate-Execute</strong>：批量或破坏性操作先生成计划并校验，再执行；</li>
+<li><strong>配套脚本</strong>：把每次都会重写的确定性逻辑固化为程序。</li>
+</ul>
+<p>这些内容比泛泛的背景知识更能提升执行稳定性。[cite:4]</p>
+<h2 id="六、让技能在正确的时机触发"><a href="#六、让技能在正确的时机触发" class="headerlink" title="六、让技能在正确的时机触发"></a>六、让技能在正确的时机触发</h2><p>一个技能即使正文写得很好，如果无法在正确请求上触发，也不会产生价值。优化描述时需要同时控制两类错误：</p>
+<ul>
+<li><strong>漏触发</strong>：相关请求没有加载技能；</li>
+<li><strong>误触发</strong>：无关或仅关键词相似的请求加载了技能。</li>
+</ul>
+<h3 id="描述的写法"><a href="#描述的写法" class="headerlink" title="描述的写法"></a>描述的写法</h3><p>有效描述应做到：</p>
+<ol>
+<li>从用户意图出发，而不是描述内部实现；</li>
+<li>同时说明“做什么”和“什么时候使用”；</li>
+<li>包含用户可能使用的文件类型、领域词和任务表达；</li>
+<li>保持简洁，不把正文内容复制到描述里。</li>
+</ol>
+<p>例如：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 过于模糊</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">Process</span> <span class="string">CSV</span> <span class="string">files.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 范围和触发条件更清晰</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">&gt;</span></span><br><span class="line"><span class="string">  Analyze CSV and tabular data files, compute summary statistics, add</span></span><br><span class="line"><span class="string">  derived columns, clean messy data, and generate charts. Use when the</span></span><br><span class="line"><span class="string">  user wants to explore, transform, or visualize CSV, TSV, or Excel data.</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="用正反样本测试"><a href="#用正反样本测试" class="headerlink" title="用正反样本测试"></a>用正反样本测试</h3><p>官方建议准备约 20 条触发测试，其中正例和反例各 8 到 10 条。好的测试集不应只包含明显样本，还要包含：</p>
+<ul>
+<li>不同语气、长度和详细程度的请求；</li>
+<li>没有明确说出领域名称、但确实需要该技能的请求；</li>
+<li>与技能共享关键词、实际意图却不同的“近似反例”；</li>
+<li>文件路径、字段名、缩写和少量拼写错误等真实上下文。</li>
+</ul>
+<p>由于模型行为存在随机性，同一查询应运行多次并统计触发率。还应将样本固定划分为训练集和验证集，避免为了通过已知样本而过度拟合描述。[cite:5]</p>
+<h2 id="七、评估技能是否真正提高质量"><a href="#七、评估技能是否真正提高质量" class="headerlink" title="七、评估技能是否真正提高质量"></a>七、评估技能是否真正提高质量</h2><p>“成功触发”只说明技能被加载，并不说明输出更好。质量评估需要将同一任务分别在“启用技能”和“未启用技能”条件下运行，比较结果、时间和 token 成本。[cite:6]</p>
+<h3 id="定义测试用例"><a href="#定义测试用例" class="headerlink" title="定义测试用例"></a>定义测试用例</h3><p>一个测试用例至少包含：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;分析 data/sales.csv，找出收入最高的三个月并生成柱状图&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;expected_output&quot;</span><span class="punctuation">:</span> <span class="string">&quot;包含前三个月的柱状图，坐标轴和数值标注完整&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;files&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;evals/files/sales.csv&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>初期只需要 2 到 3 个真实用例，观察输出后再补充断言。断言必须具体、可验证，例如：</p>
+<ul>
+<li>生成了图片文件；</li>
+<li>图表恰好包含三个月份；</li>
+<li>两个坐标轴都有标签；</li>
+<li>标题或说明包含“收入”。</li>
+</ul>
+<p>“输出很好”无法验证，而要求输出必须出现某句固定文案又过于脆弱。</p>
+<h3 id="记录证据和成本"><a href="#记录证据和成本" class="headerlink" title="记录证据和成本"></a>记录证据和成本</h3><p>每条断言都应该记录 <code>PASS</code> 或 <code>FAIL</code> 以及具体证据。除了通过率，还应记录：</p>
+<ul>
+<li>总 token 数；</li>
+<li>执行耗时；</li>
+<li>产生的文件；</li>
+<li>人工评审反馈；</li>
+<li>完整执行轨迹。</li>
+</ul>
+<p>执行轨迹尤其重要。它能解释问题来自哪里：说明太模糊、无关步骤太多、脚本接口不清晰，还是技能本身没有提供模型缺失的知识。</p>
+<h3 id="迭代闭环"><a href="#迭代闭环" class="headerlink" title="迭代闭环"></a>迭代闭环</h3><p>一个完整循环是：</p>
+<ol>
+<li>使用技能和基线分别运行测试；</li>
+<li>根据断言和人工反馈评分；</li>
+<li>阅读执行轨迹，找到失败原因；</li>
+<li>修改描述、流程、示例或脚本；</li>
+<li>在新迭代目录中重新运行全部测试；</li>
+<li>对比质量收益与时间、token 成本。</li>
+</ol>
+<p>当失败反馈持续为空，或者后续迭代已经没有明显收益时，技能才算进入相对稳定状态。</p>
+<h2 id="八、何时在技能中使用脚本"><a href="#八、何时在技能中使用脚本" class="headerlink" title="八、何时在技能中使用脚本"></a>八、何时在技能中使用脚本</h2><p>语言模型擅长理解意图和处理开放问题，脚本擅长确定性计算、解析和验证。两者结合通常比纯提示词更可靠。</p>
+<h3 id="一次性命令"><a href="#一次性命令" class="headerlink" title="一次性命令"></a>一次性命令</h3><p>如果现有工具已经解决问题，可以直接在 <code>SKILL.md</code> 中给出固定版本命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">uvx ruff@0.8.0 check .</span><br><span class="line">npx eslint@9.0.0 --fix .</span><br><span class="line">go run golang.org/x/tools/cmd/goimports@v0.28.0 .</span><br></pre></td></tr></table></figure>
+
+<p>固定版本能够减少工具升级带来的行为漂移。命令过长、参数组合复杂或每次都容易写错时，应移入 <code>scripts/</code>。</p>
+<h3 id="可复用脚本"><a href="#可复用脚本" class="headerlink" title="可复用脚本"></a>可复用脚本</h3><p>适合脚本化的工作包括：</p>
+<ul>
+<li>解析固定格式；</li>
+<li>生成图表或文档；</li>
+<li>校验配置和输出；</li>
+<li>执行可重复的数据转换；</li>
+<li>实现 dry-run 和变更计划。</li>
+</ul>
+<p>面向 Agent 的脚本还应具备以下特征：</p>
+<ul>
+<li>不依赖交互式输入；</li>
+<li>提供简洁明确的 <code>--help</code>；</li>
+<li>错误消息说明原因、期望值和修复方法；</li>
+<li>标准输出使用 JSON、CSV 等结构化格式；</li>
+<li>诊断信息写入标准错误；</li>
+<li>操作尽量幂等；</li>
+<li>破坏性操作提供 <code>--dry-run</code> 或显式确认参数；</li>
+<li>控制默认输出长度，避免工具结果被截断。</li>
+</ul>
+<p>脚本不仅是实现细节，它还是 Agent 与确定性系统之间的接口。[cite:7]</p>
+<h2 id="九、Agent-客户端怎样支持-Skills"><a href="#九、Agent-客户端怎样支持-Skills" class="headerlink" title="九、Agent 客户端怎样支持 Skills"></a>九、Agent 客户端怎样支持 Skills</h2><p>对于 Agent 或开发工具的实现者，完整生命周期包括发现、解析、披露、激活和上下文管理。[cite:8]</p>
+<h3 id="1-发现"><a href="#1-发现" class="headerlink" title="1. 发现"></a>1. 发现</h3><p>本地客户端通常同时扫描项目级和用户级目录：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">&lt;project&gt;/.agents/skills/</span><br><span class="line">~/.agents/skills/</span><br></pre></td></tr></table></figure>
+
+<p>也可以兼容客户端自己的目录。发生同名冲突时，一般让项目级技能覆盖用户级技能，并输出可诊断的警告。来自陌生仓库的项目级技能可能包含不受信任的指令，因此应与工作区信任机制结合。</p>
+<h3 id="2-解析"><a href="#2-解析" class="headerlink" title="2. 解析"></a>2. 解析</h3><p>客户端读取 YAML Front Matter，至少保存：</p>
+<ul>
+<li><code>name</code></li>
+<li><code>description</code></li>
+<li><code>SKILL.md</code> 的位置</li>
+</ul>
+<p>缺少描述或 YAML 完全无法解析时应跳过；目录名不匹配等非关键问题可以警告后继续加载，以兼顾规范和跨客户端兼容性。</p>
+<h3 id="3-披露"><a href="#3-披露" class="headerlink" title="3. 披露"></a>3. 披露</h3><p>客户端只把技能目录提供给模型，可以放在系统提示词中，也可以放在专用激活工具的描述里。目录应简洁，并明确告诉模型如何加载完整技能。</p>
+<h3 id="4-激活"><a href="#4-激活" class="headerlink" title="4. 激活"></a>4. 激活</h3><p>常见方式有两种：</p>
+<ul>
+<li>模型使用文件读取工具打开 <code>SKILL.md</code>；</li>
+<li>模型调用 <code>activate_skill(name)</code> 等专用工具。</li>
+</ul>
+<p>专用工具可以附带技能根目录和资源清单，但不应一次性读取所有资源。用户还应该能够通过 <code>/skill-name</code> 或 <code>$skill-name</code> 等方式显式激活技能。</p>
+<h3 id="5-上下文管理"><a href="#5-上下文管理" class="headerlink" title="5. 上下文管理"></a>5. 上下文管理</h3><p>技能激活后，其说明属于当前任务的持续行为约束。若客户端会压缩长对话，应保护技能内容不被随意裁剪，并避免在同一会话中重复注入同一个技能。</p>
+<h2 id="十、从零到可维护技能的实践清单"><a href="#十、从零到可维护技能的实践清单" class="headerlink" title="十、从零到可维护技能的实践清单"></a>十、从零到可维护技能的实践清单</h2><h3 id="创建阶段"><a href="#创建阶段" class="headerlink" title="创建阶段"></a>创建阶段</h3><ul>
+<li><input disabled="" type="checkbox"> 从真实任务、文档和故障中提取专业知识</li>
+<li><input disabled="" type="checkbox"> 明确技能边界和不适用范围</li>
+<li><input disabled="" type="checkbox"> 编写符合规范的 <code>name</code> 与 <code>description</code></li>
+<li><input disabled="" type="checkbox"> 给出默认流程、关键约束和停止条件</li>
+<li><input disabled="" type="checkbox"> 将长资料拆入 <code>references/</code></li>
+<li><input disabled="" type="checkbox"> 将重复的确定性逻辑放入 <code>scripts/</code></li>
+</ul>
+<h3 id="验证阶段"><a href="#验证阶段" class="headerlink" title="验证阶段"></a>验证阶段</h3><ul>
+<li><input disabled="" type="checkbox"> 使用 <code>skills-ref</code> 验证格式</li>
+<li><input disabled="" type="checkbox"> 准备正向、反向和边界触发样本</li>
+<li><input disabled="" type="checkbox"> 比较启用技能与基线结果</li>
+<li><input disabled="" type="checkbox"> 为关键输出编写客观断言</li>
+<li><input disabled="" type="checkbox"> 检查执行轨迹，而不仅是最终答案</li>
+<li><input disabled="" type="checkbox"> 记录质量、耗时和 token 成本</li>
+</ul>
+<h3 id="维护阶段"><a href="#维护阶段" class="headerlink" title="维护阶段"></a>维护阶段</h3><ul>
+<li><input disabled="" type="checkbox"> 将用户纠正补充到 Gotchas</li>
+<li><input disabled="" type="checkbox"> 固定脚本和工具版本</li>
+<li><input disabled="" type="checkbox"> 定期删除模型已经能可靠完成的冗余说明</li>
+<li><input disabled="" type="checkbox"> 避免为测试集中的具体措辞打补丁</li>
+<li><input disabled="" type="checkbox"> 保持主文件精简，并让按需资源的加载条件足够明确</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Agent Skills 的价值并不在于多写一份提示词，而在于把真实经验变成一种可发现、可执行、可验证、可迭代的工程资产。</p>
+<p>一个成熟技能应同时具备四个特征：</p>
+<ol>
+<li><strong>触发准确</strong>：在需要时加载，在近似但无关的请求上保持安静；</li>
+<li><strong>指令有效</strong>：提供模型原本缺少的流程、约束和领域事实；</li>
+<li><strong>执行可靠</strong>：关键步骤由清晰接口、脚本和验证门禁支撑；</li>
+<li><strong>持续改进</strong>：通过基线对比、断言、轨迹和人工反馈迭代。</li>
+</ol>
+<p>当技能被当作代码一样设计、评审和测试时，AI Agent 才能从“偶尔做对”逐步走向“稳定完成”。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://agentskills.io/home">Agent Skills Overview</a></p>
+<p>[cite:2] <a href="https://agentskills.io/specification">Agent Skills Specification</a></p>
+<p>[cite:3] <a href="https://agentskills.io/skill-creation/quickstart">Quickstart</a></p>
+<p>[cite:4] <a href="https://agentskills.io/skill-creation/best-practices">Best practices for skill creators</a></p>
+<p>[cite:5] <a href="https://agentskills.io/skill-creation/optimizing-descriptions">Optimizing skill descriptions</a></p>
+<p>[cite:6] <a href="https://agentskills.io/skill-creation/evaluating-skills">Evaluating skill output quality</a></p>
+<p>[cite:7] <a href="https://agentskills.io/skill-creation/using-scripts">Using scripts in skills</a></p>
+<p>[cite:8] <a href="https://agentskills.io/client-implementation/adding-skills-support">How to add skills support to your agent</a></p>
+<p>[cite:9] <a href="https://agentskills.io/clients">Client Showcase</a></p>
+]]></content>
+      <categories>
+        <category>artificial intelligence</category>
+      </categories>
+      <tags>
+        <tag>Agent Skills</tag>
+        <tag>AI Agent</tag>
+        <tag>SKILL.md</tag>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android基本概念和語法</title>
+    <url>/2016/10/16/Android%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%92%8C%E8%AA%9E%E6%B3%95/</url>
+    <content><![CDATA[<h2 id="1-什么是Intent"><a href="#1-什么是Intent" class="headerlink" title="1. 什么是Intent?"></a>1. 什么是Intent?</h2><p>Intent的中文意思是“意图，意向”，在Android中提供了Intent机制来协助应用间的交互与通讯，Intent负责对应用中一次操作的动作、动作涉及数据、附加数据进行描述，Android则根据此Intent的描述，负责找到对应的组件，将 Intent传递给调用的组件，并完成组件的调用。Intent不仅可用于应用程序之间，也可用于应用程序内部的Activity&#x2F;Service之间的交互。</p>
+<h2 id="2-什么是Bundle"><a href="#2-什么是Bundle" class="headerlink" title="2. 什么是Bundle?"></a>2. 什么是Bundle?</h2><p>键值对类</p>
+<h2 id="3-Intent如何传递数据？"><a href="#3-Intent如何传递数据？" class="headerlink" title="3. Intent如何传递数据？"></a>3. Intent如何传递数据？</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//发送端</span><br><span class="line">Intent intent = new Intent();</span><br><span class="line">intent.setClass(Login.this, MainActivity.class);</span><br><span class="line">Bundle bundle = new Bundle();</span><br><span class="line">bundle.putSerializable(&quot;user&quot;, user);</span><br><span class="line">intent.putExtras(bundle);</span><br><span class="line">this.startActivity(intent);</span><br><span class="line"></span><br><span class="line">//接收端</span><br><span class="line">Intent intent = this.getIntent(); </span><br><span class="line">user=(User)intent.getSerializableExtra(&quot;user&quot;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-id不能在string-xml中定义"><a href="#4-id不能在string-xml中定义" class="headerlink" title="4. id不能在string.xml中定义"></a>4. id不能在string.xml中定义</h2><p>控件id的格式：”@+id&#x2F;id名”</p>
+<h2 id="5-onActivityResult-方法"><a href="#5-onActivityResult-方法" class="headerlink" title="5. onActivityResult()方法"></a>5. onActivityResult()方法</h2><p>在onActivityResult(int requestCode, int resultCode, Intent data)方法中有现成的Intent,即data,无需通过getIntent获取Intent,再通過Intent獲取數據</p>
+<h2 id="6-Android-Studio如何导入jar包"><a href="#6-Android-Studio如何导入jar包" class="headerlink" title="6. Android Studio如何导入jar包"></a>6. Android Studio如何导入jar包</h2><ol>
+<li>复制你需要添加的jar，并将其黏贴到app –&gt; libs文件夹下</li>
+<li>右键点击新添加的jar，在弹出菜单中点击Add As Library</li>
+</ol>
+<h2 id="7-SocketException"><a href="#7-SocketException" class="headerlink" title="7. SocketException"></a>7. SocketException</h2><p>具體異常：<br>java.net.SocketException: socket failed: EACCES (Permission denied)</p>
+<p>说明：缺少网络访问权限 </p>
+<p>解决方案：<br>在AndroidManifest.xml中添加</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-添加权限的两种方式"><a href="#8-添加权限的两种方式" class="headerlink" title="8. 添加权限的两种方式"></a>8. 添加权限的两种方式</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//第一种方式</span><br><span class="line">&lt; uses-permission   android:name =”android.permission.INTERNET”  /&gt;  </span><br><span class="line">//第二种方式</span><br><span class="line">&lt; application   android:permission =”android.permission.INTERNET” /&gt;   </span><br></pre></td></tr></table></figure>
+
+<h2 id="9-NetworkOnMainThreadException"><a href="#9-NetworkOnMainThreadException" class="headerlink" title="9. NetworkOnMainThreadException"></a>9. NetworkOnMainThreadException</h2><p>具體異常：<br>android.os.NetworkOnMainThreadException</p>
+<p>说明:不允许在主线程中进行网络访问</p>
+<p>解决方案：将网络访问的操作单独放到一个线程中</p>
+<h2 id="10-gbk与gb2312的区别？"><a href="#10-gbk与gb2312的区别？" class="headerlink" title="10. gbk与gb2312的区别？"></a>10. gbk与gb2312的区别？</h2><p>GB2312是中国规定的汉字编码，也可以说是简体中文的字符集编码;GBK 是 GB2312的扩展 ,除了兼容GB2312外，它还能显示繁体中文，还有日文的假名</p>
+<h2 id="11-GridView-表格布局-？"><a href="#11-GridView-表格布局-？" class="headerlink" title="11. GridView(表格布局)？"></a>11. GridView(表格布局)？</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">android:numColumns=”auto_fit” ，GridView的列数设置为自动</span><br><span class="line">android:columnWidth=”90dp”，每列的宽度，也就是Item的宽度</span><br><span class="line">android:stretchMode=”columnWidth”，缩放与列宽大小同步</span><br></pre></td></tr></table></figure>
+
+<h2 id="12-HashMap与Map区别？"><a href="#12-HashMap与Map区别？" class="headerlink" title="12. HashMap与Map区别？"></a>12. HashMap与Map区别？</h2><p>hashmap是继承map接口的实现类</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Map&lt;bluh&gt; map1 = new HashMap&lt;bluh&gt;();</span><br><span class="line">HashMap&lt;bluh&gt; map2 = new HashMap&lt;bluh&gt;();</span><br></pre></td></tr></table></figure>
+<p>説明：</p>
+<ol>
+<li>定义为Map之后更灵活 今后才有可能在需要的时候替换为HashMap之外的其它实现如TreeMap等，同时如Joshua Bloch等大师也倡导面向接口编程(code to interfaces)</li>
+<li>有得必有失，第一种的tradeoff就是无法调用HashMap特有的方法</li>
+</ol>
+<h2 id="13-SimpleAdapter"><a href="#13-SimpleAdapter" class="headerlink" title="13. SimpleAdapter"></a>13. SimpleAdapter</h2><p>構造函數：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SimpleAdapter(Context context, List&lt;? extends Map&lt;String, ?&gt;&gt; data, int resource, String[] from, int[] to)</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>SimpleAdapter是扩展性最好的适配器，可以定义各种你想要的布局，而且使用很方便</p>
+</li>
+<li><p>參數含義</p>
+<ul>
+<li>context：上下文，比如this。关联SimpleAdapter运行的视图上下文</li>
+<li>data：Map列表，列表要显示的数据，这部分需要自己实现，如例子中的getData()类型要与上面的一致，每条项目要与from中指定条目一致</li>
+<li>resource：ListView单项布局文件的Id,这个布局就是你自定义的布局了，你想显示什么样子的布局都在这个布局中。这个佈局中必须包括了to中定义的控件id</li>
+<li>from：一个被添加到Map上关联每一个项目列名称的列表，数组里面是列名称</li>
+<li>to：是一个int数组，数组里面的id是自定义布局中各个控件的id，需要与上面的from对应</li>
+</ul>
+</li>
+</ol>
+<h2 id="14-List-ArrayList-LinkedList區別？"><a href="#14-List-ArrayList-LinkedList區別？" class="headerlink" title="14. List, ArrayList, LinkedList區別？"></a>14. List, ArrayList, LinkedList區別？</h2><ol>
+<li>LinkedList: 双向列表：表中的每个节点都包含了对前一个和后一个元素的引用</li>
+<li>ArrayList和LinkedList的大致区别： <ul>
+<li>ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。 </li>
+<li>对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。 </li>
+<li>对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。 </li>
+<li>List是一个接口 ArrayList是List接口下的一个实现类</li>
+</ul>
+</li>
+</ol>
+<h2 id="15-ArrayAdapter和BaseAdapter区别？"><a href="#15-ArrayAdapter和BaseAdapter区别？" class="headerlink" title="15. ArrayAdapter和BaseAdapter区别？"></a>15. ArrayAdapter和BaseAdapter区别？</h2><p>ArrayAdapter是从BaseAdapter派生出来的，具备BaseAdapter的所有功能，但ArrayAdapter更为强大，它实例化时可以直接使用泛型构造，同时ArrayAdapter可以实现像数组一样的操作</p>
+<h2 id="16-final类有什么特别之处？"><a href="#16-final类有什么特别之处？" class="headerlink" title="16. final类有什么特别之处？"></a>16. final类有什么特别之处？</h2><ul>
+<li>final类不能被继承，没有子类，final类中的方法默认是final的。 </li>
+<li>final方法不能被子类的方法覆盖，但可以被继承。 </li>
+<li>final成员变量表示常量，只能被赋值一次，赋值后值不再改变。 </li>
+<li>final不能用于修饰构造方法。</li>
+<li>final变量定义的时候，可以先声明，而不给初值，这中变量也称为final空白，无论什么情况，编译器都确保空白final在使用之前必须被初始化。但是，final空白在final的使用上提供了更大的灵活性，为此，一个类中的final数据成员就可以实现依对象而有所不同，却有保持其恒定不变的特征。</li>
+<li>当函数参数为final类型时，你可以读取使用该参数，但是无法改变该参数的值。</li>
+</ul>
+<h2 id="17-CharSequence与String的区别？"><a href="#17-CharSequence与String的区别？" class="headerlink" title="17. CharSequence与String的区别？"></a>17. CharSequence与String的区别？</h2><p>String 是java中的字符串，它继承于CharSequence。</p>
+<ul>
+<li><p>拓展</p>
+<p>  StringBuilder和StringBuffer都是可变的字符序列。它们都继承于AbstractStringBuilder，实现了CharSequence接口。StringBuilder是非线程安全的，而StringBuffer是线程安全的</p>
+</li>
+</ul>
+<h2 id="18-Display-getWidth-和Display-getHeight-已被废弃"><a href="#18-Display-getWidth-和Display-getHeight-已被废弃" class="headerlink" title="18. Display.getWidth()和Display.getHeight()已被废弃"></a>18. Display.getWidth()和Display.getHeight()已被废弃</h2><p>替代方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DisplayMetrics dm = new DisplayMetrics();</span><br><span class="line">getWindowManager().getDefaultDisplay().getMetrics(dm);</span><br><span class="line">SCREEN_WIDTH = dm.widthPixels;</span><br><span class="line">SCREEN_HEIGHT = dm.heightPixels;</span><br></pre></td></tr></table></figure>
+
+<h2 id="19-StringTokenizer是什么类型？"><a href="#19-StringTokenizer是什么类型？" class="headerlink" title="19. StringTokenizer是什么类型？"></a>19. StringTokenizer是什么类型？</h2><p>用来分隔String的应用类，与split函数相似</p>
+<h2 id="20-ListView却没有刷新？"><a href="#20-ListView却没有刷新？" class="headerlink" title="20. ListView却没有刷新？"></a>20. ListView却没有刷新？</h2><p>ListView中的数据对象始终都只能有一个，不能重新new一个新的List对象</p>
+<h2 id="21-注册上下文菜单？"><a href="#21-注册上下文菜单？" class="headerlink" title="21. 注册上下文菜单？"></a>21. 注册上下文菜单？</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void onCreateContextMenu(ContextMenu menu, View v,</span><br><span class="line">        ContextMenuInfo menuInfo) &#123;</span><br><span class="line">    menu.setHeaderIcon(R.drawable.header);</span><br><span class="line">    switch (v.getId()) &#123;</span><br><span class="line">    case R.id.editText01:</span><br><span class="line">        menu.add(0, MENU1, 0, &quot;菜单项1&quot;);</span><br><span class="line">        menu.add(0, MENU2, 0, &quot;菜单项2&quot;);</span><br><span class="line">        menu.add(0, MENU3, 0, &quot;菜单项3&quot;);</span><br><span class="line">        break;</span><br><span class="line">    case R.id.editText02:</span><br><span class="line">        menu.add(0, MENU4, 0, &quot;菜单项4&quot;);</span><br><span class="line">        menu.add(0, MENU5, 0, &quot;菜单项5&quot;);</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">    //super.onCreateContextMenu(menu, v, menuInfo);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public boolean onContextItemSelected(MenuItem item) &#123;</span><br><span class="line">    switch (item.getItemId()) &#123;</span><br><span class="line">    case MENU1:</span><br><span class="line">    case MENU2:</span><br><span class="line">    case MENU3:</span><br><span class="line">        editText01.append(&quot;\n&quot;+item.getTitle()+&quot;被按下&quot;);</span><br><span class="line">        break;</span><br><span class="line">    case MENU4:</span><br><span class="line">    case MENU5:</span><br><span class="line">        editText02.append(&quot;\n&quot;+item.getTitle()+&quot;被按下&quot;);</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>添加上下文菜单方法：</p>
+</blockquote>
+<blockquote>
+<p>方法簽名：public MenuItem add(int groupId, int itemId, int order, CharSequence title)</p>
+</blockquote>
+<blockquote>
+<p>参数解析：</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>第一个int类型的group ID参数，代表的是组概念，你可以将几个菜单项归为一组，以便更好的以组的方式管理你的菜单按钮。</li>
+<li>第二个int类型的item ID参数，代表的是项目编号。这个参数非常重要，一个item ID对应一个menu中的选项。在后面使用菜单的时候，就靠这个item ID来判断你使用的是哪个选项。</li>
+<li>第三个int类型的order ID参数，代表的是菜单项的显示顺序。默认是0，表示菜单的显示顺序就是按照add的显示顺序来显示。</li>
+<li>第四个String类型的title参数，表示选项中显示的文字。</li>
+</ul>
+</blockquote>
+<h2 id="22-Handler怎么用？"><a href="#22-Handler怎么用？" class="headerlink" title="22. Handler怎么用？"></a>22. Handler怎么用？</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">myHandler = new Handler() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void handleMessage(Message msg) &#123;</span><br><span class="line">            super.handleMessage(msg);</span><br><span class="line">            switch (msg.what) &#123;</span><br><span class="line">                case MESSAGE_UPDATE_UI:</span><br><span class="line">                    do...</span><br><span class="line">                    break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">//发送消息</span><br><span class="line">Message message = new Message();</span><br><span class="line">message.what = MESSAGE_UPDATE_UI;</span><br><span class="line">myHandler.sendMessage(message);</span><br></pre></td></tr></table></figure>
+
+<h2 id="23-返回键监听实现"><a href="#23-返回键监听实现" class="headerlink" title="23. 返回键监听实现"></a>23. 返回键监听实现</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean onKeyDown(int keyCode, KeyEvent event) &#123;</span><br><span class="line">    if (keyCode == KeyEvent.KEYCODE_BACK) &#123;</span><br><span class="line">        doKeyBack();</span><br><span class="line">        return false;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        return super.onKeyDown(keyCode, event);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//注：必须把return super.onKeyDown(keyCode, event)放到else中，或者直接删除，否则重写方法将会无效</span><br></pre></td></tr></table></figure>
+<h2 id="24-subString-begin-end"><a href="#24-subString-begin-end" class="headerlink" title="24. subString(begin,end)"></a>24. subString(begin,end)</h2><p>説明：返回begin到end-1位置的字符串</p>
+<h2 id="25-单例模式"><a href="#25-单例模式" class="headerlink" title="25. 单例模式"></a>25. 单例模式</h2><p>分类：饿汉式，懒汉式，登记式</p>
+<h2 id="26-与SD卡操作有关的权限"><a href="#26-与SD卡操作有关的权限" class="headerlink" title="26. 与SD卡操作有关的权限"></a>26. 与SD卡操作有关的权限</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!– 在SDCard中创建与删除文件权限 –&gt;</span><br><span class="line">&lt;uses-permission</span><br><span class="line">android:name=”android.permission.MOUNT_UNMOUNT_FILESYSTEMS”/&gt;</span><br><span class="line">&lt;!– 往SDCard写入数据权限 –&gt;</span><br><span class="line">&lt;uses-permission</span><br><span class="line">android:name=”android.permission.WRITE_EXTERNAL_STORAGE”/&gt;</span><br><span class="line">&lt;!– 读取SDCard数据权限 –&gt;</span><br><span class="line">&lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; /&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="27-FileNotFoundException"><a href="#27-FileNotFoundException" class="headerlink" title="27. FileNotFoundException"></a>27. FileNotFoundException</h2><p>具體異常：</p>
+<blockquote>
+<p>java.io.FileNotFoundException: &#x2F;storage&#x2F;emulated&#x2F;0report-1.doc: open failed: EACCES (Permission denied)<br>Caused by: android.system.ErrnoException: open failed: EACCES (Permission denied)</p>
+</blockquote>
+<p>原因：路径问题，Environment.getExternalStorageDirectory().getPath()获得路径结尾不含”&#x2F;“,所以在構造文件路徑時，需在末尾添加“&#x2F;”，再連接文件名</p>
+<p>注：涉及到文件传输时，一定要注意路径，很多时候都是因为路径不对才引起异常等错误。</p>
+<h2 id="28-Android-Studio-Build失败"><a href="#28-Android-Studio-Build失败" class="headerlink" title="28. Android Studio Build失败"></a>28. Android Studio Build失败</h2><p>有时Manifest文件有错误，可能会Build失败。出现cannot resolve symbol R 的错误</p>
+<h2 id="29-FileNotFoundException"><a href="#29-FileNotFoundException" class="headerlink" title="29. FileNotFoundException"></a>29. FileNotFoundException</h2><p>具體異常：</p>
+<blockquote>
+<p>java.io.FileNotFoundException: &#x2F;systemreport-1.doc: open failed: EROFS (Read-only file system)<br>Caused by: android.system.ErrnoException: open failed: EROFS (Read-only file system)</p>
+</blockquote>
+<p>原因：文件夹为只读，檢查文件路徑是否正確</p>
+<h2 id="30-选择本地文件？"><a href="#30-选择本地文件？" class="headerlink" title="30. 选择本地文件？"></a>30. 选择本地文件？</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//调用系统文件选择器选择文件</span><br><span class="line">private void showFileChooser() &#123;</span><br><span class="line">    Intent intent = new Intent(Intent.ACTION_GET_CONTENT); </span><br><span class="line">    intent.setType(&quot;*/*&quot;); </span><br><span class="line">    intent.addCategory(Intent.CATEGORY_OPENABLE);</span><br><span class="line"> </span><br><span class="line">    try &#123;</span><br><span class="line">        startActivityForResult( Intent.createChooser(intent, &quot;Select a File to Upload&quot;), FILE_SELECT_CODE);</span><br><span class="line">    &#125; catch (android.content.ActivityNotFoundException ex) &#123;</span><br><span class="line">        Toast.makeText(this, &quot;Please install a File Manager.&quot;,  Toast.LENGTH_SHORT).show();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//接收选择的文件</span><br><span class="line">    @Override</span><br><span class="line">protected void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</span><br><span class="line">    super.onActivityResult(requestCode, resultCode, data);</span><br><span class="line">    switch (requestCode) &#123;</span><br><span class="line">        case FILE_SELECT_CODE:</span><br><span class="line">            if (resultCode == RESULT_OK) &#123;</span><br><span class="line">                // Get the Uri of the selected file</span><br><span class="line">                Uri uri = data.getData();</span><br><span class="line">                localPath = FileUtils.getPath(this, uri);</span><br><span class="line">                Toast.makeText(this, &quot;选择文件成功&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line">                Message msg = new Message();</span><br><span class="line">                msg.what = FILE_SELECT_SUCCESS;</span><br><span class="line">                myHandler.sendMessage(msg);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                Toast.makeText(this, &quot;选择文件失败&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line">            &#125;</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//FileUtils类</span><br><span class="line">public class FileUtils &#123;</span><br><span class="line">	public static String getPath(Context context, Uri uri) &#123;</span><br><span class="line"></span><br><span class="line">	    if (&quot;content&quot;.equalsIgnoreCase(uri.getScheme())) &#123;</span><br><span class="line">	        String[] projection = &#123;&quot;_data&quot;&#125;;</span><br><span class="line">	        Cursor cursor = null;</span><br><span class="line"></span><br><span class="line">	        try &#123;</span><br><span class="line">	            cursor = context.getContentResolver().query(uri, projection, null, null, null);</span><br><span class="line">	            int column_index = cursor.getColumnIndexOrThrow(&quot;_data&quot;);</span><br><span class="line">	            if (cursor.moveToFirst()) &#123;</span><br><span class="line">	                return cursor.getString(column_index);</span><br><span class="line">	            &#125;</span><br><span class="line">	        &#125; catch (Exception e) &#123;</span><br><span class="line">	            // Eat it</span><br><span class="line">	        &#125;</span><br><span class="line">	    &#125; else if (&quot;file&quot;.equalsIgnoreCase(uri.getScheme())) &#123;</span><br><span class="line">	        return uri.getPath();</span><br><span class="line">	    &#125;</span><br><span class="line"></span><br><span class="line">	    return null;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="31-FileOutputStream构造函数？"><a href="#31-FileOutputStream构造函数？" class="headerlink" title="31. FileOutputStream构造函数？"></a>31. FileOutputStream构造函数？</h2><p>方法簽名：</p>
+<blockquote>
+<p>FileOutputStream(f, append);</p>
+</blockquote>
+<p>参数解析：</p>
+<p>第一个参数是文件对象，第二个参数是是否追加数据；</p>
+<h2 id="32-Java如何终止线程？"><a href="#32-Java如何终止线程？" class="headerlink" title="32. Java如何终止线程？"></a>32. Java如何终止线程？</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void run() &#123;</span><br><span class="line">	while(flag)&#123; // 通过flag控制</span><br><span class="line">	/* do your no-block task */</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注：Thread中的run()方法，不是start()之后就重复调用run()方法，run()方法也只能运行一次，直到run中的所有方法运行完成</p>
+<h2 id="33-double类型保留两位小数"><a href="#33-double类型保留两位小数" class="headerlink" title="33. double类型保留两位小数"></a>33. double类型保留两位小数</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DecimalFormat df = new DecimalFormat(&quot;#.00&quot;);  </span><br><span class="line">df.format(doubleValue);</span><br></pre></td></tr></table></figure>
+<h2 id="34-获取本地文件大小"><a href="#34-获取本地文件大小" class="headerlink" title="34. 获取本地文件大小"></a>34. 获取本地文件大小</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">long size = 0;</span><br><span class="line">try &#123;</span><br><span class="line">    java.io.File file = new java.io.File(filePath);</span><br><span class="line">    if (file.exists()) &#123;</span><br><span class="line">        FileInputStream fis = new FileInputStream(file);</span><br><span class="line">        size = fis.available();</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">	// file.createNewFile();</span><br><span class="line">        Log.e(&quot;获取文件大小&quot;, &quot;文件不存在!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; catch (IOException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line">return size;</span><br></pre></td></tr></table></figure>
+
+<h2 id="35-LayoutInflater与MenuInflater"><a href="#35-LayoutInflater与MenuInflater" class="headerlink" title="35. LayoutInflater与MenuInflater"></a>35. LayoutInflater与MenuInflater</h2><ul>
+<li>LayoutInflater: 解析定义在layout下的布局文件</li>
+<li>MenuInflater: 解析定义在menu目录下的菜单布局文件</li>
+</ul>
+<h2 id="36-FTPClient库的使用"><a href="#36-FTPClient库的使用" class="headerlink" title="36. FTPClient库的使用"></a>36. FTPClient库的使用</h2><h3 id="36-1-FTPFile获得文件的大小"><a href="#36-1-FTPFile获得文件的大小" class="headerlink" title="36.1 FTPFile获得文件的大小"></a>36.1 FTPFile获得文件的大小</h3><p>获得文件大小：file.getSize(); </p>
+<h3 id="36-2-连接服务器"><a href="#36-2-连接服务器" class="headerlink" title="36.2 连接服务器"></a>36.2 连接服务器</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ftpClient.connect(&quot;服务器名&quot;,端口号);</span><br></pre></td></tr></table></figure>
+
+<h3 id="36-3-SocketException"><a href="#36-3-SocketException" class="headerlink" title="36.3 SocketException"></a>36.3 SocketException</h3><p>具體異常：<br>java.net.SocketException: recvfrom failed: ECONNRESET (Connection reset by peer)</p>
+<p>说明：应该是过度频繁的请求连接导致</p>
+<p>解决方案：ftpClient.setKeepAlive(true);</p>
+<h3 id="36-4-ftp反馈码："><a href="#36-4-ftp反馈码：" class="headerlink" title="36.4 ftp反馈码："></a>36.4 ftp反馈码：</h3><blockquote>
+<p>220 Service ready for new user（新连接的用户的服务已就绪)<br>530 Not logged in.</p>
+</blockquote>
+<h3 id="36-5-FTPClient-listFiles-不能获取文件，返回数据为空"><a href="#36-5-FTPClient-listFiles-不能获取文件，返回数据为空" class="headerlink" title="36.5 FTPClient.listFiles()不能获取文件，返回数据为空"></a>36.5 FTPClient.listFiles()不能获取文件，返回数据为空</h3><p>解决方案：调用FTPClient.listFiles()方法前，先调用FTPClient.enterLocalPassiveMode()<br>enterLocalPassiveMode()的意思是每次数据连接之前，ftp client告诉ftp server开通一个端口来传输数据</p>
+<h3 id="36-6-ftpClient-changeWorkingDirectory-path-切换目录失败"><a href="#36-6-ftpClient-changeWorkingDirectory-path-切换目录失败" class="headerlink" title="36.6 ftpClient.changeWorkingDirectory(path)切换目录失败"></a>36.6 ftpClient.changeWorkingDirectory(path)切换目录失败</h3><p>可能原因： 路徑不支持中文</p>
+<p>解决方案：</p>
+<blockquote>
+<p>ftpClient.changeWorkingDirectory(new String(currentPath.getBytes(“GBK”),”ISO-8859-1”))  </p>
+</blockquote>
+<ul>
+<li><p>注：</p>
+<ol>
+<li>FTP.DEFAULT_CONTROL_ENCODING &#x3D; “ISO-8859-1”,可互换</li>
+<li>getBytes(“GBK”)中的参数”GBK”不能省，否则默认是”UTF-8”</li>
+</ol>
+</li>
+</ul>
+<h3 id="36-7-ftpClient-listFiles-path"><a href="#36-7-ftpClient-listFiles-path" class="headerlink" title="36.7 ftpClient.listFiles(path)"></a>36.7 ftpClient.listFiles(path)</h3><p>path参数不支持中文,解决方案同36.6</p>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>語法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android Studio 常见问题</title>
+    <url>/2017/05/21/Android-Studio-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C#使用</title>
+    <url>/2016/10/15/C-%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="1-模拟登陆"><a href="#1-模拟登陆" class="headerlink" title="1. 模拟登陆"></a>1. 模拟登陆</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">HttpWebRequest request = <span class="literal">null</span>;  <span class="comment">//提供 WebRequest 类的 HTTP 特定的实现。</span></span><br><span class="line">HttpWebResponse response = <span class="literal">null</span>;    <span class="comment">//提供 WebResponse 类的 HTTP 特定的实现</span></span><br><span class="line"><span class="keyword">try</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//提交的信息，包括用户名和密码等信息</span></span><br><span class="line">    <span class="built_in">string</span> postdata = <span class="string">&quot;uid=&quot;</span> + account + <span class="string">&quot;&amp;pwd=&quot;</span> + password;</span><br><span class="line">    <span class="comment">//抽象类的静态方法可直接调用,初始化新的WebRequest实例化web访问类</span></span><br><span class="line">    request = (HttpWebRequest)WebRequest.Create(loginUrl);</span><br><span class="line">    <span class="comment">//request.Credentials:获取或设置请求的身份验证信息;</span></span><br><span class="line">    <span class="comment">//CredentialCache.DefaultCredentials:获取应用程序的系统凭据,</span></span><br><span class="line">    <span class="comment">//对于 ASP.NET应用程序，默认凭据是已登录的用户或正被模拟的用户的用户凭据。</span></span><br><span class="line">    request.Credentials = CredentialCache.DefaultCredentials;</span><br><span class="line">    request.Method = <span class="string">&quot;POST&quot;</span>;<span class="comment">//数据提交方式为POST</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//request.ContentType:获取或设置传入请求的 MIME 内容类型。</span></span><br><span class="line">    request.ContentType = <span class="string">&quot;application/x-www-form-urlencoded&quot;</span>;    <span class="comment">//模拟头 </span></span><br><span class="line">    <span class="comment">//request.AllowAutoRedirect：获取或设置一个值，该值指示请求是否应跟随重定向响应；</span></span><br><span class="line">    <span class="comment">//如果请求应自动跟随 Internet 资源的重定向响应，则为 true，否则为 false。默认值为 true。</span></span><br><span class="line">    request.AllowAutoRedirect = <span class="literal">false</span>;   <span class="comment">// 不用需自动跳转</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//必须设置CookieContainer存储请求返回的Cookies</span></span><br><span class="line">    <span class="keyword">if</span> (CookieContainer != <span class="literal">null</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = <span class="keyword">new</span> CookieContainer();</span><br><span class="line">        CookieContainer = request.CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//保持TCP连接</span></span><br><span class="line">    request.KeepAlive = <span class="literal">true</span>;</span><br><span class="line">    <span class="comment">//提交请求  </span></span><br><span class="line">    <span class="built_in">byte</span>[] postdatabytes = Encoding.UTF8.GetBytes(postdata); <span class="comment">//对指定字符集进行编码</span></span><br><span class="line">    request.ContentLength = postdatabytes.Length;</span><br><span class="line">    Stream stream;</span><br><span class="line">    stream = request.GetRequestStream();  <span class="comment">//返回一个数据流为HttpWebRequest发送数据</span></span><br><span class="line">    <span class="comment">//设置POST 数据，向当前流中写入postdatabytes字节序列，其中0为postdatabytes从0开始的字节偏移量</span></span><br><span class="line">    <span class="comment">//postdatabytes.Length要写入当前流的字节数。</span></span><br><span class="line">    stream.Write(postdatabytes, <span class="number">0</span>, postdatabytes.Length); </span><br><span class="line">    stream.Close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//接收响应</span></span><br><span class="line">    response = (HttpWebResponse)request.GetResponse(); <span class="comment">//返回对 Internet 请求的响应。</span></span><br><span class="line">    <span class="comment">//获取包含与特定 URI（request.RequestUri） 关联的 Cookie 实例的 CookieCollection。</span></span><br><span class="line">    response.Cookies = request.CookieContainer.GetCookies(request.RequestUri);</span><br><span class="line">    CookieCollection cook = response.Cookies;</span><br><span class="line">    <span class="comment">//返回一个 HTTP Cookie 标头，其中包含表示由分号分隔的与特定 URI 关联的Cookie 实例的字符串。</span></span><br><span class="line">    <span class="built_in">string</span> strcookieheader = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br><span class="line">    CookiesString = strcookieheader;</span><br><span class="line">    <span class="comment">//取下一次GET跳转地址  </span></span><br><span class="line">    <span class="comment">//实现一个 TextReader，使其以gb2312编码从字节流中读取字符。</span></span><br><span class="line">    StreamReader sr = <span class="keyword">new</span> StreamReader(response.GetResponseStream(), Encoding.GetEncoding(<span class="string">&quot;gb2312&quot;</span>));</span><br><span class="line">    <span class="built_in">string</span> content = sr.ReadToEnd(); <span class="comment">//读取来自流的当前位置到结尾的所有字符。</span></span><br><span class="line">    sr.Close(); <span class="comment">//关闭 StreamReader 对象和基础流，并释放与读取器关联的所有系统资源</span></span><br><span class="line">    request.Abort();    <span class="comment">//取消对 Internet 资源的请求。</span></span><br><span class="line">    response.Close();   <span class="comment">//Close 方法关闭响应流，并通过其他请求将释放与重复使用的资源的连接。</span></span><br><span class="line">    <span class="comment">//依据登陆成功后返回的Page信息，求出下次请求的url</span></span><br><span class="line">    <span class="comment">//每个网站登陆后加载的Url和顺序不尽相同，以下两步需根据实际情况做特殊处理，从而得到下次请求的URL</span></span><br><span class="line">    <span class="built_in">string</span>[] substr = content.Split(<span class="keyword">new</span> <span class="built_in">char</span>[] &#123; <span class="string">&#x27;&quot;&#x27;</span> &#125;);</span><br><span class="line">    NextRequestUrl = <span class="string">&quot;http://zcgl.wzu.edu.cn/plat/&quot;</span> + substr[<span class="number">1</span>];   </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (WebException ex)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox.Show(<span class="built_in">string</span>.Format(<span class="string">&quot;登陆时出错，详细信息：&#123;0&#125;&quot;</span>, ex.Message));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>补充：</p>
+<ul>
+<li>CookieContainer: 装载返回的cookies的容器</li>
+<li>form的enctype属性为编码方式，分两种：  <ol>
+<li><p>application&#x2F;x-www-form-urlencoded，默认值。action为get时，把form数据转换成一个字串（name1&#x3D;value1&amp;name2&#x3D;value2…），append到url后面，用?分割；当action为post时，浏览器把form数据封装到http body中，然后发送到server。  </p>
+</li>
+<li><p>multipart&#x2F;form-data，type&#x3D;file时使用，浏览器会把整个表单以控件为单位分割，并为每个部分加上Content-Disposition(form-data或者file),Content-Type(默认为text&#x2F;plain),name(控件name)等信息，并加上分割符(boundary)。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h2 id="2-获取指定页面的内容"><a href="#2-获取指定页面的内容" class="headerlink" title="2. 获取指定页面的内容"></a>2. 获取指定页面的内容</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">HttpWebRequest request = <span class="literal">null</span>;</span><br><span class="line">HttpWebResponse response = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">try</span></span><br><span class="line">&#123;</span><br><span class="line">    request = (HttpWebRequest)WebRequest.Create(NextRequestUrl);</span><br><span class="line">    request.Credentials = CredentialCache.DefaultCredentials;</span><br><span class="line">    request.Method = <span class="string">&quot;GET&quot;</span>;</span><br><span class="line">    request.KeepAlive = <span class="literal">true</span>;</span><br><span class="line">    request.Headers.Add(<span class="string">&quot;Cookie:&quot;</span> + CookiesString);</span><br><span class="line">    request.CookieContainer = CookieContainer;</span><br><span class="line">    request.AllowAutoRedirect = <span class="literal">false</span>;</span><br><span class="line">    response = (HttpWebResponse)request.GetResponse();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//设置cookie  </span></span><br><span class="line">    CookiesString = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br><span class="line">    <span class="comment">//取再次跳转链接  </span></span><br><span class="line">    StreamReader sr = <span class="keyword">new</span> StreamReader(response.GetResponseStream(), Encoding.GetEncoding(<span class="string">&quot;gb2312&quot;</span>));</span><br><span class="line">    <span class="built_in">string</span> ss = sr.ReadToEnd();</span><br><span class="line">    sr.Close();</span><br><span class="line">    request.Abort();</span><br><span class="line">    response.Close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//依据登陆成功后返回的Page信息，求出下次请求的url</span></span><br><span class="line">    <span class="comment">//每个网站登陆后加载的Url和顺序不尽相同，以下两步需根据实际情况做特殊处理，从而得到下次请求的URL</span></span><br><span class="line">    <span class="comment">//string[] substr = ss.Split(new char[] &#123; &#x27;&quot;&#x27; &#125;);</span></span><br><span class="line">    <span class="comment">//NextRequestUrl = substr[1];</span></span><br><span class="line">    <span class="comment">//NextRequestUrl = &quot;http://zcgl.wzu.edu.cn/plat/&quot; + substr[1];</span></span><br><span class="line">    ResultHtml = ss;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (WebException ex)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox.Show(<span class="built_in">string</span>.Format(<span class="string">&quot;获取页面HTML信息出错，详细信息：&#123;0&#125;&quot;</span>, ex.Message));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-正則匹配"><a href="#3-正則匹配" class="headerlink" title="3. 正則匹配"></a>3. 正則匹配</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Instrument <span class="title">GetInstrumentInfo</span>(<span class="params">String InstrumentNum</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    Match m = Regex.Match(str, pattern);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (m.Success)</span><br><span class="line">    &#123;</span><br><span class="line">        Instrument instrument = <span class="keyword">new</span> Instrument();</span><br><span class="line">        instrument.Number = InstrumentNum;</span><br><span class="line">        instrument.Unit = m.Groups[<span class="number">1</span>].ToString();</span><br><span class="line">        instrument.Univalence = m.Groups[<span class="number">2</span>].ToString();</span><br><span class="line">        instrument.Name = m.Groups[<span class="number">3</span>].ToString();</span><br><span class="line">        <span class="keyword">return</span> instrument;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-用zxing库生成二维码"><a href="#4-用zxing库生成二维码" class="headerlink" title="4. 用zxing库生成二维码"></a>4. 用zxing库生成二维码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//C#代码</span></span><br><span class="line"><span class="keyword">using</span> com.google.zxing;</span><br><span class="line"><span class="keyword">using</span> ByteMatrix = com.google.zxing.common.ByteMatrix;</span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成二维码</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">CreateQRCode</span>()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//构造二维码内容</span></span><br><span class="line">    <span class="built_in">string</span> content =</span><br><span class="line">        Num_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">0</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Name_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">1</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Person_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">2</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Place_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">3</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Type_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">4</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Univalence_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">5</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Date_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">6</span>].Text;</span><br><span class="line"></span><br><span class="line">    ByteMatrix byteMatrix = <span class="keyword">new</span> MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, <span class="number">200</span>, <span class="number">200</span>);</span><br><span class="line">    Bitmap bitmap = toBitmap(byteMatrix);</span><br><span class="line">    QRCode_pictureBox.Image = bitmap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-用zxing库生成条形码"><a href="#5-用zxing库生成条形码" class="headerlink" title="5. 用zxing库生成条形码"></a>5. 用zxing库生成条形码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成条形码</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">CreateBarCode</span>(<span class="params"><span class="built_in">string</span> content</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    Regex rg = <span class="keyword">new</span> Regex(<span class="string">@&quot;^\d&#123;8&#125;$&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(rg.IsMatch(content))</span><br><span class="line">    &#123;</span><br><span class="line">        ByteMatrix byteMatrix = <span class="keyword">new</span> MultiFormatWriter().encode(content, BarcodeFormat.EAN_8, <span class="number">200</span>, <span class="number">30</span>);</span><br><span class="line">        Bitmap bitmap = toBitmap(byteMatrix);</span><br><span class="line">        BarCodeList.Add(bitmap);</span><br><span class="line">        QRCode_pictureBox.Image = bitmap;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        MessageBox.Show(<span class="string">&quot;非数字，无法生成条形码&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成位图</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;byteMatrix&quot;&gt;</span><span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">private</span> Bitmap <span class="title">toBitmap</span>(<span class="params">ByteMatrix byteMatrix</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">int</span> width = byteMatrix.Width;</span><br><span class="line">    <span class="built_in">int</span> height = byteMatrix.Height;</span><br><span class="line">    Bitmap bitmap = <span class="keyword">new</span> Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);</span><br><span class="line">    <span class="keyword">for</span>(<span class="built_in">int</span> i=<span class="number">0</span>; i&lt; width; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="built_in">int</span> j=<span class="number">0</span>; j &lt; height; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            bitmap.SetPixel(i, j, byteMatrix.get_Renamed(i, j) != <span class="number">-1</span> ? ColorTranslator.FromHtml(<span class="string">&quot;#436EEE&quot;</span>) : ColorTranslator.FromHtml(<span class="string">&quot;#C7C7C7&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> bitmap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-listView顯示信息"><a href="#6-listView顯示信息" class="headerlink" title="6. listView顯示信息"></a>6. listView顯示信息</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//向listView中添加内容</span></span><br><span class="line">ListViewItem lvi = <span class="keyword">new</span> ListViewItem(str0);</span><br><span class="line">lvi.SubItems.Add(str1);</span><br><span class="line">Info_listView.Items.Add(lvi);</span><br><span class="line"></span><br><span class="line"><span class="comment">//读取listView列标题内容</span></span><br><span class="line"><span class="built_in">string</span> str = columnHeader.Text;</span><br><span class="line"></span><br><span class="line"><span class="comment">//读取listView中的index1行，index2+1列的内容</span></span><br><span class="line"><span class="built_in">string</span> str = Info_listView.Items[index1].SubItems[index2].Text;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="7-listView刪除"><a href="#7-listView刪除" class="headerlink" title="7. listView刪除"></a>7. listView刪除</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//删除一条记录</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.Items.Remove(Info_listView.FocusedItem);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//删除多条记录</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.MultiSelect = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">foreach</span> (ListViewItem item <span class="keyword">in</span> Info_listView.Items)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (item.Selected)</span><br><span class="line">            item.Remove();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//清空</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.Items.Clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="8-listView显示圖片"><a href="#8-listView显示圖片" class="headerlink" title="8. listView显示圖片"></a>8. listView显示圖片</h2><blockquote>
+<p>listView有5种视图:LargeIcon, SmallIcon, List, Details, Tile</p>
+</blockquote>
+<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//listView显示图片,视图为LargeIcon</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">showCode</span>()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (QRCodeList.Count &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//QRCode_listView属性设置</span></span><br><span class="line">        QRCode_listView.View = View.LargeIcon;</span><br><span class="line">        QRCode_listView.LargeImageList = QRCode_imageList;</span><br><span class="line">        QRCode_listView.BeginUpdate();</span><br><span class="line"></span><br><span class="line">        QRCode_listView.LargeImageList.ImageSize = <span class="keyword">new</span> System.Drawing.Size(<span class="number">200</span>, <span class="number">200</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; QRCodeList.Count; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            QRCode_imageList.Images.Add(QRCodeList[i]);</span><br><span class="line">            ListViewItem lvi = <span class="keyword">new</span> ListViewItem(Info_listView.Items[i].SubItems[<span class="number">0</span>].Text);</span><br><span class="line">            QRCode_listView.Items.Add(lvi);</span><br><span class="line">            QRCode_listView.Items[i].ImageIndex = QRCode_imageList.Images.Count - <span class="number">1</span> ;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        QRCode_listView.EndUpdate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="9-保存图片"><a href="#9-保存图片" class="headerlink" title="9. 保存图片"></a>9. 保存图片</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">FolderBrowserDialog folderDlg = <span class="keyword">new</span> FolderBrowserDialog();</span><br><span class="line">folderDlg.Description = <span class="string">&quot;请选择文件夹&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (folderDlg.ShowDialog() == DialogResult.OK)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">string</span> path = folderDlg.SelectedPath;</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; QRCodeList.Count; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        QRCodeList[i].Save(path + <span class="string">@&quot;\&quot;</span> + Info_listView.Items[i].SubItems[<span class="number">0</span>].Text + <span class="string">&quot;.bmp&quot;</span>, System.Drawing.Imaging.ImageFormat.Bmp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-VS2013工程資源文件的保存和使用"><a href="#10-VS2013工程資源文件的保存和使用" class="headerlink" title="10. VS2013工程資源文件的保存和使用"></a>10. VS2013工程資源文件的保存和使用</h2><p><a href="http://blog.csdn.net/mengdong_zy/article/details/8971154">C#将图片保存到资源文件并调用</a></p>
+<h2 id="11-網絡請求重定向"><a href="#11-網絡請求重定向" class="headerlink" title="11. 網絡請求重定向"></a>11. 網絡請求重定向</h2><p>在通过get和post获取网络数据时，如果遇到重定向的网址，一定要把HttpWebRequest的重定向参数值设为true,并重新获取当前页面的Cookie</p>
+<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">request.AllowAutoRedirect = <span class="literal">true</span>;</span><br><span class="line">response = (HttpWebResponse)request.GetResponse();</span><br><span class="line"><span class="comment">//获取cookie  </span></span><br><span class="line">CookiesString = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br></pre></td></tr></table></figure>
+
+<h2 id="12-ListView添加checkBox問題"><a href="#12-ListView添加checkBox問題" class="headerlink" title="12. ListView添加checkBox問題"></a>12. ListView添加checkBox問題</h2><p>取消某一个已选中的项，會取消所有已选中的项，在网上找的参考代码在ItemChecked方法中多了一句代码：</p>
+<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">e.Item.Selected = e.Item.Checked;</span><br></pre></td></tr></table></figure>
+<p>將这句代码的意思应该是把checked的复选框也设制为selected的，注釋該劇代碼就解決了。</p>
+<h2 id="13-设置窗体不能拉大或拖小"><a href="#13-设置窗体不能拉大或拖小" class="headerlink" title="13. 设置窗体不能拉大或拖小"></a>13. 设置窗体不能拉大或拖小</h2><p>將FormBorderStyle設爲为Fix即可，如Fix3D;</p>
+<h2 id="14-Base64编码解码"><a href="#14-Base64编码解码" class="headerlink" title="14. Base64编码解码"></a>14. Base64编码解码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 編碼</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;data&quot;&gt;</span>需要編碼的数据<span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="built_in">string</span> <span class="title">Encode</span>(<span class="params"><span class="built_in">string</span> data</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    System.Text.Encoding encode = System.Text.Encoding.UTF8;</span><br><span class="line">    <span class="built_in">byte</span>[] bytedata = encode.GetBytes(data);</span><br><span class="line">    <span class="built_in">string</span> result = Convert.ToBase64String(bytedata, <span class="number">0</span>, bytedata.Length);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 解碼</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;data&quot;&gt;</span>需要解碼的数据<span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="built_in">string</span> <span class="title">Decode</span>(<span class="params"><span class="built_in">string</span> data</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">byte</span>[] bpath = Convert.FromBase64String(data);</span><br><span class="line">    <span class="built_in">string</span> result = System.Text.ASCIIEncoding.UTF8.GetString(bpath);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>拓展：<a href="http://www.cnblogs.com/chengxiaohui/articles/3951129.html">从原理上搞定编码– Base64编码</a></p>
+]]></content>
+      <categories>
+        <category>desktop development</category>
+      </categories>
+      <tags>
+        <tag>C#</tag>
+        <tag>模拟登录</tag>
+        <tag>ListView</tag>
+        <tag>正則匹配</tag>
+        <tag>ZXing</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android开发中的空指针异常</title>
+    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
+    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
+
+<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>空指针异常</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>EndNote使用</title>
+    <url>/2016/11/20/EndNote%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<blockquote>
+<p>提示：本文以Word2016 和 EndNote7 爲例，默認你已經安裝好EndNote，如果沒有，請先將EndNote安裝好，再繼續閲讀這篇文章</p>
+</blockquote>
+<h2 id="导入文献"><a href="#导入文献" class="headerlink" title="导入文献"></a>导入文献</h2><p>首先將需要參考的文獻導入到EndNote，文件 → 导入 → 文件夹</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_dir.jpg" alt="import directory">
+</p>
+
+<p>出现导入文件夹对话框，如下所示。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_select.jpg" alt="导入文件夹对话框">
+</p>
+
+<p>点击选择按钮，选择的文献所在的文件夹</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_select_dir.jpg" alt="选择文献所在文件夹">
+</p>
+
+<p>选择好之后，点击确定，回到“导入文件夹”对话框，点击“导入”按钮，即可完成文献导入，如下图所示。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_import.jpg" alt="click import">
+</p>
+
+<p>如下為导入结果</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_result.jpg" alt="import result">
+</p>
+
+<h2 id="修改文献格式"><a href="#修改文献格式" class="headerlink" title="修改文献格式"></a>修改文献格式</h2><p>有时候，可能因为文献格式的原因，导出的结果并不理想，如上图，导出的标题莫名其妙含有尖括号，作者栏没有内容等，我们需要手动对其进行修改。</p>
+<p>如图，选中对应的文献，将title两边的尖括号(&lt;&gt;)删除</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/manual_modify.jpg" alt="手动修改">
+</p>
+
+<p>修改好之后，然后点击其他文献，会提示你是否保存修改，点击确定按钮即可完成保存，如下图所示。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/ask_save.jpg" alt="是否保存修改">
+</p>
+
+<p>同样，你同时也可以手动添加或修改Author, Journal等其他信息。</p>
+<p>修改好文献格式后，你就可以在Word中随性地引用文献了。</p>
+<h2 id="插入引用"><a href="#插入引用" class="headerlink" title="插入引用"></a>插入引用</h2><p>在Word中，将光标定位到需要引用文献的地方，点击 Insert Citation 按钮，如下图所示</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_insert_citation.jpg" alt="Insert Citation">
+</p>
+
+<p>如下图所示，跳出文献搜索对话框，在输入框中输入你导入的文献的名称，点击“Find”按钮，即可搜索到你要引用的文献。点击选中对应的文献，点击“Insert”按钮，即可完成引用。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_insert_button.jpg" alt="点击插入按钮">
+</p>
+
+
+<p>文中的引用结果如下:</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/insert_citation_result.jpg" alt="文中的引用结果">
+</p>
+
+<p>此时，你会发现论文的末尾会有一条刚引用的文献，如下图所示。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/insert_citation_result2.jpg" alt="文中的引用结果">
+</p>
+
+<h2 id="设置引用样式"><a href="#设置引用样式" class="headerlink" title="设置引用样式"></a>设置引用样式</h2><p>做到这里，很多读者可能会说，怎么跟我的引用结果不一样，我的引用编号中没有中括号呀，别急，继续往下看，你会发现很神奇的事情。下面就是见证奇迹的时刻了[坏笑]</p>
+<h3 id="设置引用列表布局样式"><a href="#设置引用列表布局样式" class="headerlink" title="设置引用列表布局样式"></a>设置引用列表布局样式</h3><p>一般 Endnote 的默认样式，不是我们想要的样式，这时我们需要手动进行引用样式的修改。我用的样式时Nature样式，具体可通过下拉菜单进行选择，点击“选择另一个样式”，找到Nature,选择即可。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/select_citation_style.jpg" alt="选择另一个样式">
+</p>
+
+<p>点击编辑 → 输出样式 → 编辑”Nature”, 选择 参考文献 → 布局；默认布局如下</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/reference_layout.jpg" alt="引用默认布局">
+</p>
+
+<p>将Bibliography Number前后加上中括号，即“[Bibliography Number]”, 并将其后面的制表符删除，换成2个空格，因为制表符会比较宽，在word中并不美观。编辑结果如下图所示：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/reference_layout_modify_result.jpg" alt="修改引用布局">
+</p>
+
+<p>点击右上角的叉号</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_cross_button.jpg" alt="点击右上角叉">
+</p>
+
+<p>提示你是否保存之前的修改，点击是，EndNote 跳出重命名对话框，默认 “Nature 复制”，点击保存即可。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/ask_save_style.jpg" alt="保存修改样式">
+</p>
+
+<p>然后在word中选择，EndNote工具栏 → Style → Select Another Style, 选择新保存的”Nature 复制”样式，这时你会发现，文章最后的引用文献列表已经发生了变化。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/switch_word_refrence_style.jpg" alt="word中切换EndNote样式">
+</p>
+
+<h3 id="设置文中引用处编号样式"><a href="#设置文中引用处编号样式" class="headerlink" title="设置文中引用处编号样式"></a>设置文中引用处编号样式</h3><p>细心的读者可能会发现，文章中引用处的编号没有中括号“[]”,如下所示</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/citation_no_bracket.jpg" alt="word中切换EndNote样式">
+</p>
+
+<p>在EndNote中编辑 “Nature 复制”输出样式，选择 “引用” → “模板”，将 Citation 下的 “Bibliography Number”前后添加中括号，即“[Bibliography Number]”，修改结果如下：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/citation_add_bracket.jpg" alt="引用序号添加中括号">
+</p>
+
+<p>点击右上角的叉，保存修改，然后在word中更新引用即可。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/update_citations_and_bibliography.jpg" alt="更新引用">
+</p>
+
+<h3 id="引用列表缩进"><a href="#引用列表缩进" class="headerlink" title="引用列表缩进"></a>引用列表缩进</h3><p>到了这里，有强迫症的同胞可能会发现，如果引用列表中，如果引用过长，第二行会顶格显示，想把该引用的第二行设置悬挂缩进，和第一行对齐，简单，继续往下看。</p>
+<p>将光标定位到引用列表，右击，Edit Citation(s) → More</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/edit_citation_more.jpg" alt="更新引用">
+</p>
+
+<p>选择 Tools → Format Bibliography</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/tools_format_bibliography.jpg" alt="更新引用">
+</p>
+
+<p>选择 Layout，设置 Hanging即可，这里我设置的為0.848cm。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/layout_hanging.jpg" alt="更新引用">
+</p>
+
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>EndNote</tag>
+        <tag>Word</tag>
+        <tag>文献引用</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Gprinter打印机驱动安装及设置</title>
+    <url>/2016/10/15/Gprinter%E6%89%93%E5%8D%B0%E6%9C%BA%E9%A9%B1%E5%8A%A8%E5%AE%89%E8%A3%85%E5%8F%8A%E8%AE%BE%E7%BD%AE/</url>
+    <content><![CDATA[<h2 id="驱动安装"><a href="#驱动安装" class="headerlink" title="驱动安装"></a>驱动安装</h2><ol>
+<li>找到驱动文件根目录下的Drivers文件夹并进入，双击“PrnInst.exe”，进入安装向导欢迎界面，如下图所示。</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step01.jpg" alt="Step 1">
+</p>
+
+<ol start="2">
+<li>点击“下一步”，进入选项界面，如下图所示</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step02.jpg" alt="Step 1">
+</p>
+
+<ol start="3">
+<li>点击“安装打印机”，进入“选择打印机界面”，如图所示，选择“GP-9034T”,点击“下一步”。</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step03.jpg" alt="Step 1">
+</p>
+
+<ol start="4">
+<li>进入打印机名称、端口和语言设置界面，端口选择“USB001”,语言默认简体中文，和名称一样默认，点击完成即可完成安装。</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step04.jpg" alt="Step 1">
+</p>
+
+<h2 id="驱动设置"><a href="#驱动设置" class="headerlink" title="驱动设置"></a>驱动设置</h2><ol>
+<li>进入系统设备和打印机，右击“Gprinter”打印机，选择“打印机首选项”，进入打印机首选项设置界面，如下图所示；</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step05.jpg" alt="Step 1">
+</p>
+
+<ol start="2">
+<li>在“选项”Tab页面，打印速度设为5cm&#x2F;s，打印浓度设为9，标签格式选择cm,宽度设为5，高度设为3，点击应用按钮；</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step06.jpg" alt="Step 1">
+</p>
+
+<ol start="3">
+<li>进入高级设置Tab页，感测器类型选择“间距”，介质设置为“缺省设置”，选项选择“撕纸”，点击应用按钮；</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step07.jpg" alt="Step 1">
+</p>
+
+<ol start="4">
+<li>进入“抖动Tab页”，抖动类型选择“无”，点击应用按钮；到此设置完成，点击确定按钮，保存所有设置。</li>
+</ol>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/Gprinter/PrnInst%20-%20Step08.jpg" alt="Step 1">
+</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Gprinter</tag>
+        <tag>打印机</tag>
+        <tag>驱动</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Fiddler常見問題</title>
+    <url>/2016/10/16/Fiddler%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C/</url>
+    <content><![CDATA[<h2 id="无法显示会话结果"><a href="#无法显示会话结果" class="headerlink" title="无法显示会话结果"></a>无法显示会话结果</h2><p>可能是编码原因，一般Fiddler也会提示：</p>
+<blockquote>
+<p>“Response body is encoded. Click to decoded”</p>
+</blockquote>
+<p>只需点击提示按钮即可显示get到的信息，或者选择对应的Session，右击选择“decode selected session”即可。</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Fiddler</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Fexo</title>
+    <url>/2016/10/22/Fexo/</url>
+    <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Fexo是Hexo的一款极简主题之一</p>
+<h2 id="自定义Fexo"><a href="#自定义Fexo" class="headerlink" title="自定义Fexo"></a>自定义Fexo</h2><h3 id="添加评论数量显示"><a href="#添加评论数量显示" class="headerlink" title="添加评论数量显示"></a>添加评论数量显示</h3><h4 id="添加显示的代码段"><a href="#添加显示的代码段" class="headerlink" title="添加显示的代码段"></a>添加显示的代码段</h4><p>首先,确认你的评论系统用的是多说,如果不是,那就不用继续往下看了</p>
+<p>在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.duoshuo_shortname)&#123; %&gt;</span><br><span class="line">&lt;i class=&quot;icon-comment&quot;&gt;&lt;/i&gt; </span><br><span class="line">&lt;span class=&quot;ds-thread-count&quot; data-thread-key=&quot;&lt;%= url %&gt;&quot;&gt;&lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt;条评论</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+
+<p>尤其注意data-thread-key的设置,它和你之前配置多说的时候是一致的,每篇文章有一个独一无二的key。</p>
+<p>Fexo已经集成了多说，fexo&#x2F;layout&#x2F;_partial&#x2F;component&#x2F;duoshuo.ejs文件中，我们可以看到</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">data-thread-key=&quot;&lt;%= url %&gt;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>注：</p>
+<ul>
+<li><p>不是fexo&#x2F;layout&#x2F;_partial&#x2F;duoshuo.ejs文件</p>
+</li>
+<li><p>使用<code>class=&quot;fa fa-spinner fa-spin&quot;</code>图标(没加载出来前就显示个菊花转转转)，需要引入引入font-awesome字体，在fexo&#x2F;layout&#x2F;_partial&#x2F;head.esj中head标签中添加如下引用</p>
+</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">href</span>=<span class="string">&quot;//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="多说自定义文本设置"><a href="#多说自定义文本设置" class="headerlink" title="多说自定义文本设置"></a>多说自定义文本设置</h4><p>主要设置三个参数：暂无评论，1条评论，{num}条评论</p>
+<p>设置结果如下所示：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E5%A4%9A%E8%AF%B4%E8%87%AA%E5%AE%9A%E4%B9%89%E6%96%87%E6%9C%AC.png" alt="多说自定义文本设置">
+</p>
+
+<h4 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h4><p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C01.png" alt="fexo主题添加评论数运行结果01">
+</p>
+
+<p>发现无法显示访问数，没有达到预期的效果，顿时要崩溃了</p>
+<h4 id="一线生机"><a href="#一线生机" class="headerlink" title="一线生机"></a>一线生机</h4><p>查看多说官方文档，有如下发现：</p>
+<blockquote>
+<p>data-thread-key中:和,即冒号和逗号有特别的用途，请不要使用url或其他有这两个符号的内容作为data-thread-key。</p>
+</blockquote>
+<p><a href="http://dev.duoshuo.com/docs/5003ecd94cab3e7250000008">评论框调用代码参数说明</a></p>
+<p>Fexo主题默认的多说data-thread-key是url,包含”:”,这是Fexo主题的一大不足</p>
+<h4 id="重拾信心"><a href="#重拾信心" class="headerlink" title="重拾信心"></a>重拾信心</h4><p>将fexo&#x2F;layout&#x2F;_partial&#x2F;component&#x2F;duoshuo.ejs文件中data-thread-key改为如下：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 多说评论框 start --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;ds-thread&quot;</span> <span class="attr">data-thread-key</span>=<span class="string">&quot;&lt;%= page.layout %&gt;-&lt;%= page.slug %&gt;&quot;</span> </span></span><br><span class="line"><span class="tag"><span class="attr">data-title</span>=<span class="string">&quot;&lt;%= page.title %&gt;&quot;</span> <span class="attr">data-url</span>=<span class="string">&quot;&lt;%= url %&gt;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 多说评论框 end --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>将fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中评论显示代码改为如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.duoshuo_shortname)&#123; %&gt;</span><br><span class="line">	&lt;i class=&quot;icon-comment&quot;&gt;&lt;/i&gt; </span><br><span class="line">	&lt;span class=&quot;ds-thread-count&quot; data-thread-key=&quot;&lt;%= page.layout %&gt;-&lt;%= page.slug %&gt;&quot;&gt;</span><br><span class="line">	&lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt; 条评论</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+
+<p>运行观察结果,成功！</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C02.png" alt="fexo主题添加评论数运行结果01">
+</p>
+
+<h3 id="添加访问量显示"><a href="#添加访问量显示" class="headerlink" title="添加访问量显示"></a>添加访问量显示</h3><p>关于访问量统计这事儿,静态博客不太好搞,我找到了这个<a href="http://ibruce.info/2015/04/04/busuanzi/">不蒜子</a>,这位非著名码农自己做的访问统计,哈哈,点个赞</p>
+<h4 id="安装脚本"><a href="#安装脚本" class="headerlink" title="安装脚本"></a>安装脚本</h4><p>在fexo&#x2F;layout&#x2F;_partial&#x2F;head.esj文件的head标签中引入不算子js文件</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">async</span> <span class="attr">src</span>=<span class="string">&quot;//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="安装标签"><a href="#安装标签" class="headerlink" title="安装标签"></a>安装标签</h4><p>在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.busuanzi)&#123; %&gt;</span><br><span class="line">&lt;i class=&quot;fa fa-eye&quot;&gt;&lt;/i&gt; </span><br><span class="line">&lt;span id=&quot;busuanzi_container_page_pv&quot;&gt;</span><br><span class="line">   &amp;nbsp热度 &lt;span id=&quot;busuanzi_value_page_pv&quot;&gt;</span><br><span class="line">   &lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt;℃</span><br><span class="line">&lt;/span&gt;</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+<p>注：&amp;nbsp表示空格，是爲了增加”fa fa-eye” icon 與“熱度”的距離</p>
+<h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>hexo&#x2F;_config.yml添加如下设置：</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 不算子 站点访问量及文章访问量统计</span></span><br><span class="line"><span class="attr">busuanzi:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>至此大功告成，运行结果如上图所示！</p>
+<h2 id="小技巧"><a href="#小技巧" class="headerlink" title="小技巧"></a>小技巧</h2><p>如上述的font-awesome字体库,若要查看网址链接的CSS有哪些class icon图标,可以通过开发者工具将CSS文件下载到本地，一般CSS样式是压缩过的，可以用sublime的HTML-CSS-JS Prettify插件，将css代码格式化(只需右击选择HTML&#x2F;CSS&#x2F;JS Prettify -&gt; Prettify Code即可)，再查找有哪些class icon。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ol>
+<li><a href="http://bblove.me/2015/05/30/hexo-setting-with-comments-and-visitors/">给hexo配置上评论和访问量</a></li>
+<li><a href="http://dev.duoshuo.com/docs/5003ecd94cab3e7250000008">多说官方文档：评论框调用代码参数说明</a></li>
+<li><a href="http://ibruce.info/2015/04/04/busuanzi/">不算子</a></li>
+<li><a href="https://bruceyu1994.github.io/2016/10/22/Fexo/">我的博客展示地址</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Fexo</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo搭建個人博客</title>
+    <url>/2016/10/15/Hexo%E6%90%AD%E5%BB%BA%E5%80%8B%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h2 id="搭建個人博客"><a href="#搭建個人博客" class="headerlink" title="搭建個人博客"></a>搭建個人博客</h2><h3 id="環境配置"><a href="#環境配置" class="headerlink" title="環境配置"></a>環境配置</h3><h4 id="安裝Git"><a href="#安裝Git" class="headerlink" title="安裝Git"></a>安裝Git</h4><h4 id="安裝node-js"><a href="#安裝node-js" class="headerlink" title="安裝node.js"></a>安裝node.js</h4><h3 id="配置Github"><a href="#配置Github" class="headerlink" title="配置Github"></a>配置Github</h3><h3 id="安裝Hexo"><a href="#安裝Hexo" class="headerlink" title="安裝Hexo"></a>安裝Hexo</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ npm install hexo-cli -g</span><br><span class="line">$ hexo init blog</span><br><span class="line">$ cd blog</span><br><span class="line">$ npm install</span><br></pre></td></tr></table></figure>
+
+<p>【PS】 <code>hexo init blog</code> 命令执行完后，会在当前目录下生成 blog 目录，blog 目录即为博客所在的目录</p>
+<p><a href="http://blog.csdn.net/lzrreach/article/details/52863798">手把手教你使用Hexo + Github Pages搭建个人独立博客</a></p>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>blog目录下配置文件作如下修改</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repository:</span> <span class="string">git@github.com:bruceyu1994/bruceyu1994.github.io</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="安装扩展"><a href="#安装扩展" class="headerlink" title="安装扩展"></a>安装扩展</h4><p><code>$ npm install hexo-deployer-git --save</code></p>
+<p>现在你就可以执行命令进行部署了</p>
+<h2 id="常見問題"><a href="#常見問題" class="headerlink" title="常見問題"></a>常見問題</h2><h3 id="无法识别带-号的标题"><a href="#无法识别带-号的标题" class="headerlink" title="无法识别带#号的标题"></a>无法识别带#号的标题</h3><p>如执行如下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ hexo n &quot;C#使用&quot;</span><br></pre></td></tr></table></figure>
+<p>则在_posts文件夹下生成”C-使用”，而不是”C#使用”</p>
+<blockquote>
+<p>貌似衹是文件名不支持#號,title生成沒有問題。</p>
+</blockquote>
+<h3 id="themes文件fexo主題无法push到Git服務器"><a href="#themes文件fexo主題无法push到Git服務器" class="headerlink" title="themes文件fexo主題无法push到Git服務器"></a>themes文件fexo主題无法push到Git服務器</h3><p>具體描述：無法add，執行 <code>git add .</code> 之後還是會提示fexo主題文件夾需要add</p>
+<p>【解決方案】</p>
+<p>将fexo目录下的 .git&#x2F; 文件夹删除即可 <code>add</code> 并 <code>push</code></p>
+<h3 id="部署時出現錯誤"><a href="#部署時出現錯誤" class="headerlink" title="部署時出現錯誤"></a>部署時出現錯誤</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ hexo d</span><br><span class="line">ERROR Deployer not found: git</span><br></pre></td></tr></table></figure>
+<p>可能原因：git部署工具沒有安裝，執行如下命令即可</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install hexo-deployer-git --save 改了之后执行，然后再部署试试</span><br></pre></td></tr></table></figure>
+
+<h3 id="启用搜索页面，却无法进行搜索"><a href="#启用搜索页面，却无法进行搜索" class="headerlink" title="启用搜索页面，却无法进行搜索"></a>启用搜索页面，却无法进行搜索</h3><p>原因：没有安装 hexo-search 插件</p>
+<p>执行如下命令安装hexo-search插件，即可解决</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ npm install hexo-search --save</span><br></pre></td></tr></table></figure>
+
+<h3 id="warning-LF-will-be-replaced-by-CRLF"><a href="#warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="warning: LF will be replaced by CRLF"></a>warning: LF will be replaced by CRLF</h3><p>原因：windows中的换行符为 CRLF， 而在Linux下的换行符为LF，所以hexo执行git add . 时出现提示</p>
+<p>解决方案：</p>
+<ol>
+<li><p>删除你hexo根目录下面的.deploy_git文件夹</p>
+</li>
+<li><p>执行 <code>$ git config --global core.autocrlf false</code>  &#x2F;&#x2F;禁用自动转换</p>
+</li>
+<li><p>重新执行如下命令，发现已没有之前的警告了</p>
+<p> <code>$ hexo clean</code><br> <code>$ hexo d -g</code></p>
+</li>
+<li><p>打开博客网址，进行验证是否成功</p>
+<p> <a href="https://www.zhihu.com/question/38219432/answer/123443945">参考链接</a></p>
+</li>
+</ol>
+<p>注：</p>
+<blockquote>
+<p>CRLF表示句尾使用回车换行两个字符(即我们常在Windows编程时使用”\r\n”换行)<br>LF表示表示句尾，只使用换行<br>CR表示只使用回车  </p>
+</blockquote>
+<h3 id="Permission-denied-publickey"><a href="#Permission-denied-publickey" class="headerlink" title="Permission denied (publickey)."></a>Permission denied (publickey).</h3><p>部署时执行 <code>hexo d</code> 命令时出现该错误</p>
+<blockquote>
+<p>fatal: Could not read from remote repository.</p>
+</blockquote>
+<p>【Reason】You’ve probably not added a public key to your SSH keys</p>
+<p>生成 publickey ，命令：<code>$ ssh-keygen -t rsa</code>; 然后将 publickey 添加到远程服务器即可。</p>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2>]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>博客</tag>
+        <tag>Github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Markdown 常见问题</title>
+    <url>/2016/10/15/Markdown%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h2><ol>
+<li>方法一</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">center</span>&gt;</span></span></span><br><span class="line"><span class="code">	![图片说明](https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg &quot;金鱼&quot;)</span></span><br><span class="line"><span class="code">&lt;/center&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>方法二</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">align</span>=<span class="string">&quot;center&quot;</span>&gt;</span></span> </span><br><span class="line"><span class="code">	&lt;img src=&quot;https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg&quot; alt=&quot;CSDN图标&quot; /&gt;</span></span><br><span class="line"><span class="code">&lt;/div&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h2><ul>
+<li><code>&lt;p&gt;</code>:换行并加一行空白行</li>
+<li>连续两个空格会变成一个 <code>&lt;br&gt;</code></li>
+</ul>
+<p><a href="http://lutaf.com/markdown-simple-usage.htm">参考链接</a></p>
+<h2 id="Markdown哲学"><a href="#Markdown哲学" class="headerlink" title="Markdown哲学"></a>Markdown哲学</h2><p>内容與樣式分開，让思绪自由流畅不受阻，让创作回归内容本身。</p>
+<h2 id="使用感悟"><a href="#使用感悟" class="headerlink" title="使用感悟"></a>使用感悟</h2><ul>
+<li>格式越简单越好</li>
+</ul>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Markdown</tag>
+        <tag>图片</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Sublime Text 3常见问题</title>
+    <url>/2016/10/14/Sublime-Text-3%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="自带代码格式化"><a href="#自带代码格式化" class="headerlink" title="自带代码格式化"></a>自带代码格式化</h2><p>全选代码，Edit  -&gt;  Line  -&gt;  Reindent<br>只是sublime并没有给他赋予快捷键，所以只需加上快捷键即可</p>
+<ul>
+<li>添加快捷键<br>Preference  -&gt;  Key Bindings - User<br>中括号内添加如下内容；</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">	<span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;keys&quot;</span>   <span class="punctuation">:</span><span class="punctuation">[</span><span class="string">&quot;ctrl+shift+f&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;command&quot;</span><span class="punctuation">:</span><span class="string">&quot;reindent&quot;</span></span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Sublime-Text3-注册码"><a href="#Sublime-Text3-注册码" class="headerlink" title="Sublime Text3 注册码"></a>Sublime Text3 注册码</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">—– BEGIN LICENSE —–</span><br><span class="line">Michael Barnes</span><br><span class="line">Single User License</span><br><span class="line">EA7E-821385</span><br><span class="line">8A353C41 872A0D5C DF9B2950 AFF6F667</span><br><span class="line">C458EA6D 8EA3C286 98D1D650 131A97AB</span><br><span class="line">AA919AEC EF20E143 B361B1E7 4C8B7F04</span><br><span class="line">B085E65E 2F5F5360 8489D422 FB8FC1AA</span><br><span class="line">93F6323C FD7F7544 3F39C318 D95E6480</span><br><span class="line">FCCC7561 8A4A1741 68FA4223 ADCEDE07</span><br><span class="line">200C25BE DBBC4855 C4CFB774 C5EC138C</span><br><span class="line">0FEC1CEF D9DCECEC D3A5DAD1 01316C36</span><br><span class="line">—— END LICENSE ——</span><br></pre></td></tr></table></figure>
+
+<p><a href="http://blog.sina.com.cn/s/blog_7f5571aa0102w3xq.html">sublime text3 注册码</a></p>
+<h2 id="Sublime-Text-3-快捷键大全"><a href="#Sublime-Text-3-快捷键大全" class="headerlink" title="Sublime Text 3 快捷键大全"></a>Sublime Text 3 快捷键大全</h2><blockquote>
+<p>Ctrl+Shift+D → 复制当前行到下一行<br>Ctrl+Shift+K → 删除整行<br>Ctrl+F2 → 添加&#x2F;删除书签</p>
+</blockquote>
+<p><a href="http://www.jb51.net/softjc/180873.html">参考网址：sublime text 3 快捷键大全</a></p>
+<h2 id="Sublime-Text-3-常用插件与主题"><a href="#Sublime-Text-3-常用插件与主题" class="headerlink" title="Sublime Text 3 常用插件与主题"></a>Sublime Text 3 常用插件与主题</h2><h3 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h3><h4 id="Package-Control"><a href="#Package-Control" class="headerlink" title="Package Control"></a>Package Control</h4><blockquote>
+<ul>
+<li>&#96;Ctrl+&#96;&#96;调出console</li>
+<li>粘贴以下代码后回车</li>
+</ul>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import urllib.request,os; pf = &#x27;Package Control.sublime-package&#x27;; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), &#x27;wb&#x27;).write(urllib.request.urlopen( &#x27;http://sublime.wbond.net/&#x27; + pf.replace(&#x27; &#x27;,&#x27;%20&#x27;)).read())</span><br></pre></td></tr></table></figure>
+
+<p><a href="http://www.cnblogs.com/Rising/p/3741116.html">参考网址</a></p>
+<h4 id="All-Autocomplete"><a href="#All-Autocomplete" class="headerlink" title="All Autocomplete"></a>All Autocomplete</h4><blockquote>
+<p>让代码自动完成的匹配从所有打开的文件里去匹配，而不是只在当前文件里匹配</p>
+</blockquote>
+<h4 id="AutoFileName"><a href="#AutoFileName" class="headerlink" title="AutoFileName"></a>AutoFileName</h4><blockquote>
+<p>在代码里引用文件时，提供文件名的提示和补全</p>
+</blockquote>
+<h4 id="BracketHighlighter"><a href="#BracketHighlighter" class="headerlink" title="BracketHighlighter"></a>BracketHighlighter</h4><blockquote>
+<p>括号高亮</p>
+</blockquote>
+<h4 id="ConvertToUTF8"><a href="#ConvertToUTF8" class="headerlink" title="ConvertToUTF8"></a>ConvertToUTF8</h4><p>【功能】文件转码成utf-8<br>【简介】通过本插件，您可以编辑并保存目前编码不被 Sublime Text 支持的文件，特别是中日韩用户使用的 GB2312，GBK，BIG5，EUC-KR，EUC-JP ，ANSI等。ConvertToUTF8 同时支持 Sublime Text 2 和 3。</p>
+<h4 id="Emmet"><a href="#Emmet" class="headerlink" title="Emmet"></a>Emmet</h4><blockquote>
+<p>使用仿CSS选择器的语法来生成代码，大大提高了HTML&#x2F;CSS代码编写的速度</p>
+</blockquote>
+<h4 id="FileDiffs"><a href="#FileDiffs" class="headerlink" title="FileDiffs"></a>FileDiffs</h4><blockquote>
+<ul>
+<li>【功能】强大的比较代码不同工具</li>
+<li>【简介】比较当前文件与选中的代码、剪切板中代码、另一文件、未保存文件之间的差别。可配置为显示差别在外部比较工具，精确到行。</li>
+</ul>
+</blockquote>
+<h4 id="HTML-CSS-JS-Prettify"><a href="#HTML-CSS-JS-Prettify" class="headerlink" title="HTML-CSS-JS Prettify"></a>HTML-CSS-JS Prettify</h4><blockquote>
+<p>HTML&#x2F;CSS&#x2F;JS格式化插件 </p>
+</blockquote>
+<p><a href="http://blog.csdn.net/qdujunjie/article/details/38805835">参考网址</a></p>
+<h4 id="Markdown-Extended-Monokai-Extended"><a href="#Markdown-Extended-Monokai-Extended" class="headerlink" title="Markdown Extended +  Monokai Extended"></a>Markdown Extended +  Monokai Extended</h4><blockquote>
+<p>不错的Markdown主题，支持对多种语言的高亮</p>
+</blockquote>
+<h4 id="Markdown-Preview"><a href="#Markdown-Preview" class="headerlink" title="Markdown Preview"></a>Markdown Preview</h4><blockquote>
+<ul>
+<li>将 Markdown 文档渲染成我们想要的文档格式</li>
+<li>【快捷键】Ctrl + Shift + B</li>
+</ul>
+</blockquote>
+<h4 id="OmniMarkupPreviewer"><a href="#OmniMarkupPreviewer" class="headerlink" title="OmniMarkupPreviewer"></a>OmniMarkupPreviewer</h4><blockquote>
+<ul>
+<li>Markdown 文档渲染,实时在浏览器中预览</li>
+<li>Ctrl+Alt+O: Preview Markup in Browser.</li>
+<li>Ctrl+Alt+X: Export Markup as HTML.</li>
+<li>Ctrl+Alt+C: Copy Markup as HTML.</li>
+</ul>
+</blockquote>
+<h4 id="SideBarEnhancements"><a href="#SideBarEnhancements" class="headerlink" title="SideBarEnhancements"></a>SideBarEnhancements</h4><blockquote>
+<p>侧边栏增强</p>
+</blockquote>
+<h4 id="SublimeCodeIntel"><a href="#SublimeCodeIntel" class="headerlink" title="SublimeCodeIntel"></a>SublimeCodeIntel</h4><blockquote>
+<p>全功能的 Sublime Text 代码智能自动补全引擎</p>
+</blockquote>
+<h4 id="MarkdownEditing"><a href="#MarkdownEditing" class="headerlink" title="MarkdownEditing"></a>MarkdownEditing</h4><blockquote>
+<p>支持Markdown语法高亮；支持Github Favored Markdown语法；自带3个主题；支持 markdown 语法自动补全。</p>
+</blockquote>
+<p>【特性】</p>
+<blockquote>
+<ul>
+<li>跳转到符号定义</li>
+<li>导入自动完成</li>
+<li>函数调用提示</li>
+</ul>
+</blockquote>
+<h3 id="主题"><a href="#主题" class="headerlink" title="主题"></a>主题</h3><h4 id="Themr"><a href="#Themr" class="headerlink" title="Themr"></a>Themr</h4><blockquote>
+<ul>
+<li>主题管理，切换主题的时候，不用自己修改配置文件了，用这个可以方便的切换主题</li>
+<li>Ctrl+F5 切换 theme</li>
+</ul>
+</blockquote>
+<h4 id="SoDaReloaded"><a href="#SoDaReloaded" class="headerlink" title="SoDaReloaded"></a>SoDaReloaded</h4><blockquote>
+<p>Dark and light custom UI themes for Sublime Text 3 optimized for better readability.(拥有暗色和亮色两种自定义UI主题优化阅读)</p>
+</blockquote>
+<h2 id="Error"><a href="#Error" class="headerlink" title="Error"></a>Error</h2><blockquote>
+<p>Error: github API responded in an unfashion way :&#x2F;</p>
+</blockquote>
+<p>可能是 Markdown Preview 插件出了问题，如果又替代的插件，如 OmniMarkupPreviewer ，将 Markdown Preview 插件卸载就不会有问题了。而且卸载前，每保存一下 sublime 都会卡住，卸载之后就不会卡了。</p>
+<blockquote>
+<p>OmniMarkupPreviwer插件</p>
+</blockquote>
+<p>Ctrl+Alt+O: Preview Markup in Browser. 出现如下错误:</p>
+<p>Error: 404 Not Found</p>
+<p>Sorry, the requested URL ‘<a href="http://127.0.0.1:51004/view/28">http://127.0.0.1:51004/view/28</a>‘ caused an error:</p>
+<p>‘buffer_id(28) is not valid (closed or unsupported file format)’</p>
+<p><strong>NOTE:</strong> If you run multiple instances of Sublime Text, you may want to adjust<br>the <code>server_port</code> option in order to get this plugin work again.</p>
+<ul>
+<li>解决方法 <a href="http://stackoverflow.com/questions/35798823/omnimarkuppreviewer-404">参考网址</a></li>
+</ul>
+<p>Sublime Text &gt; Preferences &gt; Package Settings &gt; OmniMarkupPreviewer &gt; Settings - User</p>
+<p>paste the following to remove the strikeout package.</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;renderer_options-MarkdownRenderer&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;extensions&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;tables&quot;</span><span class="punctuation">,</span> <span class="string">&quot;fenced_code&quot;</span><span class="punctuation">,</span> <span class="string">&quot;codehilite&quot;</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="增大侧栏字体大小？"><a href="#增大侧栏字体大小？" class="headerlink" title="增大侧栏字体大小？"></a>增大侧栏字体大小？</h2><p><a href="http://www.tuicool.com/articles/FR3ma2">Sublime常用插件收集贴</a><br><a href="http://www.xuanfengge.com/practical-collection-of-sublime-plug-in.html">实用的sublime插件集合 – sublime推荐必备插件</a><br><a href="http://www.tuicool.com/articles/NJrQfub">在 Sublime 中配置 Markdown 环境</a><br><a href="http://www.tuicool.com/articles/VZ7Fnm3">Sublime Text3配置使用教程整理</a></p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Sublime</tag>
+        <tag>OmniMarkupPreviwer</tag>
+        <tag>插件</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RecyclerView的使用</title>
+    <url>/2016/11/20/RecyclerView%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="Rendering-Problems"><a href="#Rendering-Problems" class="headerlink" title="Rendering Problems"></a>Rendering Problems</h3><p>在布局文件中添加 RecyclerView,会出现 Rendering Problems,具体问题如下图所示：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/RecycleView/exception.png" alt="Rendering Problems">
+</p>
+
+<p>详细异常如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">java.lang.IllegalStateException: Unable to locate mode 0</span><br><span class="line">	at android.view.DisplayInfo.findMode(DisplayInfo.java:458)</span><br><span class="line">	at android.view.DisplayInfo.getMode(DisplayInfo.java:445)</span><br><span class="line">	at android.view.Display.getRefreshRate(Display.java:648)</span><br><span class="line">	at android.support.v7.widget.RecyclerView.onAttachedToWindow(RecyclerView.java:2392)</span><br><span class="line">	at android.view.View.dispatchAttachedToWindow(View.java:15392)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2953)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.ViewGroup.dispatchAttachedToWindow(ViewGroup.java:2960)</span><br><span class="line">	at android.view.AttachInfo_Accessor.setAttachInfo(AttachInfo_Accessor.java:42)</span><br><span class="line">	at com.android.layoutlib.bridge.impl.RenderSessionImpl.inflate(RenderSessionImpl.java:333)</span><br><span class="line">	at com.android.layoutlib.bridge.Bridge.createSession(Bridge.java:429)</span><br><span class="line">	at com.android.ide.common.rendering.LayoutLibrary.createSession(LayoutLibrary.java:389)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask$2.compute(RenderTask.java:548)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask$2.compute(RenderTask.java:533)</span><br><span class="line">	at com.intellij.openapi.application.impl.ApplicationImpl.runReadAction(ApplicationImpl.java:966)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask.createRenderSession(RenderTask.java:533)</span><br><span class="line">	at com.android.tools.idea.rendering.RenderTask.lambda$inflate$53(RenderTask.java:659)</span><br><span class="line">	at java.util.concurrent.FutureTask.run(FutureTask.java:266)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)</span><br><span class="line">	at java.lang.Thread.run(Thread.java:745)</span><br></pre></td></tr></table></figure>
+
+<p>我的工程中的 build.gradle dependencies如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile &#x27;com.android.support:appcompat-v7:25.0.0&#x27;</span><br><span class="line">compile &#x27;com.android.support:recyclerview-v7:25.0.0&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>改为如下即可解决问题，貌似是25.0.0的bug</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile &#x27;com.android.support:appcompat-v7:25.0.1&#x27;</span><br><span class="line">compile &#x27;com.android.support:recyclerview-v7:25.0.1&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>Sync Now 之后，问题完美解决</p>
+<p><a href="http://stackoverflow.com/questions/40161934/exception-raised-during-rendering-unable-to-locate-mode-0">参考网址</a></p>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>RecyclerView</tag>
+        <tag>Exception</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows常见问题</title>
+    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
+<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
+<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
+<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
+<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
+<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
+<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
+<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>windows</tag>
+        <tag>win10</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Word常见问题</title>
+    <url>/2017/03/06/Word%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="Word-2016"><a href="#Word-2016" class="headerlink" title="Word 2016"></a>Word 2016</h2><h3 id="文字重叠"><a href="#文字重叠" class="headerlink" title="文字重叠"></a>文字重叠</h3><p>【Reason】计算机中没有相应的字体  </p>
+<p>【Solution】</p>
+<ul>
+<li>选中重叠字体，查看字体类型</li>
+<li>百度或谷歌搜索相应的字体并下载</li>
+<li>将下载的字体复制到 “C:\Windows\Fonts” 目录下即可</li>
+</ul>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Word</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git之旅</title>
+    <url>/2016/10/14/git%E4%B9%8B%E6%97%85/</url>
+    <content><![CDATA[<h2 id="git-diff-探究"><a href="#git-diff-探究" class="headerlink" title="git diff 探究"></a>git diff 探究</h2><blockquote>
+<p>git提交的三大部分：  </p>
+<ol>
+<li>working directory(工作目錄，每當修改后，工作目錄的狀態都會改變)  </li>
+<li>stage&#x2F;index file(索引文件，暂存区域块，連接 working directory 和 commit 的橋梁，使用 <code>git add</code> 命令登記后，index file 内容就會改變，與 working directory 同步了)  </li>
+<li>commit file(<code>git commit</code> 將 index file 中的内容提交到 commit 中。commit 之後，代碼才進入 git 倉庫)<br>其中 1 屬於工作區，后兩者屬於版本庫<br>版本控制系统 git 使用的是合并格式 diff 的变体</li>
+</ol>
+</blockquote>
+<h3 id="1-git-diff"><a href="#1-git-diff" class="headerlink" title="1. git diff"></a>1. git diff</h3><blockquote>
+<p>显示 working directory 與 index file 的差別</p>
+</blockquote>
+<p><em><strong>注：diff 後面可添加完整“文件路徑+文件名”，可查看某一文件内容額變化，如 <code>git diff ./source/_posts/git之旅.md</code></strong></em></p>
+<h3 id="2-git-diff-–cached"><a href="#2-git-diff-–cached" class="headerlink" title="2. git diff –cached"></a>2. git diff –cached</h3><blockquote>
+<p>顯示 index file 與 commit 的差別                  </p>
+</blockquote>
+<h3 id="3-git-diff-HEAD"><a href="#3-git-diff-HEAD" class="headerlink" title="3. git diff HEAD"></a>3. git diff HEAD</h3><blockquote>
+<p>顯示 working directory 與 commit 的差別，這些内容可在執行<code>git commit -a</code>命令時被提交(HEAD 表示當下分支最新的 commit 的版本)</p>
+</blockquote>
+<h3 id="4-git-diff-HEAD-–-lib"><a href="#4-git-diff-HEAD-–-lib" class="headerlink" title="4. git diff HEAD – .&#x2F;lib"></a>4. git diff HEAD – .&#x2F;lib</h3><blockquote>
+<p>顯示 working directory 的lib目錄與 commit 之間的差別(當前分支)</p>
+</blockquote>
+<p><em><strong>注：<code>--</code> 前後都有空格</strong></em></p>
+<h3 id="5-git-diff-test"><a href="#5-git-diff-test" class="headerlink" title="5. git diff test"></a>5. git diff test</h3><blockquote>
+<p>顯示 working directory 與”test”分支的差別。可加路徑限定符比較某一文件或目錄</p>
+</blockquote>
+<h3 id="6-git-diff-–stat"><a href="#6-git-diff-–stat" class="headerlink" title="6. git diff –stat"></a>6. git diff –stat</h3><blockquote>
+<p>不看每个文件的详细差别，只统计被改动的文件和行数等</p>
+</blockquote>
+<h2 id="git-diff-结果如何查看？"><a href="#git-diff-结果如何查看？" class="headerlink" title="git diff 结果如何查看？"></a>git diff 结果如何查看？</h2><blockquote>
+<ul>
+<li>第一行 <code>diff --git a/file b/file</code> 表示结果为 git 格式的 diff ，進行比較的是 a 版本(變動前，源文件)的 file 和 b 版本(變動后，目標文件)的 file</li>
+<li>第二行 <code>index e69de29..1747b05 100644</code> 表示兩個版本的 git 哈希值(index 區域的 e69de29 對象與工作目錄區域的 1747b05 對象進行比較，最後 6 位是對象的模式，普通文件， 644 權限)</li>
+<li>—代表源文件</li>
+<li>+++代表目标文件(通常 working directory 中的文件是目标文件)</li>
+<li>空格开头的行是源文件和目标文件中都出现的行</li>
+<li>差异按照差异小结进行组织，每个差异小结的第一行都是定位语句，由<code>@@</code>开头和结尾(如 <code>@@ -0,0 +1,117 @@</code> 表示源文件从第0行开始的0行和目标文件从第1行开始的117行构成一个差异小结)</li>
+</ul>
+</blockquote>
+<h2 id="git-撤销修改"><a href="#git-撤销修改" class="headerlink" title="git 撤销修改"></a>git 撤销修改</h2><p><code>git checkout -- file</code> :直接丢弃工作区某个文件的修改</p>
+<p><a href="http://blog.csdn.net/baple/article/details/39640129">参考网址:Git 撤销修改</a></p>
+<h2 id="git-取消-commit"><a href="#git-取消-commit" class="headerlink" title="git 取消 commit"></a>git 取消 commit</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git reset --hard &lt;commit_id&gt;</span><br><span class="line">git push origin HEAD --force</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li><code>git reset --mixed</code> : 默認方式，等同于不帶任何參數的 <code>git reset</code> ,回退到某個版本，只保留源碼，回退 commit 和 index 信息</li>
+<li><code>git reset --soft</code> : 回退到某個版本，只回退 commit 信息，不恢復 index file 一級。若想再次提交，直接 commit</li>
+<li><code>git reset --hard</code> : 徹底回退到某個版本，本地源碼也會變爲上一版本的内容</li>
+</ul>
+</blockquote>
+<p><strong>注：</strong></p>
+<ol>
+<li>HEAD 最近一次提交；</li>
+<li>HEAD^(或HEAD<del>1,一次類推，上100個版本，即HEAD</del>100) 上一次提交；</li>
+<li><commit_id> 是每次 commit 的 SHA 值，可用 <code>git log</code> 查看</li>
+</ol>
+<h2 id="git查看全局配置信息"><a href="#git查看全局配置信息" class="headerlink" title="git查看全局配置信息"></a>git查看全局配置信息</h2><p>【命令】：<code>git config -l</code></p>
+<h2 id="git常见问题"><a href="#git常见问题" class="headerlink" title="git常见问题"></a>git常见问题</h2><h3 id="1-fatal-remote-origin-already-exists"><a href="#1-fatal-remote-origin-already-exists" class="headerlink" title="1. fatal: remote origin already exists"></a>1. fatal: remote origin already exists</h3><p>运行如下命令时；</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git remote add origin git@cnb.cool:iamyuzhe/blog/blog.git</span><br><span class="line">fatal: remote origin already exists.</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>问题描述：远程origin仓库已经存在</p>
+</li>
+<li><p>原因：在仓库创建之后，已经执行过此操作</p>
+</li>
+<li><p>解决方案：<a href="http://blog.csdn.net/dengjianqiang2011/article/details/9260435">参考网址</a></p>
+</li>
+</ul>
+<ol>
+<li>先输入$ git remote rm origin</li>
+<li>再输入$ git remote add origin <a href="mailto:&#x67;&#x69;&#x74;&#64;&#x63;&#x6e;&#98;&#x2e;&#99;&#x6f;&#111;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
+</ol>
+<h3 id="2-warning-LF-will-be-replaced-by-CRLF"><a href="#2-warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="2. warning: LF will be replaced by CRLF"></a>2. warning: LF will be replaced by CRLF</h3><p>运行如下命令时；</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">warning: LF will be replaced by CRLF in _config.yml.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>原因分析：<br>CRLF – Carriage-Return Line-Feed 回车换行<br>就是回车(CR, ASCII 13, \r) 换行(LF, ASCII 10, \n)。<br>这两个ACSII字符不会在屏幕有任何输出，但在Windows中广泛使用来标识一行的结束。而在Linux&#x2F;UNIX系统中只有换行符。<br>也就是说在windows中的换行符为 CRLF， 而在linux下的换行符为：LF<br>当使用git来生成一个工程后，文件中的换行符为LF， 当执行git add .时，系统提示：LF 将被转换成 CRLF</p>
+</li>
+<li><p>解决方案：<a href="http://blog.csdn.net/u011935939/article/details/50624791">参考网址</a><br>运行如下命令时；</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git config core.autocrlf false</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-如何退出編輯模式"><a href="#3-如何退出編輯模式" class="headerlink" title="3. 如何退出編輯模式"></a>3. 如何退出編輯模式</h3><p>命令模式下输入“ZZ”命令即可</p>
+<h3 id="4-執行push命令時出現錯誤"><a href="#4-執行push命令時出現錯誤" class="headerlink" title="4. 執行push命令時出現錯誤"></a>4. 執行push命令時出現錯誤</h3><p>具體錯誤:</p>
+<blockquote>
+<p>Updates were rejected because the remote contains work that you do</p>
+</blockquote>
+<p>原因：远程仓库比本地版本更新，所以需要先git pull,然后才能git push</p>
+<h3 id="5-git-diff-无任何結果輸出"><a href="#5-git-diff-无任何結果輸出" class="headerlink" title="5. git diff 无任何結果輸出"></a>5. git diff 无任何結果輸出</h3><p>【原因】当前分支没有内容需要提交（排除工作目录内容与暂存区内容相同）。如下，输入 <code>git status</code> 命令，虽然存在 <code>untracked file</code>, 但 <code>nothing added to commit</code>, 即没有需要提交的内容，此情况出现在刚添加一个新文件，且从未对该文件执行 <code>git add</code> 命令。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git status</span><br><span class="line">On branch master</span><br><span class="line">Your branch is up-to-date with &#x27;origin/master&#x27;.</span><br><span class="line">Untracked files:</span><br><span class="line">  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)</span><br><span class="line"></span><br><span class="line">        others/test.md</span><br><span class="line"></span><br><span class="line">nothing added to commit but untracked files present (use &quot;git add&quot; to track)</span><br></pre></td></tr></table></figure>
+
+<p>【注】一般执行 <code>git commit</code> 命令之后，<code>git diff</code> 命令不会有任何输出。执行 <code>git status</code> 命令，会有如下输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nothing to commit, working directory clean</span><br></pre></td></tr></table></figure>
+
+<p>即工作目录是干净的，没有任何内容需要提交。</p>
+<p><a href="http://www.oschina.net/question/1428681_139293?sort=time">参考网址:我用windows msysgit 。在git bash命令窗口中输入git diff 命令为什么没有信息输出</a></p>
+<h3 id="6-git-status-输出结果中文乱码"><a href="#6-git-status-输出结果中文乱码" class="headerlink" title="6. git status 输出结果中文乱码"></a>6. git status 输出结果中文乱码</h3><p>【Reason】在默认设置下，中文文件名在工作区状态输出，查看历史更改概要，以及在补丁文件中，文件名的中文不能正确地显示，而是显示为八进制的字符编码</p>
+<p>配置变量 core.quotepath 设置为 false 可解决问题，具体命令为 <code>git config --global core.quotepath false</code></p>
+<h3 id="7-git-pull-进入vim窗口"><a href="#7-git-pull-进入vim窗口" class="headerlink" title="7. git pull 进入vim窗口"></a>7. git pull 进入vim窗口</h3><p>【解决步骤】</p>
+<blockquote>
+<ul>
+<li>esc 键退出编辑状态</li>
+<li>shift+;(即输入冒号)</li>
+<li>wq!(保存并退出)&#x2F;q!(不保存直接退出) + 回车</li>
+</ul>
+</blockquote>
+<p>【建议】<br>编辑代码之前先 <code>pull</code> 一下，<code>push</code> 前也 <code>pull</code> 一下，减少不必要的麻烦；<br>也可先保存操作， <code>pull</code> 之后，在回复保存的内容，具体操作如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git stash</span><br><span class="line">$ git pull</span><br><span class="line">$ git stash pop stash@&#123;0&#125;</span><br></pre></td></tr></table></figure>
+
+<p>【PS】 <code>git stash list</code> 可查看保存的信息,输出如 <code>stash@{0}: WIP on master: d9b4a59 更新了hexo搭建个人博客</code> ,其中 stash@{0} 为保存的标记</p>
+<p><a href="http://www.qingpingshan.com/pc/fwq/132173.html">git pull时出现vim窗口的解决办法</a></p>
+<h3 id="8-git-diff-输出结果为中文乱码"><a href="#8-git-diff-输出结果为中文乱码" class="headerlink" title="8. git diff 输出结果为中文乱码"></a>8. git diff 输出结果为中文乱码</h3><p>如果大部分文件 <code>git diff</code> 结果中文显示正常，只是某些文件中文乱码，最可能的原因是这些文件文字编码有问题，而不是因为某些设置有问题。</p>
+<h2 id="更新本地代码"><a href="#更新本地代码" class="headerlink" title="更新本地代码"></a>更新本地代码</h2><p><code>git pull</code> 拉取代码并合并 &#x3D; <code>git fech</code> + <code>git merge</code></p>
+<h2 id="旅途感想"><a href="#旅途感想" class="headerlink" title="旅途感想"></a>旅途感想</h2><h3 id="2017年1月22日"><a href="#2017年1月22日" class="headerlink" title="2017年1月22日"></a>2017年1月22日</h3><p>使用 git 工具，應該勤提交代碼，不然有的時候我們修改了多處代碼，一次性 add 進入索引區，在 <code>git commit</code> 時候，使用 <code>-m</code> 參數很難進行準確描述,即使描述清楚了，也會顯得冗長，對於修改的文件來説，描述也不夠專注準確</p>
+<h3 id="2017年2月7日"><a href="#2017年2月7日" class="headerlink" title="2017年2月7日"></a>2017年2月7日</h3><p>积累的过程真快乐^O^ </p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+        <tag>命令</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>test</title>
+    <url>/2016/10/23/test/</url>
+    <content><![CDATA[<p>測試博客</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>我的书架</title>
+    <url>/2017/01/14/%E6%88%91%E7%9A%84%E4%B9%A6%E6%9E%B6/</url>
+    <content><![CDATA[<h2 id="The-First-Floor-Computer"><a href="#The-First-Floor-Computer" class="headerlink" title="The First Floor(Computer)"></a>The First Floor(Computer)</h2><blockquote>
+<ul>
+<li>硅谷之光</li>
+<li>失控</li>
+<li>人月神话</li>
+<li>大教堂与集市（开源运动的《圣经》）</li>
+</ul>
+</blockquote>
+<h2 id="The-Second-Floor-Philosophy"><a href="#The-Second-Floor-Philosophy" class="headerlink" title="The Second Floor(Philosophy)"></a>The Second Floor(Philosophy)</h2><blockquote>
+<ul>
+<li>苏菲的世界</li>
+</ul>
+</blockquote>
+<h2 id="The-Third-Floor-國學"><a href="#The-Third-Floor-國學" class="headerlink" title="The Third Floor(國學)"></a>The Third Floor(國學)</h2><blockquote>
+<ul>
+<li>心经</li>
+<li>坛经</li>
+<li>传习录</li>
+</ul>
+</blockquote>
+<h2 id="The-Fourth-Floor-Others"><a href="#The-Fourth-Floor-Others" class="headerlink" title="The Fourth Floor(Others)"></a>The Fourth Floor(Others)</h2><blockquote>
+<ul>
+<li>卓有成效的管理者</li>
+<li>高效能人士的7个习惯</li>
+<li>自私的基因</li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>hobbies</category>
+      </categories>
+      <tags>
+        <tag>书籍</tag>
+        <tag>book</tag>
+        <tag>reading</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>正則表達式</title>
+    <url>/2016/10/16/%E6%AD%A3%E5%89%87%E8%A1%A8%E9%81%94%E5%BC%8F/</url>
+    <content><![CDATA[<h2 id="匹配任意字符"><a href="#匹配任意字符" class="headerlink" title="匹配任意字符"></a>匹配任意字符</h2><p>使用([\s\S]*)</p>
+<p>注：</p>
+<blockquote>
+<p>此不同于(.*),(.*)不匹配换行符\n, 而\s匹配任何空白字符，包括空格、制表符、换页符等等,\S匹配任何非空白字符,合起来，([\s\S]*)可匹配任意字符</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>正則表達式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>电影集结号</title>
+    <url>/2017/01/14/%E7%94%B5%E5%BD%B1%E9%9B%86%E7%BB%93%E5%8F%B7/</url>
+    <content><![CDATA[<h2 id="动漫"><a href="#动漫" class="headerlink" title="动漫"></a>动漫</h2><blockquote>
+<ul>
+<li>头脑特工队</li>
+<li>疯狂动物城</li>
+<li>守护者联盟</li>
+</ul>
+</blockquote>
+<h2 id="喜剧"><a href="#喜剧" class="headerlink" title="喜剧"></a>喜剧</h2><blockquote>
+<ul>
+<li>喜剧之王</li>
+<li>厨子戏子痞子</li>
+<li>人再囧途之泰囧</li>
+<li>葬礼上的的死亡</li>
+<li>憨豆特工</li>
+<li>Bride Wars</li>
+<li>Yours Mine and Ours</li>
+<li>Welcome</li>
+</ul>
+</blockquote>
+<h2 id="爱情"><a href="#爱情" class="headerlink" title="爱情"></a>爱情</h2><blockquote>
+<ul>
+<li>泰坦尼克号(我心永恒)</li>
+<li>毕业生</li>
+<li>风月俏佳人</li>
+<li>大话西游(一生所爱)</li>
+<li>倩女幽魂</li>
+<li>古今大战秦俑情(焚心以火)</li>
+<li>青蛇(流光飞舞)</li>
+<li>假如爱有天意</li>
+<li>滚滚红尘</li>
+<li>再生缘</li>
+<li>唐伯虎点秋香</li>
+<li>布达佩斯之恋</li>
+<li>东邪西毒</li>
+</ul>
+</blockquote>
+<h2 id="动作"><a href="#动作" class="headerlink" title="动作"></a>动作</h2><h2 id="武侠"><a href="#武侠" class="headerlink" title="武侠"></a>武侠</h2><blockquote>
+<ul>
+<li>卧虎藏龙</li>
+</ul>
+</blockquote>
+<h2 id="奇幻"><a href="#奇幻" class="headerlink" title="奇幻"></a>奇幻</h2><blockquote>
+<ul>
+<li>捉妖记</li>
+</ul>
+</blockquote>
+<h2 id="剧情"><a href="#剧情" class="headerlink" title="剧情"></a>剧情</h2><blockquote>
+<ul>
+<li>美丽心灵</li>
+<li>闻香识女人</li>
+<li>追风筝的人</li>
+<li>光辉岁月</li>
+<li>霸王别姬</li>
+<li>天使之城</li>
+<li>保镖</li>
+<li>海上钢琴师</li>
+<li>辛德勒的名单</li>
+<li>西西里的美丽传说</li>
+<li>色戒 2002 主演：古桑 钟丽缇</li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>life</category>
+      </categories>
+      <tags>
+        <tag>movie</tag>
+        <tag>电影</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>软件开发流程</title>
+    <url>/2016/10/15/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/</url>
+    <content><![CDATA[<p><em><strong>参考自<a href="http://baike.baidu.com/link?url=cD6VLiJSqMkCLSe-7X6yB5oapMb5aD3_Vgh0PsVGkTaE8pd5rvKXUGEfKpIkZB_xnZyZ1z7Zb9WW5wwnO5mMrCaHgDhu-Nl-k8IQuNeXxyIVEhCHNrxNyrk-84CnGqU44iLJa4F3Vswkm6aYCAYK5a">百度百科</a></strong></em></p>
+<h2 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h2><ol>
+<li>了解需求</li>
+<li>大功能</li>
+<li>小功能</li>
+<li>用户群体</li>
+</ol>
+<h2 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h2><ol>
+<li>基本处理流程</li>
+<li>系统组织结构</li>
+<li>模块划分</li>
+<li>功能分配</li>
+<li>接口设计</li>
+<li>运行设计</li>
+<li>数据结构设计</li>
+<li>出错处理设计</li>
+</ol>
+<h2 id="详细设计"><a href="#详细设计" class="headerlink" title="详细设计"></a>详细设计</h2><ol>
+<li>算法</li>
+<li>数据结构</li>
+<li>类的层次结构及调用关系</li>
+</ol>
+<blockquote>
+<p>PS: 应当足够详细，能够根据详细设计进行编码</p>
+</blockquote>
+<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><ul>
+<li>实现各模块功能</li>
+</ul>
+<blockquote>
+<p>PS: 通常占软件开发1&#x2F;3的时间</p>
+</blockquote>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><ol>
+<li>按照执行方：内部测试&#x2F;外部测试</li>
+<li>按照测试范围： 模块测试&#x2F;整体联调</li>
+<li>按照条件： 正常操作情况测试&#x2F;异常操作情况测试</li>
+<li>按照测试输入范围： 全覆盖测试&#x2F;抽样测试</li>
+</ol>
+<blockquote>
+<p>PS: 测试同样是项目研发中一个相当重要步骤</p>
+</blockquote>
+<h2 id="软件交付"><a href="#软件交付" class="headerlink" title="软件交付"></a>软件交付</h2><ol>
+<li>目标程序</li>
+<li>数据字典</li>
+<li>《用户使用指南》</li>
+<li>需求报告</li>
+<li>设计报告</li>
+<li>测试报告</li>
+</ol>
+<h2 id="验收"><a href="#验收" class="headerlink" title="验收"></a>验收</h2><h2 id="维护"><a href="#维护" class="headerlink" title="维护"></a>维护</h2><ul>
+<li>需求&#x2F;环境变化 –&gt; 全部&#x2F;部分修改</li>
+</ul>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>软件开发</tag>
+        <tag>流程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>诗词集</title>
+    <url>/2017/04/26/%E8%AF%97%E8%AF%8D%E9%9B%86/</url>
+    <content><![CDATA[<h2 id="2017年4月26日"><a href="#2017年4月26日" class="headerlink" title="2017年4月26日"></a>2017年4月26日</h2><p>个人生活照寄语</p>
+<p>春有百花秋有月,<br>夏有凉风冬有雪。<br>本无闲事挂心头,<br>处处人间好时节。</p>
+<blockquote>
+<p>改编自宋朝无门慧开禅师所作《无门关》一书</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>life</category>
+      </categories>
+      <tags>
+        <tag>诗词</tag>
+        <tag>life</tag>
+      </tags>
+  </entry>
+</search>

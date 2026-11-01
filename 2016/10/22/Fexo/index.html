@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/goldfish.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/goldfish.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha256-4Lad8m4ZWW1Lgb9+sMVLYEfnIh7BjV1NQMEe79Pviks=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"iamyuzhe.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.29.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null,"show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="简介Fexo是Hexo的一款极简主题之一 自定义Fexo添加评论数量显示添加显示的代码段首先,确认你的评论系统用的是多说,如果不是,那就不用继续往下看了 在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码： 1234&lt;% if (theme.duoshuo_shortname)&#123; %&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fexo">
+<meta property="og:url" content="https://iamyuzhe.github.io/2016/10/22/Fexo/index.html">
+<meta property="og:site_name" content="Andrew Yu的个人博客">
+<meta property="og:description" content="简介Fexo是Hexo的一款极简主题之一 自定义Fexo添加评论数量显示添加显示的代码段首先,确认你的评论系统用的是多说,如果不是,那就不用继续往下看了 在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码： 1234&lt;% if (theme.duoshuo_shortname)&#123; %&gt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E5%A4%9A%E8%AF%B4%E8%87%AA%E5%AE%9A%E4%B9%89%E6%96%87%E6%9C%AC.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C01.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C02.png">
+<meta property="article:published_time" content="2016-10-22T08:45:05.000Z">
+<meta property="article:modified_time" content="2026-11-01T13:42:41.726Z">
+<meta property="article:author" content="Andrew Yu">
+<meta property="article:tag" content="Fexo">
+<meta property="article:tag" content="Hexo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E5%A4%9A%E8%AF%B4%E8%87%AA%E5%AE%9A%E4%B9%89%E6%96%87%E6%9C%AC.png">
+
+
+<link rel="canonical" href="https://iamyuzhe.github.io/2016/10/22/Fexo/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://iamyuzhe.github.io/2016/10/22/Fexo/","path":"2016/10/22/Fexo/","title":"Fexo"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Fexo | Andrew Yu的个人博客</title>
+  
+
+
+
+
+
+
+
+
+  
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Andrew Yu的个人博客" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-search popup-trigger" aria-label="搜索" role="button">
+      <i class="fa fa-search fa-fw fa-lg"></i>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Andrew Yu的个人博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">技术与生活</p>
+  </div>
+
+  <div class="site-nav-toggle" aria-label="切换导航栏" role="button">
+      <i class="fa fa-ellipsis fa-fw fa-lg"></i>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-项目"><a href="/project/" rel="section"><i class="fa fa-code fa-fw"></i>项目</a></li><li class="menu-item menu-item-友链"><a href="/link/" rel="section"><i class="fa fa-link fa-fw"></i>友链</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  
+  <template id="search-popup-template"><div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div></template>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89Fexo"><span class="nav-number">2.</span> <span class="nav-text">自定义Fexo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E8%AF%84%E8%AE%BA%E6%95%B0%E9%87%8F%E6%98%BE%E7%A4%BA"><span class="nav-number">2.1.</span> <span class="nav-text">添加评论数量显示</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%98%BE%E7%A4%BA%E7%9A%84%E4%BB%A3%E7%A0%81%E6%AE%B5"><span class="nav-number">2.1.1.</span> <span class="nav-text">添加显示的代码段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E8%AF%B4%E8%87%AA%E5%AE%9A%E4%B9%89%E6%96%87%E6%9C%AC%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.1.2.</span> <span class="nav-text">多说自定义文本设置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">2.1.3.</span> <span class="nav-text">查看运行结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E7%BA%BF%E7%94%9F%E6%9C%BA"><span class="nav-number">2.1.4.</span> <span class="nav-text">一线生机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%8B%BE%E4%BF%A1%E5%BF%83"><span class="nav-number">2.1.5.</span> <span class="nav-text">重拾信心</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E8%AE%BF%E9%97%AE%E9%87%8F%E6%98%BE%E7%A4%BA"><span class="nav-number">2.2.</span> <span class="nav-text">添加访问量显示</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%84%9A%E6%9C%AC"><span class="nav-number">2.2.1.</span> <span class="nav-text">安装脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%A0%87%E7%AD%BE"><span class="nav-number">2.2.2.</span> <span class="nav-text">安装标签</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">2.2.3.</span> <span class="nav-text">配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E6%8A%80%E5%B7%A7"><span class="nav-number">3.</span> <span class="nav-text">小技巧</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">4.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Andrew Yu"
+      src="/images/goldfish.jpg">
+  <p class="site-author-name" itemprop="name">Andrew Yu</p>
+  <div class="site-description" itemprop="description">分享技术，记录生活……</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/category/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tag/">
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iamyuzhe" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iamyuzhe" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://iamyuzhe.github.io/2016/10/22/Fexo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/goldfish.jpg">
+      <meta itemprop="name" content="Andrew Yu">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew Yu的个人博客">
+      <meta itemprop="description" content="分享技术，记录生活……">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Fexo | Andrew Yu的个人博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Fexo
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-10-22 16:45:05" itemprop="dateCreated datePublished" datetime="2016-10-22T16:45:05+08:00">2016-10-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Fexo是Hexo的一款极简主题之一</p>
+<h2 id="自定义Fexo"><a href="#自定义Fexo" class="headerlink" title="自定义Fexo"></a>自定义Fexo</h2><h3 id="添加评论数量显示"><a href="#添加评论数量显示" class="headerlink" title="添加评论数量显示"></a>添加评论数量显示</h3><h4 id="添加显示的代码段"><a href="#添加显示的代码段" class="headerlink" title="添加显示的代码段"></a>添加显示的代码段</h4><p>首先,确认你的评论系统用的是多说,如果不是,那就不用继续往下看了</p>
+<p>在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;% if (theme.duoshuo_shortname)&#123; %&gt;</span><br><span class="line">&lt;i class=&quot;icon-comment&quot;&gt;&lt;/i&gt; </span><br><span class="line">&lt;span class=&quot;ds-thread-count&quot; data-thread-key=&quot;&lt;%= url %&gt;&quot;&gt;&lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt;条评论</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+
+<p>尤其注意data-thread-key的设置,它和你之前配置多说的时候是一致的,每篇文章有一个独一无二的key。</p>
+<p>Fexo已经集成了多说，fexo&#x2F;layout&#x2F;_partial&#x2F;component&#x2F;duoshuo.ejs文件中，我们可以看到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data-thread-key=&quot;&lt;%= url %&gt;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>注：</p>
+<ul>
+<li><p>不是fexo&#x2F;layout&#x2F;_partial&#x2F;duoshuo.ejs文件</p>
+</li>
+<li><p>使用<code>class=&quot;fa fa-spinner fa-spin&quot;</code>图标(没加载出来前就显示个菊花转转转)，需要引入引入font-awesome字体，在fexo&#x2F;layout&#x2F;_partial&#x2F;head.esj中head标签中添加如下引用</p>
+</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">href</span>=<span class="string">&quot;//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="多说自定义文本设置"><a href="#多说自定义文本设置" class="headerlink" title="多说自定义文本设置"></a>多说自定义文本设置</h4><p>主要设置三个参数：暂无评论，1条评论，{num}条评论</p>
+<p>设置结果如下所示：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E5%A4%9A%E8%AF%B4%E8%87%AA%E5%AE%9A%E4%B9%89%E6%96%87%E6%9C%AC.png" alt="多说自定义文本设置">
+</p>
+
+<h4 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h4><p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C01.png" alt="fexo主题添加评论数运行结果01">
+</p>
+
+<p>发现无法显示访问数，没有达到预期的效果，顿时要崩溃了</p>
+<h4 id="一线生机"><a href="#一线生机" class="headerlink" title="一线生机"></a>一线生机</h4><p>查看多说官方文档，有如下发现：</p>
+<blockquote>
+<p>data-thread-key中:和,即冒号和逗号有特别的用途，请不要使用url或其他有这两个符号的内容作为data-thread-key。</p>
+</blockquote>
+<p><a href="http://dev.duoshuo.com/docs/5003ecd94cab3e7250000008">评论框调用代码参数说明</a></p>
+<p>Fexo主题默认的多说data-thread-key是url,包含”:”,这是Fexo主题的一大不足</p>
+<h4 id="重拾信心"><a href="#重拾信心" class="headerlink" title="重拾信心"></a>重拾信心</h4><p>将fexo&#x2F;layout&#x2F;_partial&#x2F;component&#x2F;duoshuo.ejs文件中data-thread-key改为如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 多说评论框 start --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;ds-thread&quot;</span> <span class="attr">data-thread-key</span>=<span class="string">&quot;&lt;%= page.layout %&gt;-&lt;%= page.slug %&gt;&quot;</span> </span></span><br><span class="line"><span class="tag"><span class="attr">data-title</span>=<span class="string">&quot;&lt;%= page.title %&gt;&quot;</span> <span class="attr">data-url</span>=<span class="string">&quot;&lt;%= url %&gt;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 多说评论框 end --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>将fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中评论显示代码改为如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;% if (theme.duoshuo_shortname)&#123; %&gt;</span><br><span class="line">	&lt;i class=&quot;icon-comment&quot;&gt;&lt;/i&gt; </span><br><span class="line">	&lt;span class=&quot;ds-thread-count&quot; data-thread-key=&quot;&lt;%= page.layout %&gt;-&lt;%= page.slug %&gt;&quot;&gt;</span><br><span class="line">	&lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt; 条评论</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+
+<p>运行观察结果,成功！</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C02.png" alt="fexo主题添加评论数运行结果01">
+</p>
+
+<h3 id="添加访问量显示"><a href="#添加访问量显示" class="headerlink" title="添加访问量显示"></a>添加访问量显示</h3><p>关于访问量统计这事儿,静态博客不太好搞,我找到了这个<a href="http://ibruce.info/2015/04/04/busuanzi/">不蒜子</a>,这位非著名码农自己做的访问统计,哈哈,点个赞</p>
+<h4 id="安装脚本"><a href="#安装脚本" class="headerlink" title="安装脚本"></a>安装脚本</h4><p>在fexo&#x2F;layout&#x2F;_partial&#x2F;head.esj文件的head标签中引入不算子js文件</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">async</span> <span class="attr">src</span>=<span class="string">&quot;//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="安装标签"><a href="#安装标签" class="headerlink" title="安装标签"></a>安装标签</h4><p>在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;% if (theme.busuanzi)&#123; %&gt;</span><br><span class="line">&lt;i class=&quot;fa fa-eye&quot;&gt;&lt;/i&gt; </span><br><span class="line">&lt;span id=&quot;busuanzi_container_page_pv&quot;&gt;</span><br><span class="line">   &amp;nbsp热度 &lt;span id=&quot;busuanzi_value_page_pv&quot;&gt;</span><br><span class="line">   &lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt;℃</span><br><span class="line">&lt;/span&gt;</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+<p>注：&amp;nbsp表示空格，是爲了增加”fa fa-eye” icon 與“熱度”的距離</p>
+<h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>hexo&#x2F;_config.yml添加如下设置：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不算子 站点访问量及文章访问量统计</span></span><br><span class="line"><span class="attr">busuanzi:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>至此大功告成，运行结果如上图所示！</p>
+<h2 id="小技巧"><a href="#小技巧" class="headerlink" title="小技巧"></a>小技巧</h2><p>如上述的font-awesome字体库,若要查看网址链接的CSS有哪些class icon图标,可以通过开发者工具将CSS文件下载到本地，一般CSS样式是压缩过的，可以用sublime的HTML-CSS-JS Prettify插件，将css代码格式化(只需右击选择HTML&#x2F;CSS&#x2F;JS Prettify -&gt; Prettify Code即可)，再查找有哪些class icon。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ol>
+<li><a href="http://bblove.me/2015/05/30/hexo-setting-with-comments-and-visitors/">给hexo配置上评论和访问量</a></li>
+<li><a href="http://dev.duoshuo.com/docs/5003ecd94cab3e7250000008">多说官方文档：评论框调用代码参数说明</a></li>
+<li><a href="http://ibruce.info/2015/04/04/busuanzi/">不算子</a></li>
+<li><a href="https://bruceyu1994.github.io/2016/10/22/Fexo/">我的博客展示地址</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Fexo/" rel="tag"># Fexo</a>
+              <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/10/16/%E6%AD%A3%E5%89%87%E8%A1%A8%E9%81%94%E5%BC%8F/" rel="prev" title="正則表達式">
+                  <i class="fa fa-angle-left"></i> 正則表達式
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/10/23/test/" rel="next" title="test">
+                  test <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2016 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Andrew Yu</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

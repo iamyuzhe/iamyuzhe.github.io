@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/goldfish.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/goldfish.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha256-4Lad8m4ZWW1Lgb9+sMVLYEfnIh7BjV1NQMEe79Pviks=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"iamyuzhe.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.29.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null,"show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="从开放规范、技能创建、触发优化、质量评估、脚本设计和客户端接入六个方面，系统理解 Agent Skills。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent Skills：让 AI Agent 获得可复用能力的开放规范">
+<meta property="og:url" content="https://iamyuzhe.github.io/2026/11/01/Agent-Skills%E5%BC%80%E6%94%BE%E8%A7%84%E8%8C%83%E4%B8%8E%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="Andrew Yu的个人博客">
+<meta property="og:description" content="从开放规范、技能创建、触发优化、质量评估、脚本设计和客户端接入六个方面，系统理解 Agent Skills。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-01T13:30:00.000Z">
+<meta property="article:modified_time" content="2026-11-01T13:42:41.724Z">
+<meta property="article:author" content="Andrew Yu">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Agent Skills">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="SKILL.md">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://iamyuzhe.github.io/2026/11/01/Agent-Skills%E5%BC%80%E6%94%BE%E8%A7%84%E8%8C%83%E4%B8%8E%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://iamyuzhe.github.io/2026/11/01/Agent-Skills%E5%BC%80%E6%94%BE%E8%A7%84%E8%8C%83%E4%B8%8E%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/","path":"2026/11/01/Agent-Skills开放规范与实践指南/","title":"Agent Skills：让 AI Agent 获得可复用能力的开放规范"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Agent Skills：让 AI Agent 获得可复用能力的开放规范 | Andrew Yu的个人博客</title>
+  
+
+
+
+
+
+
+
+
+  
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Andrew Yu的个人博客" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-search popup-trigger" aria-label="搜索" role="button">
+      <i class="fa fa-search fa-fw fa-lg"></i>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Andrew Yu的个人博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">技术与生活</p>
+  </div>
+
+  <div class="site-nav-toggle" aria-label="切换导航栏" role="button">
+      <i class="fa fa-ellipsis fa-fw fa-lg"></i>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-项目"><a href="/project/" rel="section"><i class="fa fa-code fa-fw"></i>项目</a></li><li class="menu-item menu-item-友链"><a href="/link/" rel="section"><i class="fa fa-link fa-fw"></i>友链</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  
+  <template id="search-popup-template"><div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div></template>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Agent-Skills-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">一、Agent Skills 是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%BC%8F%E6%8A%AB%E9%9C%B2"><span class="nav-number">2.</span> <span class="nav-text">二、核心机制：渐进式披露</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81SKILL-md-%E7%9A%84%E6%A0%BC%E5%BC%8F%E8%A7%84%E8%8C%83"><span class="nav-number">3.</span> <span class="nav-text">三、SKILL.md 的格式规范</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BF%85%E9%9C%80%E5%AD%97%E6%AE%B5"><span class="nav-number">3.1.</span> <span class="nav-text">必需字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E9%80%89%E5%AD%97%E6%AE%B5"><span class="nav-number">3.2.</span> <span class="nav-text">可选字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%88%9B%E5%BB%BA%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%8A%80%E8%83%BD"><span class="nav-number">4.</span> <span class="nav-text">四、创建第一个技能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%80%8E%E6%A0%B7%E5%86%99%E5%87%BA%E6%9C%89%E6%95%88%E7%9A%84%E6%8A%80%E8%83%BD"><span class="nav-number">5.</span> <span class="nav-text">五、怎样写出有效的技能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%9C%9F%E5%AE%9E%E7%BB%8F%E9%AA%8C%E4%B8%AD%E6%8F%90%E7%82%BC"><span class="nav-number">5.1.</span> <span class="nav-text">从真实经验中提炼</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E6%8A%80%E8%83%BD%E8%BE%B9%E7%95%8C"><span class="nav-number">5.2.</span> <span class="nav-text">控制技能边界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE%E4%BB%BB%E5%8A%A1%E9%A3%8E%E9%99%A9%E8%B0%83%E6%95%B4%E6%8E%A7%E5%88%B6%E5%BC%BA%E5%BA%A6"><span class="nav-number">5.3.</span> <span class="nav-text">根据任务风险调整控制强度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%AB%98%E4%BB%B7%E5%80%BC%E7%BB%93%E6%9E%84"><span class="nav-number">5.4.</span> <span class="nav-text">使用高价值结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E8%AE%A9%E6%8A%80%E8%83%BD%E5%9C%A8%E6%AD%A3%E7%A1%AE%E7%9A%84%E6%97%B6%E6%9C%BA%E8%A7%A6%E5%8F%91"><span class="nav-number">6.</span> <span class="nav-text">六、让技能在正确的时机触发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%8F%E8%BF%B0%E7%9A%84%E5%86%99%E6%B3%95"><span class="nav-number">6.1.</span> <span class="nav-text">描述的写法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%AD%A3%E5%8F%8D%E6%A0%B7%E6%9C%AC%E6%B5%8B%E8%AF%95"><span class="nav-number">6.2.</span> <span class="nav-text">用正反样本测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E8%AF%84%E4%BC%B0%E6%8A%80%E8%83%BD%E6%98%AF%E5%90%A6%E7%9C%9F%E6%AD%A3%E6%8F%90%E9%AB%98%E8%B4%A8%E9%87%8F"><span class="nav-number">7.</span> <span class="nav-text">七、评估技能是否真正提高质量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"><span class="nav-number">7.1.</span> <span class="nav-text">定义测试用例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E8%AF%81%E6%8D%AE%E5%92%8C%E6%88%90%E6%9C%AC"><span class="nav-number">7.2.</span> <span class="nav-text">记录证据和成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E9%97%AD%E7%8E%AF"><span class="nav-number">7.3.</span> <span class="nav-text">迭代闭环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E4%BD%95%E6%97%B6%E5%9C%A8%E6%8A%80%E8%83%BD%E4%B8%AD%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC"><span class="nav-number">8.</span> <span class="nav-text">八、何时在技能中使用脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E6%AC%A1%E6%80%A7%E5%91%BD%E4%BB%A4"><span class="nav-number">8.1.</span> <span class="nav-text">一次性命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E5%A4%8D%E7%94%A8%E8%84%9A%E6%9C%AC"><span class="nav-number">8.2.</span> <span class="nav-text">可复用脚本</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81Agent-%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%80%8E%E6%A0%B7%E6%94%AF%E6%8C%81-Skills"><span class="nav-number">9.</span> <span class="nav-text">九、Agent 客户端怎样支持 Skills</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8F%91%E7%8E%B0"><span class="nav-number">9.1.</span> <span class="nav-text">1. 发现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%A7%A3%E6%9E%90"><span class="nav-number">9.2.</span> <span class="nav-text">2. 解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%8A%AB%E9%9C%B2"><span class="nav-number">9.3.</span> <span class="nav-text">3. 披露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%BF%80%E6%B4%BB"><span class="nav-number">9.4.</span> <span class="nav-text">4. 激活</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86"><span class="nav-number">9.5.</span> <span class="nav-text">5. 上下文管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E4%BB%8E%E9%9B%B6%E5%88%B0%E5%8F%AF%E7%BB%B4%E6%8A%A4%E6%8A%80%E8%83%BD%E7%9A%84%E5%AE%9E%E8%B7%B5%E6%B8%85%E5%8D%95"><span class="nav-number">10.</span> <span class="nav-text">十、从零到可维护技能的实践清单</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E9%98%B6%E6%AE%B5"><span class="nav-number">10.1.</span> <span class="nav-text">创建阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E9%98%B6%E6%AE%B5"><span class="nav-number">10.2.</span> <span class="nav-text">验证阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%B4%E6%8A%A4%E9%98%B6%E6%AE%B5"><span class="nav-number">10.3.</span> <span class="nav-text">维护阶段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">11.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">12.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Andrew Yu"
+      src="/images/goldfish.jpg">
+  <p class="site-author-name" itemprop="name">Andrew Yu</p>
+  <div class="site-description" itemprop="description">分享技术，记录生活……</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/category/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tag/">
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iamyuzhe" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iamyuzhe" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://iamyuzhe.github.io/2026/11/01/Agent-Skills%E5%BC%80%E6%94%BE%E8%A7%84%E8%8C%83%E4%B8%8E%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/goldfish.jpg">
+      <meta itemprop="name" content="Andrew Yu">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew Yu的个人博客">
+      <meta itemprop="description" content="分享技术，记录生活……">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Agent Skills：让 AI Agent 获得可复用能力的开放规范 | Andrew Yu的个人博客">
+      <meta itemprop="description" content="从开放规范、技能创建、触发优化、质量评估、脚本设计和客户端接入六个方面，系统理解 Agent Skills。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Agent Skills：让 AI Agent 获得可复用能力的开放规范
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-11-01 21:30:00" itemprop="dateCreated datePublished" datetime="2026-11-01T21:30:00+08:00">2026-11-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/artificial-intelligence/" itemprop="url" rel="index"><span itemprop="name">artificial intelligence</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">从开放规范、技能创建、触发优化、质量评估、脚本设计和客户端接入六个方面，系统理解 Agent Skills。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>大语言模型具备广泛的通用能力，但真正进入工程环境后，往往还缺少三类关键上下文：</p>
+<ul>
+<li>团队实际采用的工具、接口和约束；</li>
+<li>一个任务可靠完成所需的操作顺序；</li>
+<li>从历史故障、评审意见和项目实践中积累的隐性经验。</li>
+</ul>
+<p>Agent Skills 提供了一种轻量、开放的解决方案：把专业知识、工作流程和配套资源组织成可被 AI Agent 按需加载的目录。它不是新的模型，也不是一套重量级插件系统，而是一种以 <code>SKILL.md</code> 为核心的能力封装格式。[cite:1]</p>
+<span id="more"></span>
+
+<h2 id="一、Agent-Skills-是什么"><a href="#一、Agent-Skills-是什么" class="headerlink" title="一、Agent Skills 是什么"></a>一、Agent Skills 是什么</h2><p>一个最小的 Agent Skill 只是一个目录和其中的 <code>SKILL.md</code> 文件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">my-skill/</span><br><span class="line">├── SKILL.md</span><br><span class="line">├── scripts/</span><br><span class="line">├── references/</span><br><span class="line">└── assets/</span><br></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<ul>
+<li><code>SKILL.md</code> 是唯一必需文件，包含元数据和执行说明；</li>
+<li><code>scripts/</code> 放置可重复执行的脚本；</li>
+<li><code>references/</code> 保存按需读取的详细资料；</li>
+<li><code>assets/</code> 保存模板、图片、Schema 或其他静态资源。</li>
+</ul>
+<p>这种形式有几个直接价值：</p>
+<ol>
+<li><strong>可复用</strong>：一次整理的流程可以反复用于同类任务。</li>
+<li><strong>可审查</strong>：技能内容是普通文件，可以进入版本控制和代码评审。</li>
+<li><strong>可移植</strong>：遵循同一格式的技能可以被不同 Agent 客户端识别。</li>
+<li><strong>可组合</strong>：每个技能聚焦一个连贯的工作单元，复杂任务可以组合多个技能完成。</li>
+</ol>
+<p>Agent Skills 最早由 Anthropic 开发并开放，随后逐渐被更多 Agent 产品采用。[cite:1][cite:9]</p>
+<h2 id="二、核心机制：渐进式披露"><a href="#二、核心机制：渐进式披露" class="headerlink" title="二、核心机制：渐进式披露"></a>二、核心机制：渐进式披露</h2><p>如果 Agent 在启动时读取所有技能的完整内容，大量无关说明会占满上下文窗口。Agent Skills 用“渐进式披露”解决这个问题，将加载过程分成三层：[cite:1][cite:2]</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>加载内容</th>
+<th>加载时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>技能目录</td>
+<td><code>name</code> 和 <code>description</code></td>
+<td>会话开始时</td>
+</tr>
+<tr>
+<td>完整说明</td>
+<td><code>SKILL.md</code> 正文</td>
+<td>技能与当前任务匹配时</td>
+</tr>
+<tr>
+<td>配套资源</td>
+<td>脚本、参考资料、模板</td>
+<td>执行过程中确有需要时</td>
+</tr>
+</tbody></table>
+<p>这意味着 Agent 可以知道“有哪些能力可用”，却不必提前承担全部上下文成本。一个客户端即使安装了几十个技能，当前会话通常也只会加载真正相关的几个。</p>
+<p>该机制也解释了为什么 <code>description</code> 如此重要：在技能正文尚未加载时，它几乎独自承担了技能发现和触发的职责。</p>
+<h2 id="三、SKILL-md-的格式规范"><a href="#三、SKILL-md-的格式规范" class="headerlink" title="三、SKILL.md 的格式规范"></a>三、SKILL.md 的格式规范</h2><p><code>SKILL.md</code> 由 YAML Front Matter 和 Markdown 正文组成：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: code-review</span><br><span class="line">description: &gt;</span><br><span class="line">  Review code changes for correctness, security, regressions, and missing</span><br><span class="line"><span class="section">  tests. Use when the user asks to review a patch, commit, or pull request.</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section">## Review process</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> Read the complete diff.</span><br><span class="line"><span class="bullet">2.</span> Identify behavioral changes.</span><br><span class="line"><span class="bullet">3.</span> Report findings by severity with file and line references.</span><br><span class="line"><span class="bullet">4.</span> Call out missing tests and residual risks.</span><br></pre></td></tr></table></figure>
+
+<h3 id="必需字段"><a href="#必需字段" class="headerlink" title="必需字段"></a>必需字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>作用</th>
+<th>主要约束</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>技能唯一名称</td>
+<td>最长 64 个字符；使用小写字母、数字和连字符；与目录名一致</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>能力范围和触发条件</td>
+<td>非空，最长 1024 个字符</td>
+</tr>
+</tbody></table>
+<h3 id="可选字段"><a href="#可选字段" class="headerlink" title="可选字段"></a>可选字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>license</code></td>
+<td>声明许可证或指向许可证文件</td>
+</tr>
+<tr>
+<td><code>compatibility</code></td>
+<td>描述运行环境、系统依赖或网络要求</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>保存作者、版本等自定义字符串元数据</td>
+</tr>
+<tr>
+<td><code>allowed-tools</code></td>
+<td>声明预批准工具，目前仍属于实验字段</td>
+</tr>
+</tbody></table>
+<p>规范建议让主 <code>SKILL.md</code> 保持在 500 行、5000 tokens 以内。更详细的 API 文档、错误码、模板和长示例应该拆入 <code>references/</code> 或 <code>assets/</code>，并在正文中明确说明何时读取。[cite:2]</p>
+<p>技能完成后，可以使用官方参考工具验证目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">skills-ref validate ./my-skill</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、创建第一个技能"><a href="#四、创建第一个技能" class="headerlink" title="四、创建第一个技能"></a>四、创建第一个技能</h2><p>官方快速入门使用“掷骰子”作为示例。以项目级技能为例，可以创建：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.agents/skills/roll-dice/SKILL.md</span><br></pre></td></tr></table></figure>
+
+<p>内容如下：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: roll-dice</span><br><span class="line">description: &gt;</span><br><span class="line">  Roll dice using a random number generator. Use when asked to roll a die,</span><br><span class="line"><span class="section">  such as a d6 or d20, or to generate a random dice result.</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line">Run the following command after replacing <span class="code">`&lt;sides&gt;`</span> with the requested</span><br><span class="line">number of sides:</span><br><span class="line"></span><br><span class="line"><span class="code">```bash</span></span><br><span class="line"><span class="code">echo $((RANDOM % &lt;sides&gt; + 1))</span></span><br><span class="line"><span class="code">```</span></span><br></pre></td></tr></table></figure>
+
+<p>当用户提出“掷一个 d20”时，Agent 的行为过程是：</p>
+<ol>
+<li>会话启动时发现 <code>roll-dice</code> 的名称和描述；</li>
+<li>判断请求与描述匹配，加载完整 <code>SKILL.md</code>；</li>
+<li>将 <code>&lt;sides&gt;</code> 替换为 <code>20</code> 并执行命令；</li>
+<li>返回 1 到 20 之间的结果。</li>
+</ol>
+<p>这个不足 20 行的示例体现了技能的本质：技能并不替 Agent 完成任务，而是向 Agent 提供完成任务所需的可靠方法。[cite:3]</p>
+<h2 id="五、怎样写出有效的技能"><a href="#五、怎样写出有效的技能" class="headerlink" title="五、怎样写出有效的技能"></a>五、怎样写出有效的技能</h2><h3 id="从真实经验中提炼"><a href="#从真实经验中提炼" class="headerlink" title="从真实经验中提炼"></a>从真实经验中提炼</h3><p>最常见的误区，是让模型仅凭通用知识生成一个看似完整的技能。这样的技能通常充满“妥善处理异常”“遵循最佳实践”等正确但无用的表述。</p>
+<p>高价值技能应来自真实材料：</p>
+<ul>
+<li>已经成功完成的任务及其操作顺序；</li>
+<li>用户或评审者曾经给出的纠正；</li>
+<li>项目 Runbook、接口规范和配置文件；</li>
+<li>Code Review 评论、Issue 和历史修复；</li>
+<li>真实故障及其恢复过程。</li>
+</ul>
+<p>如果某条说明不能降低 Agent 犯错的概率，它通常就不值得占用上下文。</p>
+<h3 id="控制技能边界"><a href="#控制技能边界" class="headerlink" title="控制技能边界"></a>控制技能边界</h3><p>技能边界类似函数职责：</p>
+<ul>
+<li>太窄，会让一个任务被拆成大量微型技能，增加加载和协调成本；</li>
+<li>太宽，会导致触发条件模糊，正文中充斥与当前任务无关的分支。</li>
+</ul>
+<p>合适的技能应该覆盖一个完整、连贯、可以独立验证的工作单元。例如“查询数据库并格式化结果”可以是一个技能，而把数据库管理、备份、迁移和性能调优全部塞进去通常过于宽泛。</p>
+<h3 id="根据任务风险调整控制强度"><a href="#根据任务风险调整控制强度" class="headerlink" title="根据任务风险调整控制强度"></a>根据任务风险调整控制强度</h3><p>并非所有步骤都需要同样严格：</p>
+<ul>
+<li>对代码评审、方案分析等开放任务，说明目标、关注点和原因，允许 Agent 根据上下文选择方法；</li>
+<li>对数据库迁移、生产发布等脆弱任务，给出明确顺序、固定命令、验证门禁和停止条件；</li>
+<li>多个方案都可行时，提供一个默认方案，再简要说明何时使用替代方案。</li>
+</ul>
+<h3 id="使用高价值结构"><a href="#使用高价值结构" class="headerlink" title="使用高价值结构"></a>使用高价值结构</h3><p>实践中最有效的几类结构包括：</p>
+<ul>
+<li><strong>Gotchas</strong>：记录违反直觉、容易反复踩坑的事实；</li>
+<li><strong>输出模板</strong>：直接展示期望结构，而不是只用文字描述；</li>
+<li><strong>检查清单</strong>：帮助 Agent 跟踪多阶段工作；</li>
+<li><strong>验证循环</strong>：执行、验证、修复，再次验证；</li>
+<li><strong>Plan-Validate-Execute</strong>：批量或破坏性操作先生成计划并校验，再执行；</li>
+<li><strong>配套脚本</strong>：把每次都会重写的确定性逻辑固化为程序。</li>
+</ul>
+<p>这些内容比泛泛的背景知识更能提升执行稳定性。[cite:4]</p>
+<h2 id="六、让技能在正确的时机触发"><a href="#六、让技能在正确的时机触发" class="headerlink" title="六、让技能在正确的时机触发"></a>六、让技能在正确的时机触发</h2><p>一个技能即使正文写得很好，如果无法在正确请求上触发，也不会产生价值。优化描述时需要同时控制两类错误：</p>
+<ul>
+<li><strong>漏触发</strong>：相关请求没有加载技能；</li>
+<li><strong>误触发</strong>：无关或仅关键词相似的请求加载了技能。</li>
+</ul>
+<h3 id="描述的写法"><a href="#描述的写法" class="headerlink" title="描述的写法"></a>描述的写法</h3><p>有效描述应做到：</p>
+<ol>
+<li>从用户意图出发，而不是描述内部实现；</li>
+<li>同时说明“做什么”和“什么时候使用”；</li>
+<li>包含用户可能使用的文件类型、领域词和任务表达；</li>
+<li>保持简洁，不把正文内容复制到描述里。</li>
+</ol>
+<p>例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 过于模糊</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">Process</span> <span class="string">CSV</span> <span class="string">files.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 范围和触发条件更清晰</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">&gt;</span></span><br><span class="line"><span class="string">  Analyze CSV and tabular data files, compute summary statistics, add</span></span><br><span class="line"><span class="string">  derived columns, clean messy data, and generate charts. Use when the</span></span><br><span class="line"><span class="string">  user wants to explore, transform, or visualize CSV, TSV, or Excel data.</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="用正反样本测试"><a href="#用正反样本测试" class="headerlink" title="用正反样本测试"></a>用正反样本测试</h3><p>官方建议准备约 20 条触发测试，其中正例和反例各 8 到 10 条。好的测试集不应只包含明显样本，还要包含：</p>
+<ul>
+<li>不同语气、长度和详细程度的请求；</li>
+<li>没有明确说出领域名称、但确实需要该技能的请求；</li>
+<li>与技能共享关键词、实际意图却不同的“近似反例”；</li>
+<li>文件路径、字段名、缩写和少量拼写错误等真实上下文。</li>
+</ul>
+<p>由于模型行为存在随机性，同一查询应运行多次并统计触发率。还应将样本固定划分为训练集和验证集，避免为了通过已知样本而过度拟合描述。[cite:5]</p>
+<h2 id="七、评估技能是否真正提高质量"><a href="#七、评估技能是否真正提高质量" class="headerlink" title="七、评估技能是否真正提高质量"></a>七、评估技能是否真正提高质量</h2><p>“成功触发”只说明技能被加载，并不说明输出更好。质量评估需要将同一任务分别在“启用技能”和“未启用技能”条件下运行，比较结果、时间和 token 成本。[cite:6]</p>
+<h3 id="定义测试用例"><a href="#定义测试用例" class="headerlink" title="定义测试用例"></a>定义测试用例</h3><p>一个测试用例至少包含：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;分析 data/sales.csv，找出收入最高的三个月并生成柱状图&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;expected_output&quot;</span><span class="punctuation">:</span> <span class="string">&quot;包含前三个月的柱状图，坐标轴和数值标注完整&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;files&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;evals/files/sales.csv&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>初期只需要 2 到 3 个真实用例，观察输出后再补充断言。断言必须具体、可验证，例如：</p>
+<ul>
+<li>生成了图片文件；</li>
+<li>图表恰好包含三个月份；</li>
+<li>两个坐标轴都有标签；</li>
+<li>标题或说明包含“收入”。</li>
+</ul>
+<p>“输出很好”无法验证，而要求输出必须出现某句固定文案又过于脆弱。</p>
+<h3 id="记录证据和成本"><a href="#记录证据和成本" class="headerlink" title="记录证据和成本"></a>记录证据和成本</h3><p>每条断言都应该记录 <code>PASS</code> 或 <code>FAIL</code> 以及具体证据。除了通过率，还应记录：</p>
+<ul>
+<li>总 token 数；</li>
+<li>执行耗时；</li>
+<li>产生的文件；</li>
+<li>人工评审反馈；</li>
+<li>完整执行轨迹。</li>
+</ul>
+<p>执行轨迹尤其重要。它能解释问题来自哪里：说明太模糊、无关步骤太多、脚本接口不清晰，还是技能本身没有提供模型缺失的知识。</p>
+<h3 id="迭代闭环"><a href="#迭代闭环" class="headerlink" title="迭代闭环"></a>迭代闭环</h3><p>一个完整循环是：</p>
+<ol>
+<li>使用技能和基线分别运行测试；</li>
+<li>根据断言和人工反馈评分；</li>
+<li>阅读执行轨迹，找到失败原因；</li>
+<li>修改描述、流程、示例或脚本；</li>
+<li>在新迭代目录中重新运行全部测试；</li>
+<li>对比质量收益与时间、token 成本。</li>
+</ol>
+<p>当失败反馈持续为空，或者后续迭代已经没有明显收益时，技能才算进入相对稳定状态。</p>
+<h2 id="八、何时在技能中使用脚本"><a href="#八、何时在技能中使用脚本" class="headerlink" title="八、何时在技能中使用脚本"></a>八、何时在技能中使用脚本</h2><p>语言模型擅长理解意图和处理开放问题，脚本擅长确定性计算、解析和验证。两者结合通常比纯提示词更可靠。</p>
+<h3 id="一次性命令"><a href="#一次性命令" class="headerlink" title="一次性命令"></a>一次性命令</h3><p>如果现有工具已经解决问题，可以直接在 <code>SKILL.md</code> 中给出固定版本命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">uvx ruff@0.8.0 check .</span><br><span class="line">npx eslint@9.0.0 --fix .</span><br><span class="line">go run golang.org/x/tools/cmd/goimports@v0.28.0 .</span><br></pre></td></tr></table></figure>
+
+<p>固定版本能够减少工具升级带来的行为漂移。命令过长、参数组合复杂或每次都容易写错时，应移入 <code>scripts/</code>。</p>
+<h3 id="可复用脚本"><a href="#可复用脚本" class="headerlink" title="可复用脚本"></a>可复用脚本</h3><p>适合脚本化的工作包括：</p>
+<ul>
+<li>解析固定格式；</li>
+<li>生成图表或文档；</li>
+<li>校验配置和输出；</li>
+<li>执行可重复的数据转换；</li>
+<li>实现 dry-run 和变更计划。</li>
+</ul>
+<p>面向 Agent 的脚本还应具备以下特征：</p>
+<ul>
+<li>不依赖交互式输入；</li>
+<li>提供简洁明确的 <code>--help</code>；</li>
+<li>错误消息说明原因、期望值和修复方法；</li>
+<li>标准输出使用 JSON、CSV 等结构化格式；</li>
+<li>诊断信息写入标准错误；</li>
+<li>操作尽量幂等；</li>
+<li>破坏性操作提供 <code>--dry-run</code> 或显式确认参数；</li>
+<li>控制默认输出长度，避免工具结果被截断。</li>
+</ul>
+<p>脚本不仅是实现细节，它还是 Agent 与确定性系统之间的接口。[cite:7]</p>
+<h2 id="九、Agent-客户端怎样支持-Skills"><a href="#九、Agent-客户端怎样支持-Skills" class="headerlink" title="九、Agent 客户端怎样支持 Skills"></a>九、Agent 客户端怎样支持 Skills</h2><p>对于 Agent 或开发工具的实现者，完整生命周期包括发现、解析、披露、激活和上下文管理。[cite:8]</p>
+<h3 id="1-发现"><a href="#1-发现" class="headerlink" title="1. 发现"></a>1. 发现</h3><p>本地客户端通常同时扫描项目级和用户级目录：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;project&gt;/.agents/skills/</span><br><span class="line">~/.agents/skills/</span><br></pre></td></tr></table></figure>
+
+<p>也可以兼容客户端自己的目录。发生同名冲突时，一般让项目级技能覆盖用户级技能，并输出可诊断的警告。来自陌生仓库的项目级技能可能包含不受信任的指令，因此应与工作区信任机制结合。</p>
+<h3 id="2-解析"><a href="#2-解析" class="headerlink" title="2. 解析"></a>2. 解析</h3><p>客户端读取 YAML Front Matter，至少保存：</p>
+<ul>
+<li><code>name</code></li>
+<li><code>description</code></li>
+<li><code>SKILL.md</code> 的位置</li>
+</ul>
+<p>缺少描述或 YAML 完全无法解析时应跳过；目录名不匹配等非关键问题可以警告后继续加载，以兼顾规范和跨客户端兼容性。</p>
+<h3 id="3-披露"><a href="#3-披露" class="headerlink" title="3. 披露"></a>3. 披露</h3><p>客户端只把技能目录提供给模型，可以放在系统提示词中，也可以放在专用激活工具的描述里。目录应简洁，并明确告诉模型如何加载完整技能。</p>
+<h3 id="4-激活"><a href="#4-激活" class="headerlink" title="4. 激活"></a>4. 激活</h3><p>常见方式有两种：</p>
+<ul>
+<li>模型使用文件读取工具打开 <code>SKILL.md</code>；</li>
+<li>模型调用 <code>activate_skill(name)</code> 等专用工具。</li>
+</ul>
+<p>专用工具可以附带技能根目录和资源清单，但不应一次性读取所有资源。用户还应该能够通过 <code>/skill-name</code> 或 <code>$skill-name</code> 等方式显式激活技能。</p>
+<h3 id="5-上下文管理"><a href="#5-上下文管理" class="headerlink" title="5. 上下文管理"></a>5. 上下文管理</h3><p>技能激活后，其说明属于当前任务的持续行为约束。若客户端会压缩长对话，应保护技能内容不被随意裁剪，并避免在同一会话中重复注入同一个技能。</p>
+<h2 id="十、从零到可维护技能的实践清单"><a href="#十、从零到可维护技能的实践清单" class="headerlink" title="十、从零到可维护技能的实践清单"></a>十、从零到可维护技能的实践清单</h2><h3 id="创建阶段"><a href="#创建阶段" class="headerlink" title="创建阶段"></a>创建阶段</h3><ul>
+<li><input disabled="" type="checkbox"> 从真实任务、文档和故障中提取专业知识</li>
+<li><input disabled="" type="checkbox"> 明确技能边界和不适用范围</li>
+<li><input disabled="" type="checkbox"> 编写符合规范的 <code>name</code> 与 <code>description</code></li>
+<li><input disabled="" type="checkbox"> 给出默认流程、关键约束和停止条件</li>
+<li><input disabled="" type="checkbox"> 将长资料拆入 <code>references/</code></li>
+<li><input disabled="" type="checkbox"> 将重复的确定性逻辑放入 <code>scripts/</code></li>
+</ul>
+<h3 id="验证阶段"><a href="#验证阶段" class="headerlink" title="验证阶段"></a>验证阶段</h3><ul>
+<li><input disabled="" type="checkbox"> 使用 <code>skills-ref</code> 验证格式</li>
+<li><input disabled="" type="checkbox"> 准备正向、反向和边界触发样本</li>
+<li><input disabled="" type="checkbox"> 比较启用技能与基线结果</li>
+<li><input disabled="" type="checkbox"> 为关键输出编写客观断言</li>
+<li><input disabled="" type="checkbox"> 检查执行轨迹，而不仅是最终答案</li>
+<li><input disabled="" type="checkbox"> 记录质量、耗时和 token 成本</li>
+</ul>
+<h3 id="维护阶段"><a href="#维护阶段" class="headerlink" title="维护阶段"></a>维护阶段</h3><ul>
+<li><input disabled="" type="checkbox"> 将用户纠正补充到 Gotchas</li>
+<li><input disabled="" type="checkbox"> 固定脚本和工具版本</li>
+<li><input disabled="" type="checkbox"> 定期删除模型已经能可靠完成的冗余说明</li>
+<li><input disabled="" type="checkbox"> 避免为测试集中的具体措辞打补丁</li>
+<li><input disabled="" type="checkbox"> 保持主文件精简，并让按需资源的加载条件足够明确</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Agent Skills 的价值并不在于多写一份提示词，而在于把真实经验变成一种可发现、可执行、可验证、可迭代的工程资产。</p>
+<p>一个成熟技能应同时具备四个特征：</p>
+<ol>
+<li><strong>触发准确</strong>：在需要时加载，在近似但无关的请求上保持安静；</li>
+<li><strong>指令有效</strong>：提供模型原本缺少的流程、约束和领域事实；</li>
+<li><strong>执行可靠</strong>：关键步骤由清晰接口、脚本和验证门禁支撑；</li>
+<li><strong>持续改进</strong>：通过基线对比、断言、轨迹和人工反馈迭代。</li>
+</ol>
+<p>当技能被当作代码一样设计、评审和测试时，AI Agent 才能从“偶尔做对”逐步走向“稳定完成”。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://agentskills.io/home">Agent Skills Overview</a></p>
+<p>[cite:2] <a href="https://agentskills.io/specification">Agent Skills Specification</a></p>
+<p>[cite:3] <a href="https://agentskills.io/skill-creation/quickstart">Quickstart</a></p>
+<p>[cite:4] <a href="https://agentskills.io/skill-creation/best-practices">Best practices for skill creators</a></p>
+<p>[cite:5] <a href="https://agentskills.io/skill-creation/optimizing-descriptions">Optimizing skill descriptions</a></p>
+<p>[cite:6] <a href="https://agentskills.io/skill-creation/evaluating-skills">Evaluating skill output quality</a></p>
+<p>[cite:7] <a href="https://agentskills.io/skill-creation/using-scripts">Using scripts in skills</a></p>
+<p>[cite:8] <a href="https://agentskills.io/client-implementation/adding-skills-support">How to add skills support to your agent</a></p>
+<p>[cite:9] <a href="https://agentskills.io/clients">Client Showcase</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Agent-Skills/" rel="tag"># Agent Skills</a>
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/SKILL-md/" rel="tag"># SKILL.md</a>
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/05/21/Android-Studio-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/" rel="prev" title="Android Studio 常见问题">
+                  <i class="fa fa-angle-left"></i> Android Studio 常见问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2016 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Andrew Yu</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
