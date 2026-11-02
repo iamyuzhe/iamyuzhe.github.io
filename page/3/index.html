@@ -166,7 +166,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-count">27</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -177,7 +177,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tag/">
-        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-count">61</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -199,6 +199,133 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://iamyuzhe.github.io/2016/10/15/Hexo%E6%90%AD%E5%BB%BA%E5%80%8B%E4%BA%BA%E5%8D%9A%E5%AE%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/goldfish.jpg">
+      <meta itemprop="name" content="Andrew Yu">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew Yu的个人博客">
+      <meta itemprop="description" content="分享技术，记录生活……">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Andrew Yu的个人博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2016/10/15/Hexo%E6%90%AD%E5%BB%BA%E5%80%8B%E4%BA%BA%E5%8D%9A%E5%AE%A2/" class="post-title-link" itemprop="url">Hexo搭建個人博客</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-10-15 19:23:13" itemprop="dateCreated datePublished" datetime="2016-10-15T19:23:13+08:00">2016-10-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="搭建個人博客"><a href="#搭建個人博客" class="headerlink" title="搭建個人博客"></a>搭建個人博客</h2><h3 id="環境配置"><a href="#環境配置" class="headerlink" title="環境配置"></a>環境配置</h3><h4 id="安裝Git"><a href="#安裝Git" class="headerlink" title="安裝Git"></a>安裝Git</h4><h4 id="安裝node-js"><a href="#安裝node-js" class="headerlink" title="安裝node.js"></a>安裝node.js</h4><h3 id="配置Github"><a href="#配置Github" class="headerlink" title="配置Github"></a>配置Github</h3><h3 id="安裝Hexo"><a href="#安裝Hexo" class="headerlink" title="安裝Hexo"></a>安裝Hexo</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ npm install hexo-cli -g</span><br><span class="line">$ hexo init blog</span><br><span class="line">$ cd blog</span><br><span class="line">$ npm install</span><br></pre></td></tr></table></figure>
+
+<p>【PS】 <code>hexo init blog</code> 命令执行完后，会在当前目录下生成 blog 目录，blog 目录即为博客所在的目录</p>
+<p><a href="http://blog.csdn.net/lzrreach/article/details/52863798">手把手教你使用Hexo + Github Pages搭建个人独立博客</a></p>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>blog目录下配置文件作如下修改</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repository:</span> <span class="string">git@github.com:bruceyu1994/bruceyu1994.github.io</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="安装扩展"><a href="#安装扩展" class="headerlink" title="安装扩展"></a>安装扩展</h4><p><code>$ npm install hexo-deployer-git --save</code></p>
+<p>现在你就可以执行命令进行部署了</p>
+<h2 id="常見問題"><a href="#常見問題" class="headerlink" title="常見問題"></a>常見問題</h2><h3 id="无法识别带-号的标题"><a href="#无法识别带-号的标题" class="headerlink" title="无法识别带#号的标题"></a>无法识别带#号的标题</h3><p>如执行如下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo n &quot;C#使用&quot;</span><br></pre></td></tr></table></figure>
+<p>则在_posts文件夹下生成”C-使用”，而不是”C#使用”</p>
+<blockquote>
+<p>貌似衹是文件名不支持#號,title生成沒有問題。</p>
+</blockquote>
+<h3 id="themes文件fexo主題无法push到Git服務器"><a href="#themes文件fexo主題无法push到Git服務器" class="headerlink" title="themes文件fexo主題无法push到Git服務器"></a>themes文件fexo主題无法push到Git服務器</h3><p>具體描述：無法add，執行 <code>git add .</code> 之後還是會提示fexo主題文件夾需要add</p>
+<p>【解決方案】</p>
+<p>将fexo目录下的 .git&#x2F; 文件夹删除即可 <code>add</code> 并 <code>push</code></p>
+<h3 id="部署時出現錯誤"><a href="#部署時出現錯誤" class="headerlink" title="部署時出現錯誤"></a>部署時出現錯誤</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ hexo d</span><br><span class="line">ERROR Deployer not found: git</span><br></pre></td></tr></table></figure>
+<p>可能原因：git部署工具沒有安裝，執行如下命令即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save 改了之后执行，然后再部署试试</span><br></pre></td></tr></table></figure>
+
+<h3 id="启用搜索页面，却无法进行搜索"><a href="#启用搜索页面，却无法进行搜索" class="headerlink" title="启用搜索页面，却无法进行搜索"></a>启用搜索页面，却无法进行搜索</h3><p>原因：没有安装 hexo-search 插件</p>
+<p>执行如下命令安装hexo-search插件，即可解决</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install hexo-search --save</span><br></pre></td></tr></table></figure>
+
+<h3 id="warning-LF-will-be-replaced-by-CRLF"><a href="#warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="warning: LF will be replaced by CRLF"></a>warning: LF will be replaced by CRLF</h3><p>原因：windows中的换行符为 CRLF， 而在Linux下的换行符为LF，所以hexo执行git add . 时出现提示</p>
+<p>解决方案：</p>
+<ol>
+<li><p>删除你hexo根目录下面的.deploy_git文件夹</p>
+</li>
+<li><p>执行 <code>$ git config --global core.autocrlf false</code>  &#x2F;&#x2F;禁用自动转换</p>
+</li>
+<li><p>重新执行如下命令，发现已没有之前的警告了</p>
+<p> <code>$ hexo clean</code><br> <code>$ hexo d -g</code></p>
+</li>
+<li><p>打开博客网址，进行验证是否成功</p>
+<p> <a href="https://www.zhihu.com/question/38219432/answer/123443945">参考链接</a></p>
+</li>
+</ol>
+<p>注：</p>
+<blockquote>
+<p>CRLF表示句尾使用回车换行两个字符(即我们常在Windows编程时使用”\r\n”换行)<br>LF表示表示句尾，只使用换行<br>CR表示只使用回车  </p>
+</blockquote>
+<h3 id="Permission-denied-publickey"><a href="#Permission-denied-publickey" class="headerlink" title="Permission denied (publickey)."></a>Permission denied (publickey).</h3><p>部署时执行 <code>hexo d</code> 命令时出现该错误</p>
+<blockquote>
+<p>fatal: Could not read from remote repository.</p>
+</blockquote>
+<p>【Reason】You’ve probably not added a public key to your SSH keys</p>
+<p>生成 publickey ，命令：<code>$ ssh-keygen -t rsa</code>; 然后将 publickey 添加到远程服务器即可。</p>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -807,7 +934,7 @@
 </ul>
 <ol>
 <li>先输入$ git remote rm origin</li>
-<li>再输入$ git remote add origin <a href="mailto:&#103;&#105;&#x74;&#x40;&#x63;&#x6e;&#98;&#46;&#x63;&#x6f;&#x6f;&#108;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
+<li>再输入$ git remote add origin <a href="mailto:&#103;&#x69;&#116;&#x40;&#x63;&#110;&#98;&#x2e;&#99;&#111;&#x6f;&#108;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
 </ol>
 <h3 id="2-warning-LF-will-be-replaced-by-CRLF"><a href="#2-warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="2. warning: LF will be replaced by CRLF"></a>2. warning: LF will be replaced by CRLF</h3><p>运行如下命令时；</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">warning: LF will be replaced by CRLF in _config.yml.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br></pre></td></tr></table></figure>
