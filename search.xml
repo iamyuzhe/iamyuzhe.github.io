@@ -305,6 +305,17 @@
       </tags>
   </entry>
   <entry>
+    <title>Android Studio 常见问题</title>
+    <url>/2017/05/21/Android-Studio-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Android基本概念和語法</title>
     <url>/2016/10/16/Android%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%92%8C%E8%AA%9E%E6%B3%95/</url>
     <content><![CDATA[<h2 id="1-什么是Intent"><a href="#1-什么是Intent" class="headerlink" title="1. 什么是Intent?"></a>1. 什么是Intent?</h2><p>Intent的中文意思是“意图，意向”，在Android中提供了Intent机制来协助应用间的交互与通讯，Intent负责对应用中一次操作的动作、动作涉及数据、附加数据进行描述，Android则根据此Intent的描述，负责找到对应的组件，将 Intent传递给调用的组件，并完成组件的调用。Intent不仅可用于应用程序之间，也可用于应用程序内部的Activity&#x2F;Service之间的交互。</p>
@@ -473,14 +484,21 @@
       </tags>
   </entry>
   <entry>
-    <title>Android Studio 常见问题</title>
-    <url>/2017/05/21/Android-Studio-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[]]></content>
+    <title>Android开发中的空指针异常</title>
+    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
+    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
+
+<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
+]]></content>
       <categories>
         <category>mobile development</category>
       </categories>
       <tags>
         <tag>Android</tag>
+        <tag>空指针异常</tag>
       </tags>
   </entry>
   <entry>
@@ -686,24 +704,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Android开发中的空指针异常</title>
-    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
-    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
-
-<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
-]]></content>
-      <categories>
-        <category>mobile development</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>空指针异常</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Fexo</title>
     <url>/2016/10/22/Fexo/</url>
     <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Fexo是Hexo的一款极简主题之一</p>
@@ -776,38 +776,6 @@
       <tags>
         <tag>Fexo</tag>
         <tag>Hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Markdown 常见问题</title>
-    <url>/2016/10/15/Markdown%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h2><ol>
-<li>方法一</li>
-</ol>
-<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">center</span>&gt;</span></span></span><br><span class="line"><span class="code">	![图片说明](https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg &quot;金鱼&quot;)</span></span><br><span class="line"><span class="code">&lt;/center&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-<ol start="2">
-<li>方法二</li>
-</ol>
-<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">align</span>=<span class="string">&quot;center&quot;</span>&gt;</span></span> </span><br><span class="line"><span class="code">	&lt;img src=&quot;https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg&quot; alt=&quot;CSDN图标&quot; /&gt;</span></span><br><span class="line"><span class="code">&lt;/div&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h2><ul>
-<li><code>&lt;p&gt;</code>:换行并加一行空白行</li>
-<li>连续两个空格会变成一个 <code>&lt;br&gt;</code></li>
-</ul>
-<p><a href="http://lutaf.com/markdown-simple-usage.htm">参考链接</a></p>
-<h2 id="Markdown哲学"><a href="#Markdown哲学" class="headerlink" title="Markdown哲学"></a>Markdown哲学</h2><p>内容與樣式分開，让思绪自由流畅不受阻，让创作回归内容本身。</p>
-<h2 id="使用感悟"><a href="#使用感悟" class="headerlink" title="使用感悟"></a>使用感悟</h2><ul>
-<li>格式越简单越好</li>
-</ul>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>Markdown</tag>
-        <tag>图片</tag>
       </tags>
   </entry>
   <entry>
@@ -958,6 +926,38 @@
       </tags>
   </entry>
   <entry>
+    <title>Markdown 常见问题</title>
+    <url>/2016/10/15/Markdown%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h2><ol>
+<li>方法一</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">center</span>&gt;</span></span></span><br><span class="line"><span class="code">	![图片说明](https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg &quot;金鱼&quot;)</span></span><br><span class="line"><span class="code">&lt;/center&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>方法二</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">align</span>=<span class="string">&quot;center&quot;</span>&gt;</span></span> </span><br><span class="line"><span class="code">	&lt;img src=&quot;https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg&quot; alt=&quot;CSDN图标&quot; /&gt;</span></span><br><span class="line"><span class="code">&lt;/div&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h2><ul>
+<li><code>&lt;p&gt;</code>:换行并加一行空白行</li>
+<li>连续两个空格会变成一个 <code>&lt;br&gt;</code></li>
+</ul>
+<p><a href="http://lutaf.com/markdown-simple-usage.htm">参考链接</a></p>
+<h2 id="Markdown哲学"><a href="#Markdown哲学" class="headerlink" title="Markdown哲学"></a>Markdown哲学</h2><p>内容與樣式分開，让思绪自由流畅不受阻，让创作回归内容本身。</p>
+<h2 id="使用感悟"><a href="#使用感悟" class="headerlink" title="使用感悟"></a>使用感悟</h2><ul>
+<li>格式越简单越好</li>
+</ul>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Markdown</tag>
+        <tag>图片</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>RecyclerView的使用</title>
     <url>/2016/11/20/RecyclerView%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="Rendering-Problems"><a href="#Rendering-Problems" class="headerlink" title="Rendering Problems"></a>Rendering Problems</h3><p>在布局文件中添加 RecyclerView,会出现 Rendering Problems,具体问题如下图所示：</p>
@@ -983,26 +983,6 @@
       <tags>
         <tag>RecyclerView</tag>
         <tag>Exception</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows常见问题</title>
-    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
-<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
-<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
-<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
-<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
-<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
-<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
-<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>windows</tag>
-        <tag>win10</tag>
       </tags>
   </entry>
   <entry>
@@ -1127,6 +1107,26 @@
       </tags>
   </entry>
   <entry>
+    <title>Windows常见问题</title>
+    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
+<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
+<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
+<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
+<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
+<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
+<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
+<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>windows</tag>
+        <tag>win10</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Word常见问题</title>
     <url>/2017/03/06/Word%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2 id="Word-2016"><a href="#Word-2016" class="headerlink" title="Word 2016"></a>Word 2016</h2><h3 id="文字重叠"><a href="#文字重叠" class="headerlink" title="文字重叠"></a>文字重叠</h3><p>【Reason】计算机中没有相应的字体  </p>
@@ -1152,6 +1152,46 @@
       <categories>
         <category>tools</category>
       </categories>
+  </entry>
+  <entry>
+    <title>我的书架</title>
+    <url>/2017/01/14/%E6%88%91%E7%9A%84%E4%B9%A6%E6%9E%B6/</url>
+    <content><![CDATA[<h2 id="The-First-Floor-Computer"><a href="#The-First-Floor-Computer" class="headerlink" title="The First Floor(Computer)"></a>The First Floor(Computer)</h2><blockquote>
+<ul>
+<li>硅谷之光</li>
+<li>失控</li>
+<li>人月神话</li>
+<li>大教堂与集市（开源运动的《圣经》）</li>
+</ul>
+</blockquote>
+<h2 id="The-Second-Floor-Philosophy"><a href="#The-Second-Floor-Philosophy" class="headerlink" title="The Second Floor(Philosophy)"></a>The Second Floor(Philosophy)</h2><blockquote>
+<ul>
+<li>苏菲的世界</li>
+</ul>
+</blockquote>
+<h2 id="The-Third-Floor-國學"><a href="#The-Third-Floor-國學" class="headerlink" title="The Third Floor(國學)"></a>The Third Floor(國學)</h2><blockquote>
+<ul>
+<li>心经</li>
+<li>坛经</li>
+<li>传习录</li>
+</ul>
+</blockquote>
+<h2 id="The-Fourth-Floor-Others"><a href="#The-Fourth-Floor-Others" class="headerlink" title="The Fourth Floor(Others)"></a>The Fourth Floor(Others)</h2><blockquote>
+<ul>
+<li>卓有成效的管理者</li>
+<li>高效能人士的7个习惯</li>
+<li>自私的基因</li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>hobbies</category>
+      </categories>
+      <tags>
+        <tag>书籍</tag>
+        <tag>book</tag>
+        <tag>reading</tag>
+      </tags>
   </entry>
   <entry>
     <title>Git之旅</title>
@@ -1225,7 +1265,7 @@
 </ul>
 <ol>
 <li>先输入$ git remote rm origin</li>
-<li>再输入$ git remote add origin <a href="mailto:&#x67;&#105;&#x74;&#64;&#x63;&#110;&#98;&#x2e;&#99;&#x6f;&#x6f;&#108;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
+<li>再输入$ git remote add origin <a href="mailto:&#x67;&#x69;&#116;&#64;&#99;&#110;&#x62;&#46;&#99;&#111;&#111;&#108;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
 </ol>
 <h3 id="2-warning-LF-will-be-replaced-by-CRLF"><a href="#2-warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="2. warning: LF will be replaced by CRLF"></a>2. warning: LF will be replaced by CRLF</h3><p>运行如下命令时；</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">warning: LF will be replaced by CRLF in _config.yml.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br></pre></td></tr></table></figure>
@@ -1280,46 +1320,6 @@
       </tags>
   </entry>
   <entry>
-    <title>我的书架</title>
-    <url>/2017/01/14/%E6%88%91%E7%9A%84%E4%B9%A6%E6%9E%B6/</url>
-    <content><![CDATA[<h2 id="The-First-Floor-Computer"><a href="#The-First-Floor-Computer" class="headerlink" title="The First Floor(Computer)"></a>The First Floor(Computer)</h2><blockquote>
-<ul>
-<li>硅谷之光</li>
-<li>失控</li>
-<li>人月神话</li>
-<li>大教堂与集市（开源运动的《圣经》）</li>
-</ul>
-</blockquote>
-<h2 id="The-Second-Floor-Philosophy"><a href="#The-Second-Floor-Philosophy" class="headerlink" title="The Second Floor(Philosophy)"></a>The Second Floor(Philosophy)</h2><blockquote>
-<ul>
-<li>苏菲的世界</li>
-</ul>
-</blockquote>
-<h2 id="The-Third-Floor-國學"><a href="#The-Third-Floor-國學" class="headerlink" title="The Third Floor(國學)"></a>The Third Floor(國學)</h2><blockquote>
-<ul>
-<li>心经</li>
-<li>坛经</li>
-<li>传习录</li>
-</ul>
-</blockquote>
-<h2 id="The-Fourth-Floor-Others"><a href="#The-Fourth-Floor-Others" class="headerlink" title="The Fourth Floor(Others)"></a>The Fourth Floor(Others)</h2><blockquote>
-<ul>
-<li>卓有成效的管理者</li>
-<li>高效能人士的7个习惯</li>
-<li>自私的基因</li>
-</ul>
-</blockquote>
-]]></content>
-      <categories>
-        <category>hobbies</category>
-      </categories>
-      <tags>
-        <tag>书籍</tag>
-        <tag>book</tag>
-        <tag>reading</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>正則表達式</title>
     <url>/2016/10/16/%E6%AD%A3%E5%89%87%E8%A1%A8%E9%81%94%E5%BC%8F/</url>
     <content><![CDATA[<h2 id="匹配任意字符"><a href="#匹配任意字符" class="headerlink" title="匹配任意字符"></a>匹配任意字符</h2><p>使用([\s\S]*)</p>
@@ -1333,69 +1333,6 @@
       </categories>
       <tags>
         <tag>正則表達式</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>软件开发流程</title>
-    <url>/2016/10/15/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/</url>
-    <content><![CDATA[<p><em><strong>参考自<a href="http://baike.baidu.com/link?url=cD6VLiJSqMkCLSe-7X6yB5oapMb5aD3_Vgh0PsVGkTaE8pd5rvKXUGEfKpIkZB_xnZyZ1z7Zb9WW5wwnO5mMrCaHgDhu-Nl-k8IQuNeXxyIVEhCHNrxNyrk-84CnGqU44iLJa4F3Vswkm6aYCAYK5a">百度百科</a></strong></em></p>
-<h2 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h2><ol>
-<li>了解需求</li>
-<li>大功能</li>
-<li>小功能</li>
-<li>用户群体</li>
-</ol>
-<h2 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h2><ol>
-<li>基本处理流程</li>
-<li>系统组织结构</li>
-<li>模块划分</li>
-<li>功能分配</li>
-<li>接口设计</li>
-<li>运行设计</li>
-<li>数据结构设计</li>
-<li>出错处理设计</li>
-</ol>
-<h2 id="详细设计"><a href="#详细设计" class="headerlink" title="详细设计"></a>详细设计</h2><ol>
-<li>算法</li>
-<li>数据结构</li>
-<li>类的层次结构及调用关系</li>
-</ol>
-<blockquote>
-<p>PS: 应当足够详细，能够根据详细设计进行编码</p>
-</blockquote>
-<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><ul>
-<li>实现各模块功能</li>
-</ul>
-<blockquote>
-<p>PS: 通常占软件开发1&#x2F;3的时间</p>
-</blockquote>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><ol>
-<li>按照执行方：内部测试&#x2F;外部测试</li>
-<li>按照测试范围： 模块测试&#x2F;整体联调</li>
-<li>按照条件： 正常操作情况测试&#x2F;异常操作情况测试</li>
-<li>按照测试输入范围： 全覆盖测试&#x2F;抽样测试</li>
-</ol>
-<blockquote>
-<p>PS: 测试同样是项目研发中一个相当重要步骤</p>
-</blockquote>
-<h2 id="软件交付"><a href="#软件交付" class="headerlink" title="软件交付"></a>软件交付</h2><ol>
-<li>目标程序</li>
-<li>数据字典</li>
-<li>《用户使用指南》</li>
-<li>需求报告</li>
-<li>设计报告</li>
-<li>测试报告</li>
-</ol>
-<h2 id="验收"><a href="#验收" class="headerlink" title="验收"></a>验收</h2><h2 id="维护"><a href="#维护" class="headerlink" title="维护"></a>维护</h2><ul>
-<li>需求&#x2F;环境变化 –&gt; 全部&#x2F;部分修改</li>
-</ul>
-]]></content>
-      <categories>
-        <category>mobile development</category>
-      </categories>
-      <tags>
-        <tag>软件开发</tag>
-        <tag>流程</tag>
       </tags>
   </entry>
   <entry>
@@ -1486,6 +1423,373 @@
       <tags>
         <tag>movie</tag>
         <tag>电影</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>雅思口语 News 话题：词汇、习语与 Part 2 答题框架</title>
+    <url>/2026/11/02/%E9%9B%85%E6%80%9D%E5%8F%A3%E8%AF%ADNews%E8%AF%9D%E9%A2%98/</url>
+    <content><![CDATA[<p><code>News</code> 是雅思口语中很常见的主题。题目既可能讨论电视、报纸和社交媒体中的国内外新闻，也可能只是询问家人、朋友之间的个人消息。</p>
+<p>这篇文章整理自 Keith 的直播课 <strong>IELTS Speaking Practice: Topic of THE NEWS</strong>。课程从基础词汇开始，经过真实对话、问题练习和习语讲解，最后用一道 Part 2 题目展示如何在两分钟内讲清楚一条坏消息。[cite:1][cite:2][cite:3]</p>
+<span id="more"></span>
+
+<h2 id="一、先避开最常见的语法错误"><a href="#一、先避开最常见的语法错误" class="headerlink" title="一、先避开最常见的语法错误"></a>一、先避开最常见的语法错误</h2><p><code>news</code> 是不可数名词，不能说：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I heard a news yesterday.  ✗</span><br><span class="line">I have two news for you.   ✗</span><br></pre></td></tr></table></figure>
+
+<p>应该说：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I heard some news yesterday.</span><br><span class="line">I&#x27;ve got some news for you.</span><br><span class="line">I haven&#x27;t got much news.</span><br></pre></td></tr></table></figure>
+
+<p>需要表达“一条消息”时，可以使用：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">a piece of news</span><br><span class="line">an item of news</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I heard an interesting piece of news this morning.</span><br><span class="line">The first item of news is about the local election.</span><br></pre></td></tr></table></figure>
+
+<p>还要注意，<code>the news</code> 在语法上仍然按单数处理：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">The news is spreading quickly.</span><br><span class="line">The news helps us stay in touch with the world.</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、描述新闻行业的人与机构"><a href="#二、描述新闻行业的人与机构" class="headerlink" title="二、描述新闻行业的人与机构"></a>二、描述新闻行业的人与机构</h2><h3 id="Journalist、correspondent-与-news-anchor"><a href="#Journalist、correspondent-与-news-anchor" class="headerlink" title="Journalist、correspondent 与 news anchor"></a>Journalist、correspondent 与 news anchor</h3><table>
+<thead>
+<tr>
+<th>表达</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>journalist</code></td>
+<td>采访、调查和报道新闻的记者</td>
+<td>She works as a journalist.</td>
+</tr>
+<tr>
+<td><code>correspondent</code></td>
+<td>驻某地或负责某领域的通讯记者</td>
+<td>the BBC’s foreign correspondent</td>
+</tr>
+<tr>
+<td><code>news anchor</code></td>
+<td>电视新闻主播</td>
+<td>The news anchor introduced the story.</td>
+</tr>
+<tr>
+<td><code>news host</code></td>
+<td>新闻节目主持人，英式英语中也常见</td>
+<td>He is a well-known news host.</td>
+</tr>
+<tr>
+<td><code>paparazzi</code></td>
+<td>追拍名人的摄影记者，通常含贬义</td>
+<td>The paparazzi followed the actor.</td>
+</tr>
+</tbody></table>
+<p><code>journalism</code> 指新闻行业、新闻工作或新闻学：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">She studied journalism at university.</span><br><span class="line">Good journalism should be accurate and responsible.</span><br></pre></td></tr></table></figure>
+
+<h3 id="Media、press-与-media-outlet"><a href="#Media、press-与-media-outlet" class="headerlink" title="Media、press 与 media outlet"></a>Media、press 与 media outlet</h3><ul>
+<li><code>the media</code>：媒体的总称，可以包括报纸、电视、广播和网络平台；</li>
+<li><code>the press</code>：传统上更偏向报刊新闻界，但也可泛指新闻机构；</li>
+<li><code>media outlet</code>：一家具体的媒体机构或发布渠道。</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">The story was reported by several media outlets.</span><br><span class="line">Some people think the press is biased.</span><br><span class="line">Social media has changed the way news spreads.</span><br></pre></td></tr></table></figure>
+
+<h3 id="Tabloid-的语气"><a href="#Tabloid-的语气" class="headerlink" title="Tabloid 的语气"></a>Tabloid 的语气</h3><p><code>tabloid</code> 通常指偏重名人八卦、耸动标题和轰动性报道的报纸。它往往带有“不够严肃”的负面含义。</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">The story appeared in a tabloid.</span><br><span class="line">Tabloids often focus on sensational stories.</span><br></pre></td></tr></table></figure>
+
+<p><code>paparazzi</code> 同样具有负面色彩，尤其强调为了照片而追踪名人、侵犯隐私。</p>
+<h2 id="三、报道新闻时常用的动词和搭配"><a href="#三、报道新闻时常用的动词和搭配" class="headerlink" title="三、报道新闻时常用的动词和搭配"></a>三、报道新闻时常用的动词和搭配</h2><h3 id="Cover-与-report"><a href="#Cover-与-report" class="headerlink" title="Cover 与 report"></a>Cover 与 report</h3><p><code>cover a story</code> 表示报道一则新闻：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Several journalists are covering the election.</span><br><span class="line">The BBC covered the story in great detail.</span><br></pre></td></tr></table></figure>
+
+<p><code>report</code> 可以直接接宾语，也可以使用 <code>report on</code>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">The journalist reported the incident.</span><br><span class="line">She is reporting on the climate conference.</span><br></pre></td></tr></table></figure>
+
+<p>对应的名词是 <code>coverage</code>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">The news coverage was detailed and balanced.</span><br><span class="line">The event received extensive media coverage.</span><br></pre></td></tr></table></figure>
+
+<h3 id="常用-collocations"><a href="#常用-collocations" class="headerlink" title="常用 collocations"></a>常用 collocations</h3><table>
+<thead>
+<tr>
+<th>搭配</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>breaking news</code></td>
+<td>突发新闻、刚刚发生的新闻</td>
+</tr>
+<tr>
+<td><code>the latest news</code></td>
+<td>最新消息</td>
+</tr>
+<tr>
+<td><code>a news flash</code></td>
+<td>突然插播的简短新闻</td>
+</tr>
+<tr>
+<td><code>urgent news</code></td>
+<td>紧急消息</td>
+</tr>
+<tr>
+<td><code>good / tremendous news</code></td>
+<td>好消息、极好的消息</td>
+</tr>
+<tr>
+<td><code>unwelcome / devastating news</code></td>
+<td>不受欢迎或令人打击的消息</td>
+</tr>
+<tr>
+<td><code>fake news</code></td>
+<td>虚假新闻</td>
+</tr>
+<tr>
+<td><code>news coverage</code></td>
+<td>新闻报道、报道范围</td>
+</tr>
+<tr>
+<td><code>catch up on the news</code></td>
+<td>补看新闻、了解最近消息</td>
+</tr>
+</tbody></table>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I usually catch up on the news during breakfast.</span><br><span class="line">Breaking news spreads rapidly on social media.</span><br><span class="line">The accident received extensive news coverage.</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、区分不同类型的新闻"><a href="#四、区分不同类型的新闻" class="headerlink" title="四、区分不同类型的新闻"></a>四、区分不同类型的新闻</h2><p>新闻不只指国家大事。雅思题目使用 <code>news</code> 时，可以从多个角度回答：</p>
+<ul>
+<li><code>international / foreign news</code>：国际新闻；</li>
+<li><code>national / domestic news</code>：国内新闻；</li>
+<li><code>local news</code>：本地新闻；</li>
+<li><code>personal news</code>：亲友之间的个人消息。</li>
+</ul>
+<p>个人消息可以包括：</p>
+<ul>
+<li>结婚或订婚；</li>
+<li>通过考试；</li>
+<li>找到新工作；</li>
+<li>搬家；</li>
+<li>新生儿出生；</li>
+<li>家庭成员的近况。</li>
+</ul>
+<p>当题目说 <code>Describe some news you heard recently</code> 时，不一定要讲政治、经济或灾难。只要内容确实是一条最近听到的消息，就可以选择更熟悉、更容易展开的个人经历。[cite:3]</p>
+<h2 id="五、讨论新闻来源与可信度"><a href="#五、讨论新闻来源与可信度" class="headerlink" title="五、讨论新闻来源与可信度"></a>五、讨论新闻来源与可信度</h2><p>News 话题经常从“看什么新闻”延伸到“是否相信新闻”。回答时可以沿着以下结构展开：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Source → Habit → Reason → Evaluation</span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I normally get my news from a couple of online newspapers.</span><br><span class="line">I check them once or twice a day because it helps me keep up</span><br><span class="line">with current events. However, I rarely trust a story immediately.</span><br><span class="line">I usually compare it with another reliable source first.</span><br></pre></td></tr></table></figure>
+
+<h3 id="评价新闻可信度的表达"><a href="#评价新闻可信度的表达" class="headerlink" title="评价新闻可信度的表达"></a>评价新闻可信度的表达</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">reliable / credible / trustworthy sources</span><br><span class="line">misleading information</span><br><span class="line">blatant lies</span><br><span class="line">outright lies</span><br><span class="line">stretch the truth</span><br><span class="line">be economical with the truth</span><br><span class="line">have one&#x27;s own agenda</span><br><span class="line">check alternative sources</span><br><span class="line">look for reliable evidence</span><br></pre></td></tr></table></figure>
+
+<p><code>be economical with the truth</code> 表示没有说出全部事实；<code>stretch the truth</code> 表示夸大或扭曲事实；<code>lie through one&#39;s teeth</code> 则表示明目张胆地撒谎。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Some reports are economical with the truth.</span><br><span class="line">The headline is misleading and stretches the truth.</span><br><span class="line">Every media platform may have its own agenda.</span><br><span class="line">I prefer to check alternative sources before sharing a story.</span><br></pre></td></tr></table></figure>
+
+<p>表达不确定态度时，可以说：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I have mixed feelings about it.</span><br><span class="line">I&#x27;m on the fence.</span><br><span class="line">I&#x27;m in two minds about it.</span><br><span class="line">It depends on how reliable the source is.</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、新闻话题中的实用习语"><a href="#六、新闻话题中的实用习语" class="headerlink" title="六、新闻话题中的实用习语"></a>六、新闻话题中的实用习语</h2><h3 id="Give-someone-the-lowdown"><a href="#Give-someone-the-lowdown" class="headerlink" title="Give someone the lowdown"></a>Give someone the lowdown</h3><p>表示把详细情况告诉某人：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I&#x27;ve just read about the accident.</span><br><span class="line">Can you give me the lowdown?</span><br></pre></td></tr></table></figure>
+
+<h3 id="Hear-something-through-the-grapevine"><a href="#Hear-something-through-the-grapevine" class="headerlink" title="Hear something through the grapevine"></a>Hear something through the grapevine</h3><p>表示消息不是来自当事人或原始来源，而是辗转听说：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I heard through the grapevine that Tom is getting married.</span><br></pre></td></tr></table></figure>
+
+<p>也可以说：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I heard it by word of mouth.</span><br></pre></td></tr></table></figure>
+
+<h3 id="Keep-someone-posted-in-the-loop"><a href="#Keep-someone-posted-in-the-loop" class="headerlink" title="Keep someone posted &#x2F; in the loop"></a>Keep someone posted &#x2F; in the loop</h3><p>两者都表示持续向某人通报进展：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Keep me posted about the interview.</span><br><span class="line">Please keep me in the loop.</span><br></pre></td></tr></table></figure>
+
+<p>注意是 <code>in the loop</code>，不是 <code>on the loop</code>。</p>
+<h3 id="Break-the-news-与-breaking-news"><a href="#Break-the-news-与-breaking-news" class="headerlink" title="Break the news 与 breaking news"></a>Break the news 与 breaking news</h3><p>这两个表达容易混淆：</p>
+<ul>
+<li><code>break the news to someone</code>：把消息告诉某人，常用于坏消息；</li>
+<li><code>breaking news</code>：刚刚发生的突发新闻。</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I had to break the news to him that he had failed the exam.</span><br><span class="line">The channel interrupted the programme with breaking news.</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、常见-IELTS-Speaking-问题"><a href="#七、常见-IELTS-Speaking-问题" class="headerlink" title="七、常见 IELTS Speaking 问题"></a>七、常见 IELTS Speaking 问题</h2><h3 id="Part-1"><a href="#Part-1" class="headerlink" title="Part 1"></a>Part 1</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Where do you usually get your news?</span><br><span class="line">Do you often read newspapers?</span><br><span class="line">What kind of news are you interested in?</span><br><span class="line">Do you prefer local or international news?</span><br></pre></td></tr></table></figure>
+
+<p>Part 1 可以采用：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Direct answer → Detail → Reason</span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I mostly get my news online, especially from two newspaper apps.</span><br><span class="line">They send short notifications, so I can keep up with important events</span><br><span class="line">without spending too much time scrolling.</span><br></pre></td></tr></table></figure>
+
+<h3 id="Part-3"><a href="#Part-3" class="headerlink" title="Part 3"></a>Part 3</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Is it important to keep up to date with the news?</span><br><span class="line">Why do some people avoid watching the news?</span><br><span class="line">How has social media changed journalism?</span><br><span class="line">Do people believe online news too easily?</span><br><span class="line">Should governments control fake news?</span><br></pre></td></tr></table></figure>
+
+<p>Part 3 可以采用：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Opinion → Reason → Example → Qualification</span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I think it is useful to follow important news because it helps people</span><br><span class="line">understand decisions that may affect their lives. For example, during</span><br><span class="line">a public emergency, reliable updates can influence how people travel</span><br><span class="line">or work. That said, constantly chasing every headline can be stressful,</span><br><span class="line">so it is better to choose a few trustworthy sources.</span><br></pre></td></tr></table></figure>
+
+<h2 id="八、Part-2：怎样讲述一条坏消息"><a href="#八、Part-2：怎样讲述一条坏消息" class="headerlink" title="八、Part 2：怎样讲述一条坏消息"></a>八、Part 2：怎样讲述一条坏消息</h2><p>课程中的示例题目是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Describe a time when you received bad news.</span><br></pre></td></tr></table></figure>
+
+<h3 id="选材不要过度消耗情绪"><a href="#选材不要过度消耗情绪" class="headerlink" title="选材不要过度消耗情绪"></a>选材不要过度消耗情绪</h3><p>Keith 特别提醒，不必选择亲人去世等会让自己在考场上真正崩溃的经历。雅思评估的是语言表现，不是故事有多悲惨。</p>
+<p>可以选择程度适中的坏消息：</p>
+<ul>
+<li>一次旅行被取消；</li>
+<li>没有通过考试；</li>
+<li>错过活动或比赛；</li>
+<li>预订出现问题；</li>
+<li>计划因为天气或交通中断。</li>
+</ul>
+<p>故事不必惊天动地，甚至可以合理虚构。关键是让自己能够稳定、清楚地讲完。</p>
+<h3 id="两分钟回答框架"><a href="#两分钟回答框架" class="headerlink" title="两分钟回答框架"></a>两分钟回答框架</h3><p>课程中的示例讲述了一次酒店旅行被取消的经历，可以整理为五步：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Background</td>
+<td>什么时候、原本计划做什么</td>
+</tr>
+<tr>
+<td>Expectation</td>
+<td>为什么期待这件事</td>
+</tr>
+<tr>
+<td>Bad news</td>
+<td>收到了什么消息</td>
+</tr>
+<tr>
+<td>Response</td>
+<td>做了什么决定，如何处理</td>
+</tr>
+<tr>
+<td>Result and feeling</td>
+<td>最终结果与感受</td>
+</tr>
+</tbody></table>
+<p>示例骨架：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I&#x27;d like to talk about a short holiday my family had planned...</span><br><span class="line"></span><br><span class="line">We had booked a hotel and were really looking forward to the trip...</span><br><span class="line"></span><br><span class="line">The day before we left, we heard that travel restrictions had changed...</span><br><span class="line"></span><br><span class="line">We considered our options, but eventually decided to cancel...</span><br><span class="line"></span><br><span class="line">Fortunately, the hotel gave us a refund, although we were still</span><br><span class="line">disappointed and frustrated...</span><br></pre></td></tr></table></figure>
+
+<p>这个结构自然形成过去时叙述，还提供了使用过去完成时、情绪词汇和连接表达的机会。</p>
+<h3 id="一分钟准备怎么用"><a href="#一分钟准备怎么用" class="headerlink" title="一分钟准备怎么用"></a>一分钟准备怎么用</h3><p>不要尝试写完整句子，只记五个关键词：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">hotel → excited → restriction → cancel/refund → disappointed</span><br></pre></td></tr></table></figure>
+
+<p>准备顺序可以是：</p>
+<ol>
+<li>接受脑中第一个足够好讲的想法；</li>
+<li>写下两到三个主要情节点；</li>
+<li>有余力时补一个习语或搭配。</li>
+</ol>
+<p>停下来组织想法是正常的 <code>pause</code>；不断用 <code>um</code>、<code>er</code> 搜索单词则属于影响流利度的 <code>hesitation</code>。[cite:3]</p>
+<h2 id="九、把课堂内容变成真正的口语能力"><a href="#九、把课堂内容变成真正的口语能力" class="headerlink" title="九、把课堂内容变成真正的口语能力"></a>九、把课堂内容变成真正的口语能力</h2><p>Keith 建议不要先把答案写成完美文章。书面答案容易过于正式，读出来像一本书，而不是自然对话。</p>
+<p>更有效的练习顺序是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Speak → Record → Listen → Write → Improve → Speak again</span><br></pre></td></tr></table></figure>
+
+<p>一次练习可以这样完成：</p>
+<ol>
+<li>选择一道新闻话题；</li>
+<li>不看稿回答并录音；</li>
+<li>回听，标记停顿、重复和不自然表达；</li>
+<li>写下实际说出的内容；</li>
+<li>替换一个错误搭配，增加一个自然连接；</li>
+<li>再回答一次，但不要背诵全文。</li>
+</ol>
+<p>British Council 的官方说明显示，口语考试包含三个部分，持续 11–14 分钟；评分平均分配在流利度与连贯性、词汇资源、语法范围与准确性、发音四项上。[cite:4][cite:5]</p>
+<p>因此，News 话题复习不应只是背单词。需要同时练习：</p>
+<ul>
+<li>使用词汇讨论不同新闻来源；</li>
+<li>用理由和例子展开观点；</li>
+<li>在 Part 2 中持续组织故事；</li>
+<li>保持表达自然、清楚、易懂。</li>
+</ul>
+<h2 id="十、练习清单"><a href="#十、练习清单" class="headerlink" title="十、练习清单"></a>十、练习清单</h2><p>完成本主题后，可以用下面的清单自测：</p>
+<ul>
+<li><input disabled="" type="checkbox"> 能正确使用不可数名词 <code>news</code></li>
+<li><input disabled="" type="checkbox"> 能区分 journalist、correspondent 和 news anchor</li>
+<li><input disabled="" type="checkbox"> 能使用 cover、report 和 coverage</li>
+<li><input disabled="" type="checkbox"> 能说出三种以上新闻类型</li>
+<li><input disabled="" type="checkbox"> 能使用三组新闻 collocations</li>
+<li><input disabled="" type="checkbox"> 能解释信息来源是否可靠</li>
+<li><input disabled="" type="checkbox"> 能正确使用 <code>in the loop</code></li>
+<li><input disabled="" type="checkbox"> 能区分 <code>break the news</code> 与 <code>breaking news</code></li>
+<li><input disabled="" type="checkbox"> 能完成一个两分钟 News 主题故事</li>
+<li><input disabled="" type="checkbox"> 能对自己的录音进行一次具体修改</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>News 话题的难点并不是缺少生僻词，而是把基础词汇、自然搭配和清晰结构组合起来。</p>
+<p>先掌握 <code>news</code> 的不可数用法，再建立人物、机构、报道动作和新闻类型的词汇网络。回答观点题时，用“立场、原因、例子、限定”展开；回答 Part 2 时，用“背景、期待、坏消息、应对、结果与感受”组织故事。</p>
+<p>当这些表达能够脱离笔记自然说出来时，它们才真正成为口语能力。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://www.bilibili.com/video/BV1fK421C7yr/?p=53">Bilibili：IELTS Speaking Practice，第 53 集</a></p>
+<p>[cite:2] <a href="https://www.youtube.com/watch?v=YaYBqzjM_vE">English Speaking Success：IELTS Speaking Practice: Topic of THE NEWS</a></p>
+<p>[cite:3] <a href="https://keithspeakingacademy.com/how-to-talk-about-news-in-ielts-speaking/">Keith Speaking Academy：IELTS Speaking Lesson about News</a></p>
+<p>[cite:4] <a href="https://takeielts.britishcouncil.org/take-ielts/prepare/free-ielts-english-practice-tests/speaking">British Council：Preparing for your IELTS Speaking test</a></p>
+<p>[cite:5] <a href="https://takeielts.britishcouncil.org/results/how-is-ielts-assessed">British Council：IELTS Speaking Assessment Criteria</a></p>
+]]></content>
+      <categories>
+        <category>english-learning</category>
+      </categories>
+      <tags>
+        <tag>IELTS</tag>
+        <tag>雅思口语</tag>
+        <tag>英语学习</tag>
+        <tag>News</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>软件开发流程</title>
+    <url>/2016/10/15/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/</url>
+    <content><![CDATA[<p><em><strong>参考自<a href="http://baike.baidu.com/link?url=cD6VLiJSqMkCLSe-7X6yB5oapMb5aD3_Vgh0PsVGkTaE8pd5rvKXUGEfKpIkZB_xnZyZ1z7Zb9WW5wwnO5mMrCaHgDhu-Nl-k8IQuNeXxyIVEhCHNrxNyrk-84CnGqU44iLJa4F3Vswkm6aYCAYK5a">百度百科</a></strong></em></p>
+<h2 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h2><ol>
+<li>了解需求</li>
+<li>大功能</li>
+<li>小功能</li>
+<li>用户群体</li>
+</ol>
+<h2 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h2><ol>
+<li>基本处理流程</li>
+<li>系统组织结构</li>
+<li>模块划分</li>
+<li>功能分配</li>
+<li>接口设计</li>
+<li>运行设计</li>
+<li>数据结构设计</li>
+<li>出错处理设计</li>
+</ol>
+<h2 id="详细设计"><a href="#详细设计" class="headerlink" title="详细设计"></a>详细设计</h2><ol>
+<li>算法</li>
+<li>数据结构</li>
+<li>类的层次结构及调用关系</li>
+</ol>
+<blockquote>
+<p>PS: 应当足够详细，能够根据详细设计进行编码</p>
+</blockquote>
+<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><ul>
+<li>实现各模块功能</li>
+</ul>
+<blockquote>
+<p>PS: 通常占软件开发1&#x2F;3的时间</p>
+</blockquote>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><ol>
+<li>按照执行方：内部测试&#x2F;外部测试</li>
+<li>按照测试范围： 模块测试&#x2F;整体联调</li>
+<li>按照条件： 正常操作情况测试&#x2F;异常操作情况测试</li>
+<li>按照测试输入范围： 全覆盖测试&#x2F;抽样测试</li>
+</ol>
+<blockquote>
+<p>PS: 测试同样是项目研发中一个相当重要步骤</p>
+</blockquote>
+<h2 id="软件交付"><a href="#软件交付" class="headerlink" title="软件交付"></a>软件交付</h2><ol>
+<li>目标程序</li>
+<li>数据字典</li>
+<li>《用户使用指南》</li>
+<li>需求报告</li>
+<li>设计报告</li>
+<li>测试报告</li>
+</ol>
+<h2 id="验收"><a href="#验收" class="headerlink" title="验收"></a>验收</h2><h2 id="维护"><a href="#维护" class="headerlink" title="维护"></a>维护</h2><ul>
+<li>需求&#x2F;环境变化 –&gt; 全部&#x2F;部分修改</li>
+</ul>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>软件开发</tag>
+        <tag>流程</tag>
       </tags>
   </entry>
   <entry>
