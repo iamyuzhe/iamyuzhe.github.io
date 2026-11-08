@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/goldfish.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/goldfish.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha256-4Lad8m4ZWW1Lgb9+sMVLYEfnIh7BjV1NQMEe79Pviks=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"iamyuzhe.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.29.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null,"show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="根据 AI 产品千媚的视频，梳理 Agent Framework、Runtime、Harness 的边界，对比 7 个代表项目，并给出插件、SDK 与源码改造三层选型方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent 开发架构怎么选：Framework、Runtime、Harness 与 7 个代表项目">
+<meta property="og:url" content="https://iamyuzhe.github.io/2026/11/08/Agent%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84%E6%80%8E%E4%B9%88%E9%80%89-Framework-Runtime-Harness%E4%B8%8E7%E4%B8%AA%E4%BB%A3%E8%A1%A8%E9%A1%B9%E7%9B%AE/index.html">
+<meta property="og:site_name" content="Andrew 的个人博客">
+<meta property="og:description" content="根据 AI 产品千媚的视频，梳理 Agent Framework、Runtime、Harness 的边界，对比 7 个代表项目，并给出插件、SDK 与源码改造三层选型方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-08T10:10:00.000Z">
+<meta property="article:modified_time" content="2026-11-08T09:45:46.641Z">
+<meta property="article:author" content="Andrew Yu">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Agent Harness">
+<meta property="article:tag" content="Claude Agent SDK">
+<meta property="article:tag" content="Deep Agents">
+<meta property="article:tag" content="OpenCode">
+<meta property="article:tag" content="Pi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://iamyuzhe.github.io/2026/11/08/Agent%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84%E6%80%8E%E4%B9%88%E9%80%89-Framework-Runtime-Harness%E4%B8%8E7%E4%B8%AA%E4%BB%A3%E8%A1%A8%E9%A1%B9%E7%9B%AE/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://iamyuzhe.github.io/2026/11/08/Agent%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84%E6%80%8E%E4%B9%88%E9%80%89-Framework-Runtime-Harness%E4%B8%8E7%E4%B8%AA%E4%BB%A3%E8%A1%A8%E9%A1%B9%E7%9B%AE/","path":"2026/11/08/Agent开发架构怎么选-Framework-Runtime-Harness与7个代表项目/","title":"Agent 开发架构怎么选：Framework、Runtime、Harness 与 7 个代表项目"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Agent 开发架构怎么选：Framework、Runtime、Harness 与 7 个代表项目 | Andrew 的个人博客</title>
+  
+
+
+
+
+
+
+
+
+  
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Andrew 的个人博客" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-search popup-trigger" aria-label="搜索" role="button">
+      <i class="fa fa-search fa-fw fa-lg"></i>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Andrew 的个人博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">技术与生活</p>
+  </div>
+
+  <div class="site-nav-toggle" aria-label="切换导航栏" role="button">
+      <i class="fa fa-ellipsis fa-fw fa-lg"></i>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-项目"><a href="/project/" rel="section"><i class="fa fa-code fa-fw"></i>项目</a></li><li class="menu-item menu-item-友链"><a href="/link/" rel="section"><i class="fa fa-link fa-fw"></i>友链</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  
+  <template id="search-popup-template"><div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div></template>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E5%8C%BA%E5%88%86-Framework%E3%80%81Runtime-%E4%B8%8E-Harness"><span class="nav-number">1.</span> <span class="nav-text">一、先区分 Framework、Runtime 与 Harness</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Framework%EF%BC%9A%E6%8F%90%E4%BE%9B%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97"><span class="nav-number">1.1.</span> <span class="nav-text">Framework：提供构建模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Runtime%EF%BC%9A%E4%BF%9D%E8%AF%81%E6%B5%81%E7%A8%8B%E8%83%BD%E5%A4%9F%E6%8C%81%E7%BB%AD%E6%89%A7%E8%A1%8C"><span class="nav-number">1.2.</span> <span class="nav-text">Runtime：保证流程能够持续执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Harness%EF%BC%9A%E6%8F%90%E4%BE%9B%E5%AE%8C%E6%95%B4%E7%9A%84%E6%89%A7%E8%A1%8C%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.3.</span> <span class="nav-text">Harness：提供完整的执行系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Harness-%E8%A7%A3%E5%86%B3%E7%9A%84%E4%B8%8D%E6%98%AF%E4%B8%80%E6%AC%A1%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">二、Harness 解决的不是一次工具调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%A4%E6%9D%A1%E9%80%89%E5%9E%8B%E8%BD%B4%EF%BC%9A%E9%BB%98%E8%AE%A4%E6%9C%BA%E5%88%B6%E4%B8%8E%E6%8E%A7%E5%88%B6%E6%9D%83"><span class="nav-number">3.</span> <span class="nav-text">三、两条选型轴：默认机制与控制权</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%AE%9E%E7%8E%B0%E4%BA%86%E5%A4%9A%E5%B0%91%E6%9C%BA%E5%88%B6"><span class="nav-number">3.1.</span> <span class="nav-text">默认实现了多少机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E6%94%BE%E4%BA%86%E5%A4%9A%E5%B0%91%E6%8E%A7%E5%88%B6%E6%9D%83"><span class="nav-number">3.2.</span> <span class="nav-text">开放了多少控制权</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%B8%83%E4%B8%AA%E4%BB%A3%E8%A1%A8%E9%A1%B9%E7%9B%AE%E7%9A%84%E5%AE%9A%E4%BD%8D"><span class="nav-number">4.</span> <span class="nav-text">四、七个代表项目的定位</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Claude-Agent-SDK%EF%BC%9A%E5%A4%8D%E7%94%A8-Claude-Code-%E7%9A%84%E6%89%A7%E8%A1%8C%E7%B3%BB%E7%BB%9F"><span class="nav-number">4.1.</span> <span class="nav-text">1. Claude Agent SDK：复用 Claude Code 的执行系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Deep-Agents%EF%BC%9A%E9%BB%98%E8%AE%A4%E5%AE%8C%E6%95%B4%EF%BC%8C%E5%90%8C%E6%97%B6%E5%BC%BA%E8%B0%83%E6%A8%A1%E5%9D%97%E5%8C%96"><span class="nav-number">4.2.</span> <span class="nav-text">2. Deep Agents：默认完整，同时强调模块化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Pi%EF%BC%9A%E4%BF%9D%E6%8C%81%E6%A0%B8%E5%BF%83%E6%9E%81%E7%AE%80%EF%BC%8C%E6%8A%8A%E9%80%89%E6%8B%A9%E6%9D%83%E4%BA%A4%E7%BB%99%E5%BC%80%E5%8F%91%E8%80%85"><span class="nav-number">4.3.</span> <span class="nav-text">3. Pi：保持核心极简，把选择权交给开发者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-OpenCode%EF%BC%9A%E5%9B%B4%E7%BB%95%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E6%8F%90%E4%BE%9B%E5%AE%8C%E6%95%B4%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="nav-number">4.4.</span> <span class="nav-text">4. OpenCode：围绕软件开发提供完整工作流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-OpenClaw%EF%BC%9A%E4%BB%A5-Gateway-%E8%BF%9E%E6%8E%A5%E4%B8%AA%E4%BA%BA%E5%B7%A5%E4%BD%9C%E5%85%A5%E5%8F%A3"><span class="nav-number">4.5.</span> <span class="nav-text">5. OpenClaw：以 Gateway 连接个人工作入口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Hermes-Agent%EF%BC%9A%E5%BC%BA%E8%B0%83%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0%E4%B8%8E%E8%83%BD%E5%8A%9B%E6%B2%89%E6%B7%80"><span class="nav-number">4.6.</span> <span class="nav-text">6. Hermes Agent：强调持续学习与能力沉淀</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-DeepSeek-Harness%EF%BC%9A%E8%BF%9E%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6%E4%B9%9F%E6%8F%92%E4%BB%B6%E5%8C%96"><span class="nav-number">4.7.</span> <span class="nav-text">7. DeepSeek Harness：连核心机制也插件化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%B8%8D%E8%A6%81%E6%8C%89%E2%80%9C%E7%BB%BC%E5%90%88%E4%BB%BB%E5%8A%A1%E2%80%9D%E5%92%8C%E2%80%9C%E7%BC%96%E7%A0%81%E4%BB%BB%E5%8A%A1%E2%80%9D%E7%94%BB%E6%AD%BB%E8%BE%B9%E7%95%8C"><span class="nav-number">5.</span> <span class="nav-text">五、不要按“综合任务”和“编码任务”画死边界</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E4%B8%83%E4%B8%AA%E9%A1%B9%E7%9B%AE%E7%9A%84%E6%A8%AA%E5%90%91%E6%AF%94%E8%BE%83"><span class="nav-number">6.</span> <span class="nav-text">六、七个项目的横向比较</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E7%94%A8%E4%B8%89%E5%B1%82%E9%9C%80%E6%B1%82%E5%86%B3%E5%AE%9A%E6%94%B9%E9%80%A0%E6%96%B9%E5%BC%8F"><span class="nav-number">7.</span> <span class="nav-text">七、用三层需求决定改造方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%EF%BC%9A%E6%89%A9%E5%B1%95%E7%8E%B0%E6%9C%89-Agent"><span class="nav-number">7.1.</span> <span class="nav-text">第一层：扩展现有 Agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%EF%BC%9A%E5%BC%80%E5%8F%91%E8%87%AA%E5%B7%B1%E7%9A%84-Agent-%E4%BA%A7%E5%93%81"><span class="nav-number">7.2.</span> <span class="nav-text">第二层：开发自己的 Agent 产品</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%EF%BC%9A%E6%94%B9%E9%80%A0%E5%BA%95%E5%B1%82-Harness"><span class="nav-number">7.3.</span> <span class="nav-text">第三层：改造底层 Harness</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E4%B8%80%E5%A5%97%E5%8F%AF%E6%89%A7%E8%A1%8C%E7%9A%84%E9%80%89%E5%9E%8B%E6%B5%81%E7%A8%8B"><span class="nav-number">8.</span> <span class="nav-text">八、一套可执行的选型流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%85%88%E5%86%99%E4%B8%9A%E5%8A%A1%E9%97%AD%E7%8E%AF"><span class="nav-number">8.1.</span> <span class="nav-text">1. 先写业务闭环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%A0%87%E8%AE%B0%E4%B8%8D%E5%8F%AF%E5%A6%A5%E5%8D%8F%E7%9A%84%E6%8E%A7%E5%88%B6%E7%82%B9"><span class="nav-number">8.2.</span> <span class="nav-text">2. 标记不可妥协的控制点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%80%89%E6%8B%A9%E6%9C%80%E9%AB%98%E5%8F%AF%E6%8E%A5%E5%8F%97%E8%B5%B7%E7%82%B9"><span class="nav-number">8.3.</span> <span class="nav-text">3. 选择最高可接受起点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%94%A8%E5%90%8C%E4%B8%80%E6%9D%A1%E4%BB%BB%E5%8A%A1%E5%81%9A%E5%B0%8F%E5%9E%8B%E9%AA%8C%E8%AF%81"><span class="nav-number">8.4.</span> <span class="nav-text">4. 用同一条任务做小型验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%AF%84%E4%BC%B0%E5%8D%87%E7%BA%A7%E8%80%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E5%BC%80%E5%8F%91"><span class="nav-number">8.5.</span> <span class="nav-text">5. 评估升级而不只是开发</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E4%B8%8D%E5%90%8C%E7%9B%AE%E6%A0%87%E4%B8%8B%E7%9A%84%E6%8E%A8%E8%8D%90%E8%B5%B7%E7%82%B9"><span class="nav-number">9.</span> <span class="nav-text">九、不同目标下的推荐起点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E8%BF%98%E8%A6%81%E8%A1%A5%E9%BD%90%E7%9A%84%E8%83%BD%E5%8A%9B"><span class="nav-number">10.</span> <span class="nav-text">十、生产环境还要补齐的能力</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">11.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">12.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Andrew Yu"
+      src="/images/goldfish.jpg">
+  <p class="site-author-name" itemprop="name">Andrew Yu</p>
+  <div class="site-description" itemprop="description">分享技术，记录生活……</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/category/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tag/">
+        <span class="site-state-item-count">67</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iamyuzhe" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iamyuzhe" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://iamyuzhe.github.io/2026/11/08/Agent%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84%E6%80%8E%E4%B9%88%E9%80%89-Framework-Runtime-Harness%E4%B8%8E7%E4%B8%AA%E4%BB%A3%E8%A1%A8%E9%A1%B9%E7%9B%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/goldfish.jpg">
+      <meta itemprop="name" content="Andrew Yu">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew 的个人博客">
+      <meta itemprop="description" content="分享技术，记录生活……">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Agent 开发架构怎么选：Framework、Runtime、Harness 与 7 个代表项目 | Andrew 的个人博客">
+      <meta itemprop="description" content="根据 AI 产品千媚的视频，梳理 Agent Framework、Runtime、Harness 的边界，对比 7 个代表项目，并给出插件、SDK 与源码改造三层选型方法。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Agent 开发架构怎么选：Framework、Runtime、Harness 与 7 个代表项目
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-11-08 18:10:00" itemprop="dateCreated datePublished" datetime="2026-11-08T18:10:00+08:00">2026-11-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ai-engineering/" itemprop="url" rel="index"><span itemprop="name">ai-engineering</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">根据 AI 产品千媚的视频，梳理 Agent Framework、Runtime、Harness 的边界，对比 7 个代表项目，并给出插件、SDK 与源码改造三层选型方法。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>开发一个 Agent，最先要决定的往往不是模型，而是<strong>从哪一层开始搭建</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">从模型和工具开始，自己实现循环？</span><br><span class="line">复用带状态管理的 Runtime？</span><br><span class="line">还是直接采用一套现成 Harness？</span><br></pre></td></tr></table></figure>
+
+<p>起点选得太低，团队会重复实现上下文、权限、文件、会话和恢复机制；起点选得太高，又可能发现关键流程被封装，业务差异无法落地。</p>
+<p>这篇文章整理自 AI 产品千媚的视频 <strong>《Agent 开发架构怎么选？7 个代表项目系统对比》</strong>。视频比较了 Claude Agent SDK、Deep Agents、Pi、OpenCode、OpenClaw、Hermes Agent 和 DeepSeek Harness，并用“默认实现了多少机制”和“开放了多少控制权”两条轴解释选型差异。[cite:1]</p>
+<span id="more"></span>
+
+<h2 id="一、先区分-Framework、Runtime-与-Harness"><a href="#一、先区分-Framework、Runtime-与-Harness" class="headerlink" title="一、先区分 Framework、Runtime 与 Harness"></a>一、先区分 Framework、Runtime 与 Harness</h2><p>这三个词经常混用，但它们解决的问题并不相同。</p>
+<h3 id="Framework：提供构建模块"><a href="#Framework：提供构建模块" class="headerlink" title="Framework：提供构建模块"></a>Framework：提供构建模块</h3><p>Framework 主要负责把模型、工具、提示词和流程节点连接起来。开发者通常可以自由设计：</p>
+<ul>
+<li>模型如何接收上下文；</li>
+<li>工具如何注册和调用；</li>
+<li>多个步骤如何连接；</li>
+<li>不同 Agent 如何协作；</li>
+<li>业务状态如何在节点间传递。</li>
+</ul>
+<p>Framework 的优势是灵活，代价是大量基础机制仍要自己补齐。工具权限、上下文压缩、任务恢复、文件系统、会话持久化、审计和评测，通常不会因为“已经能调用工具”就自动成立。</p>
+<h3 id="Runtime：保证流程能够持续执行"><a href="#Runtime：保证流程能够持续执行" class="headerlink" title="Runtime：保证流程能够持续执行"></a>Runtime：保证流程能够持续执行</h3><p>Runtime 更关注执行过程：</p>
+<ul>
+<li>状态保存与恢复；</li>
+<li>长任务和中断续跑；</li>
+<li>事件流与流式输出；</li>
+<li>并发和任务调度；</li>
+<li>人工审批；</li>
+<li>错误重试与检查点。</li>
+</ul>
+<p>它回答的是“这条流程怎样可靠地跑下去”，而不一定替开发者决定 Agent 应该拥有哪些工具、记忆和工作方式。</p>
+<h3 id="Harness：提供完整的执行系统"><a href="#Harness：提供完整的执行系统" class="headerlink" title="Harness：提供完整的执行系统"></a>Harness：提供完整的执行系统</h3><p>Harness 位于更高层。它通常把模型、工具、上下文、Agent Loop、文件系统、权限、会话、记忆、子 Agent、Skills 和可观测性组合成一套可直接使用的执行系统。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Framework：给积木</span><br><span class="line">Runtime：让流程稳定运行</span><br><span class="line">Harness：给出一套可工作的 Agent 执行环境</span><br></pre></td></tr></table></figure>
+
+<p>视频把技术演进概括为从 Framework、Runtime 到 Harness。这个时间线适合帮助理解开发起点的变化，但不是严格的行业分期：很多项目同时跨越多层，边界也会随版本演进而变化。[cite:1]</p>
+<h2 id="二、Harness-解决的不是一次工具调用"><a href="#二、Harness-解决的不是一次工具调用" class="headerlink" title="二、Harness 解决的不是一次工具调用"></a>二、Harness 解决的不是一次工具调用</h2><p>一个简单 Agent 可能只需要：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">读取商品信息</span><br><span class="line">→ 查询库存、价格和佣金</span><br><span class="line">→ 商品打分</span><br><span class="line">→ 生成选品结果</span><br></pre></td></tr></table></figure>
+
+<p>但真实业务很快会出现更多要求：</p>
+<ul>
+<li>某一步失败后从哪里重试；</li>
+<li>长结果是否写入文件而不是塞回上下文；</li>
+<li>哪些工具可以自动执行，哪些必须审批；</li>
+<li>如何避免 Agent 反复调用同一个工具；</li>
+<li>会话怎样恢复；</li>
+<li>多个子任务怎样隔离上下文；</li>
+<li>运行轨迹怎样审计；</li>
+<li>模型切换后行为是否退化。</li>
+</ul>
+<p>课程用“研究一家公司的产品”说明了同一个目标可能需要搜索资料、验证关键信息、编写代码分析数据，再根据中间结果继续迭代。真正复杂的不是某个工具，而是工具之间的组织、状态、边界和恢复。[cite:1]</p>
+<p>因此，选 Harness 时不应只看工具数量，而应该看它默认替团队解决了多少执行问题。</p>
+<h2 id="三、两条选型轴：默认机制与控制权"><a href="#三、两条选型轴：默认机制与控制权" class="headerlink" title="三、两条选型轴：默认机制与控制权"></a>三、两条选型轴：默认机制与控制权</h2><p>视频采用了两个很实用的比较维度：</p>
+<h3 id="默认实现了多少机制"><a href="#默认实现了多少机制" class="headerlink" title="默认实现了多少机制"></a>默认实现了多少机制</h3><p>默认机制越多，通常意味着更快启动：</p>
+<ul>
+<li>内置 Agent Loop；</li>
+<li>文件读写和命令执行；</li>
+<li>上下文管理与压缩；</li>
+<li>会话与恢复；</li>
+<li>权限和 Hook；</li>
+<li>子 Agent；</li>
+<li>Skills、记忆与计划；</li>
+<li>日志和运行轨迹。</li>
+</ul>
+<p>但默认机制越多，也意味着团队要先理解项目预设的工作方式。</p>
+<h3 id="开放了多少控制权"><a href="#开放了多少控制权" class="headerlink" title="开放了多少控制权"></a>开放了多少控制权</h3><p>控制权关注的是：</p>
+<ul>
+<li>能否替换模型、工具和存储；</li>
+<li>能否控制上下文进入方式；</li>
+<li>能否改变循环和停止条件；</li>
+<li>能否插入审批、审计与策略；</li>
+<li>能否替换执行环境；</li>
+<li>能否把核心机制嵌入自己的产品。</li>
+</ul>
+<p>这两条轴并不是简单的“功能多”和“功能少”。一个项目可以同时拥有丰富默认能力和较强扩展性，只是学习成本和改造边界不同。</p>
+<h2 id="四、七个代表项目的定位"><a href="#四、七个代表项目的定位" class="headerlink" title="四、七个代表项目的定位"></a>四、七个代表项目的定位</h2><h3 id="1-Claude-Agent-SDK：复用-Claude-Code-的执行系统"><a href="#1-Claude-Agent-SDK：复用-Claude-Code-的执行系统" class="headerlink" title="1. Claude Agent SDK：复用 Claude Code 的执行系统"></a>1. Claude Agent SDK：复用 Claude Code 的执行系统</h3><p>Claude Agent SDK 将 Claude Code 的 Agent Loop、上下文管理和工具能力封装为 Python 与 TypeScript 库。官方列出的能力包括内置工具、Hooks、子 Agent、MCP、权限、会话、Skills、记忆和插件。[cite:2]</p>
+<p>它适合：</p>
+<ul>
+<li>希望快速得到成熟 Agent 执行能力；</li>
+<li>业务能够接受 Claude Code 的核心工作方式；</li>
+<li>需要通过 Hook 增加审批、审计或业务规则；</li>
+<li>希望把 Agent 嵌入现有 Python 或 TypeScript 服务。</li>
+</ul>
+<p>它的关键价值不是“调用 Claude API 更方便”，而是直接复用已经形成的 Agent Harness。与普通 Client SDK 相比，开发者不需要重新实现完整工具循环。</p>
+<p>需要注意的是，复用成熟 Loop 也意味着底层执行哲学已有明确预设。如果业务必须彻底改变循环、上下文策略或模型选择边界，需要先确认 SDK 暴露的扩展点是否足够。</p>
+<h3 id="2-Deep-Agents：默认完整，同时强调模块化"><a href="#2-Deep-Agents：默认完整，同时强调模块化" class="headerlink" title="2. Deep Agents：默认完整，同时强调模块化"></a>2. Deep Agents：默认完整，同时强调模块化</h3><p>Deep Agents 在 LangChain 和 LangGraph 之上提供面向复杂多步任务的 Harness。官方能力包括计划、虚拟文件系统、上下文管理、长期记忆、子 Agent、人工审批和可插拔 Backend。[cite:3]</p>
+<p>它适合：</p>
+<ul>
+<li>研究、数据分析、文档处理等综合任务；</li>
+<li>需要模型和工具供应商选择空间；</li>
+<li>需要自定义文件或执行 Backend；</li>
+<li>既希望有完整默认能力，又希望通过 Middleware 调整行为。</li>
+</ul>
+<p>Deep Agents 的特点是“默认完整，但仍保留模块化入口”。例如，虚拟文件系统可以映射到内存、本地磁盘、持久化 Store 或自定义 Backend；子 Agent 可以隔离长任务上下文；Middleware 可以替换或扩展特定能力。[cite:3]</p>
+<p>代价是系统层次较多。团队需要理解 LangChain、LangGraph、Middleware、Backend 与 Deep Agents Harness 之间的职责，否则容易在错误层次修改问题。</p>
+<h3 id="3-Pi：保持核心极简，把选择权交给开发者"><a href="#3-Pi：保持核心极简，把选择权交给开发者" class="headerlink" title="3. Pi：保持核心极简，把选择权交给开发者"></a>3. Pi：保持核心极简，把选择权交给开发者</h3><p>Pi 将自己定义为 minimal agent harness。它提供基本 Coding Agent 能力、会话树、上下文压缩、Skills、扩展、RPC 和 SDK，但有意不把子 Agent、Plan Mode、权限弹窗等工作方式写死在核心中。[cite:4]</p>
+<p>它适合：</p>
+<ul>
+<li>希望精确控制上下文和工具；</li>
+<li>不认同现成 Coding Agent 的默认流程；</li>
+<li>愿意通过 TypeScript Extension 构建能力；</li>
+<li>希望将极简核心嵌入自己的产品。</li>
+</ul>
+<p>Pi 的思路是“提供 primitives，而不是预设所有 features”。扩展可以访问工具、命令、事件、键盘交互和 TUI，因此团队能够构建自己的权限门、计划模式、沙箱、SSH 执行或子 Agent。[cite:4]</p>
+<p>这种自由度的代价很明确：缺少的默认机制不会凭空出现。安全、审批、任务恢复、并发和观测需要由团队选择插件、编写扩展或在外层补齐。</p>
+<h3 id="4-OpenCode：围绕软件开发提供完整工作流"><a href="#4-OpenCode：围绕软件开发提供完整工作流" class="headerlink" title="4. OpenCode：围绕软件开发提供完整工作流"></a>4. OpenCode：围绕软件开发提供完整工作流</h3><p>OpenCode 面向软件开发场景，内置 Build、Plan、General、Explore 等角色。Build 可以执行文件修改和系统命令，Plan 默认限制写操作，General 与 Explore 则分别承担通用多步任务和只读代码探索。[cite:5]</p>
+<p>它适合：</p>
+<ul>
+<li>目标明确是代码探索、修改、执行和验证；</li>
+<li>希望直接获得角色分工和权限边界；</li>
+<li>需要通过配置定义模型、提示词、工具权限和子 Agent；</li>
+<li>不想从零搭建 Coding Agent 交互流程。</li>
+</ul>
+<p>OpenCode 的优势是完整的软件开发产品形态。视频将它与 Pi 对比：Pi 更像可自由设计执行方式的极简核心，OpenCode 则已经替用户定义了更完整的开发路径。[cite:1]</p>
+<p>如果业务目标不是 Coding Agent，直接改造 OpenCode 可能不如从更通用的 SDK 或极简 Harness 出发。</p>
+<h3 id="5-OpenClaw：以-Gateway-连接个人工作入口"><a href="#5-OpenClaw：以-Gateway-连接个人工作入口" class="headerlink" title="5. OpenClaw：以 Gateway 连接个人工作入口"></a>5. OpenClaw：以 Gateway 连接个人工作入口</h3><p>OpenClaw 的重点不只在 Agent Loop，而在 Gateway。它可以连接多种消息渠道，并围绕会话、记忆、多 Agent 路由、Skills、插件、定时任务和 Webhook 形成个人助手的管理中心。[cite:6]</p>
+<p>它适合：</p>
+<ul>
+<li>从飞书、Slack、Telegram、WhatsApp 等入口接收任务；</li>
+<li>需要持续在线的个人或团队助手；</li>
+<li>需要定时任务、Webhook 和跨渠道投递；</li>
+<li>希望把 Agent 作为长期运行的服务，而不是一次 CLI 调用。</li>
+</ul>
+<p>这类系统的核心复杂度是“入口与运行治理”：身份、会话归属、渠道路由、长期记忆、权限和自动化都比单次推理更重要。</p>
+<h3 id="6-Hermes-Agent：强调持续学习与能力沉淀"><a href="#6-Hermes-Agent：强调持续学习与能力沉淀" class="headerlink" title="6. Hermes Agent：强调持续学习与能力沉淀"></a>6. Hermes Agent：强调持续学习与能力沉淀</h3><p>Hermes Agent 同样提供消息渠道、持久记忆、定时任务、子 Agent 和 Skills，但官方定位特别强调闭环学习：Agent 可以从经验中创建 Skills，在使用过程中改进，并把跨会话信息沉淀为可复用能力。[cite:7]</p>
+<p>它适合：</p>
+<ul>
+<li>Agent 会长期服务同一用户或团队；</li>
+<li>需要把重复任务沉淀成 Skills；</li>
+<li>希望记忆、用户模型和自动化共同演进；</li>
+<li>需要在本地、容器、SSH 或云端执行环境间切换。</li>
+</ul>
+<p>视频用“写周报”举例：Agent 不只完成一次周报，还能总结方法、保存为 Skill，并在后续任务中直接复用。[cite:1]</p>
+<p>这类“持续学习”需要更严格的治理。错误经验如果未经评测就固化为记忆或 Skill，长期影响可能比一次错误回答更大。</p>
+<h3 id="7-DeepSeek-Harness：连核心机制也插件化"><a href="#7-DeepSeek-Harness：连核心机制也插件化" class="headerlink" title="7. DeepSeek Harness：连核心机制也插件化"></a>7. DeepSeek Harness：连核心机制也插件化</h3><p>DeepSeek Harness 采用 “Everything is a plugin” 架构。模型、工具、Skills、会话、沙箱、存储、Agent Loop、调度和 UI 都可以作为插件组合或替换。[cite:8]</p>
+<p>它适合：</p>
+<ul>
+<li>研究不同 Agent Loop；</li>
+<li>构建自己的 Harness 平台；</li>
+<li>希望替换核心执行机制；</li>
+<li>需要完整运行轨迹、恢复、分叉和回放。</li>
+</ul>
+<p>官方还提供 Standard、Code、Minimal 和 Creator 等运行模式，并通过追加写 Session Log 记录模型看到的提示词、推理、工具调用、子 Agent 调度和上下文注入。[cite:8]</p>
+<p>这带来很高的可塑性，也带来更高的系统责任。DeepSeek Harness 目前仍处于 Developer Preview，核心 API 和插件接口可能继续变化，生产采用时必须评估升级和兼容成本。[cite:8]</p>
+<h2 id="五、不要按“综合任务”和“编码任务”画死边界"><a href="#五、不要按“综合任务”和“编码任务”画死边界" class="headerlink" title="五、不要按“综合任务”和“编码任务”画死边界"></a>五、不要按“综合任务”和“编码任务”画死边界</h2><p>视频先把项目粗略分为综合任务类与编码类：</p>
+<table>
+<thead>
+<tr>
+<th>粗略类型</th>
+<th>代表项目</th>
+<th>默认优化方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>综合任务</td>
+<td>Claude Agent SDK、Deep Agents</td>
+<td>研究、数据分析、文档处理、代码执行</td>
+</tr>
+<tr>
+<td>编码任务</td>
+<td>Pi、OpenCode</td>
+<td>代码探索、文件修改、命令执行、测试验证</td>
+</tr>
+<tr>
+<td>个人助手与长期运行</td>
+<td>OpenClaw、Hermes Agent</td>
+<td>多渠道、记忆、自动化、持续任务</td>
+</tr>
+<tr>
+<td>Harness 平台</td>
+<td>DeepSeek Harness</td>
+<td>核心机制组合、替换和实验</td>
+</tr>
+</tbody></table>
+<p>但分类不等于严格边界。Claude Agent SDK 来自 Claude Code，却可以构建非编码 Agent；Pi 可以通过 Extension 发展成个人工作流；OpenClaw 可以把其他 Coding Harness 作为执行后端；DeepSeek Harness 也提供完整 Coding Agent 模式。</p>
+<p>真正的区别不是“能不能做”，而是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">默认提供了哪些能力？</span><br><span class="line">围绕哪类任务做了优化？</span><br><span class="line">为了改成目标形态，需要修改多少层？</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、七个项目的横向比较"><a href="#六、七个项目的横向比较" class="headerlink" title="六、七个项目的横向比较"></a>六、七个项目的横向比较</h2><p>下面的表格综合视频观点与各项目官方文档。它描述的是<strong>架构倾向</strong>，不是性能排名。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>默认完整度</th>
+<th>控制方式</th>
+<th>更适合的起点</th>
+<th>主要代价</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Claude Agent SDK</td>
+<td>高</td>
+<td>Hooks、工具、权限、插件、SDK 配置</td>
+<td>快速复用成熟 Agent Loop</td>
+<td>核心执行方式已有较强预设</td>
+</tr>
+<tr>
+<td>Deep Agents</td>
+<td>高</td>
+<td>Middleware、Backend、模型与工具配置</td>
+<td>综合任务与可定制执行环境</td>
+<td>需要理解多层抽象</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td>较低</td>
+<td>Extension、Skill、RPC、SDK</td>
+<td>极简 Coding Agent 与自定义工作流</td>
+<td>大量机制需要自行选择或实现</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td>高</td>
+<td>Agent 配置、Prompt、模型、细粒度权限</td>
+<td>完整软件开发流程</td>
+<td>非编码场景可能需要逆向改造</td>
+</tr>
+<tr>
+<td>OpenClaw</td>
+<td>高</td>
+<td>Gateway、插件、渠道、Agent 路由</td>
+<td>多渠道个人或团队助手</td>
+<td>部署与权限治理复杂</td>
+</tr>
+<tr>
+<td>Hermes Agent</td>
+<td>高</td>
+<td>Skills、记忆、Bot、Gateway、Backend</td>
+<td>长期运行和持续学习</td>
+<td>学习闭环需要评测与纠错</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td>中到高</td>
+<td>几乎所有机制插件化</td>
+<td>Harness 研究和平台开发</td>
+<td>Preview 阶段，集成责任较大</td>
+</tr>
+</tbody></table>
+<p>如果只看功能清单，这些项目会显得越来越相似。更有区分度的问题是：</p>
+<ul>
+<li>Agent Loop 能否改变；</li>
+<li>上下文和状态由谁管理；</li>
+<li>工具执行发生在哪里；</li>
+<li>权限在什么层生效；</li>
+<li>持久化格式能否迁移；</li>
+<li>运行轨迹能否审计和回放；</li>
+<li>业务需要承担多少基础设施责任。</li>
+</ul>
+<h2 id="七、用三层需求决定改造方式"><a href="#七、用三层需求决定改造方式" class="headerlink" title="七、用三层需求决定改造方式"></a>七、用三层需求决定改造方式</h2><p>视频最后把开发需求拆成三个层次，这比直接比较项目 Star 数更实用。</p>
+<h3 id="第一层：扩展现有-Agent"><a href="#第一层：扩展现有-Agent" class="headerlink" title="第一层：扩展现有 Agent"></a>第一层：扩展现有 Agent</h3><p>如果已有 Agent 产品，只需要增加：</p>
+<ul>
+<li>一个工具；</li>
+<li>一套固定工作流；</li>
+<li>领域知识；</li>
+<li>自动化命令；</li>
+<li>特定审批规则。</li>
+</ul>
+<p>优先选择：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Plugin / Extension / Skill</span><br></pre></td></tr></table></figure>
+
+<p>以 Pi 为例，可以通过 Extension 增加自动检查、按要求生成 PR 描述或新的工具；产品仍然是 Pi，只是能力被扩展。[cite:1][cite:4]</p>
+<p>这一层不应轻易 Fork 源码。插件边界通常更容易升级、测试和移除。</p>
+<h3 id="第二层：开发自己的-Agent-产品"><a href="#第二层：开发自己的-Agent-产品" class="headerlink" title="第二层：开发自己的 Agent 产品"></a>第二层：开发自己的 Agent 产品</h3><p>如果需要自己的界面、用户体系、任务系统和业务流程，但不想重写 Agent Loop，可以采用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Agent SDK / Harness SDK</span><br></pre></td></tr></table></figure>
+
+<p>这时产品属于自己，底层复用 Claude Agent SDK、Deep Agents 或 Pi SDK 等执行能力。重点是确认：</p>
+<ul>
+<li>SDK 是否支持目标语言；</li>
+<li>会话能否外部持久化；</li>
+<li>事件是否可流式消费；</li>
+<li>工具与权限是否可注入；</li>
+<li>是否支持取消、恢复和并发；</li>
+<li>授权与商业条款是否匹配。</li>
+</ul>
+<h3 id="第三层：改造底层-Harness"><a href="#第三层：改造底层-Harness" class="headerlink" title="第三层：改造底层 Harness"></a>第三层：改造底层 Harness</h3><p>只有当需求涉及下面这些问题时，才应该进入源码或核心插件层：</p>
+<ul>
+<li>改变 Agent Loop；</li>
+<li>替换调度或上下文机制；</li>
+<li>研究新的工具编排方式；</li>
+<li>构建 Harness 平台；</li>
+<li>对运行轨迹和恢复机制有特殊要求。</li>
+</ul>
+<p>此时可以选择 DeepSeek Harness 这类核心机制可替换的系统，或 Fork 一个足够小、足够清楚的代码库。</p>
+<p>代价不只是初次开发，还包括：</p>
+<ul>
+<li>跟进上游安全修复；</li>
+<li>维护模型和工具协议变化；</li>
+<li>处理状态格式迁移；</li>
+<li>建立兼容测试；</li>
+<li>为团队提供调试和观测工具。</li>
+</ul>
+<h2 id="八、一套可执行的选型流程"><a href="#八、一套可执行的选型流程" class="headerlink" title="八、一套可执行的选型流程"></a>八、一套可执行的选型流程</h2><h3 id="1-先写业务闭环"><a href="#1-先写业务闭环" class="headerlink" title="1. 先写业务闭环"></a>1. 先写业务闭环</h3><p>不要先列框架名称。先画出真实任务：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">输入从哪里来</span><br><span class="line">→ Agent 需要哪些上下文</span><br><span class="line">→ 调用哪些工具</span><br><span class="line">→ 哪些操作需要审批</span><br><span class="line">→ 中断后怎样恢复</span><br><span class="line">→ 结果保存到哪里</span><br><span class="line">→ 如何判断任务成功</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-标记不可妥协的控制点"><a href="#2-标记不可妥协的控制点" class="headerlink" title="2. 标记不可妥协的控制点"></a>2. 标记不可妥协的控制点</h3><p>例如：</p>
+<ul>
+<li>模型必须可替换；</li>
+<li>工具必须运行在内网沙箱；</li>
+<li>所有写操作必须审批；</li>
+<li>会话必须存储在自有数据库；</li>
+<li>运行轨迹必须可审计；</li>
+<li>必须支持飞书入口；</li>
+<li>必须允许自定义 Agent Loop。</li>
+</ul>
+<p>这些要求会直接排除不合适的抽象层。</p>
+<h3 id="3-选择最高可接受起点"><a href="#3-选择最高可接受起点" class="headerlink" title="3. 选择最高可接受起点"></a>3. 选择最高可接受起点</h3><p>一个实用原则是：</p>
+<blockquote>
+<p>在不失去关键控制权的前提下，选择能够复用最多成熟机制的最高层起点。</p>
+</blockquote>
+<p>这样可以减少重复建设，但不会把业务差异埋在无法修改的黑盒中。</p>
+<h3 id="4-用同一条任务做小型验证"><a href="#4-用同一条任务做小型验证" class="headerlink" title="4. 用同一条任务做小型验证"></a>4. 用同一条任务做小型验证</h3><p>不要只跑“查询天气”Demo。选一条接近生产的任务，至少验证：</p>
+<ul>
+<li>多步工具调用；</li>
+<li>长上下文；</li>
+<li>文件读写；</li>
+<li>权限拒绝；</li>
+<li>中断和恢复；</li>
+<li>错误重试；</li>
+<li>日志与轨迹；</li>
+<li>模型切换；</li>
+<li>任务成功标准。</li>
+</ul>
+<h3 id="5-评估升级而不只是开发"><a href="#5-评估升级而不只是开发" class="headerlink" title="5. 评估升级而不只是开发"></a>5. 评估升级而不只是开发</h3><p>PoC 能跑通不代表长期成本可控。还要检查：</p>
+<ul>
+<li>上游发布节奏；</li>
+<li>配置和状态格式是否稳定；</li>
+<li>扩展点是否有兼容承诺；</li>
+<li>核心能力是否依赖单一模型；</li>
+<li>Fork 后与上游同步的成本；</li>
+<li>团队能否定位 Harness 内部问题。</li>
+</ul>
+<h2 id="九、不同目标下的推荐起点"><a href="#九、不同目标下的推荐起点" class="headerlink" title="九、不同目标下的推荐起点"></a>九、不同目标下的推荐起点</h2><table>
+<thead>
+<tr>
+<th>目标</th>
+<th>优先考察</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>尽快获得成熟的通用 Agent 执行能力</td>
+<td>Claude Agent SDK</td>
+</tr>
+<tr>
+<td>综合任务，且需要 Backend、模型与 Middleware 定制</td>
+<td>Deep Agents</td>
+</tr>
+<tr>
+<td>构建极简、强定制的 Coding Agent</td>
+<td>Pi</td>
+</tr>
+<tr>
+<td>直接使用完整的软件开发工作流</td>
+<td>OpenCode</td>
+</tr>
+<tr>
+<td>从多个聊天渠道运营长期个人助手</td>
+<td>OpenClaw</td>
+</tr>
+<tr>
+<td>让记忆与 Skills 随长期使用持续沉淀</td>
+<td>Hermes Agent</td>
+</tr>
+<tr>
+<td>研究或搭建可替换核心机制的 Harness 平台</td>
+<td>DeepSeek Harness</td>
+</tr>
+</tbody></table>
+<p>这不是唯一答案。同一个业务也可以组合多层：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">OpenClaw 负责渠道和会话入口</span><br><span class="line">        ↓</span><br><span class="line">Claude Agent SDK / Pi 负责具体执行</span><br><span class="line">        ↓</span><br><span class="line">自有沙箱、存储和审计系统负责治理</span><br></pre></td></tr></table></figure>
+
+<p>组合的前提是明确每一层的状态所有权、身份边界和失败责任。</p>
+<h2 id="十、生产环境还要补齐的能力"><a href="#十、生产环境还要补齐的能力" class="headerlink" title="十、生产环境还要补齐的能力"></a>十、生产环境还要补齐的能力</h2><p>视频重点讨论开发起点和控制权。进入生产环境后，还要单独评估：</p>
+<ul>
+<li>Prompt Injection 与工具输入校验；</li>
+<li>文件、网络和命令沙箱；</li>
+<li>用户身份与租户隔离；</li>
+<li>凭据管理；</li>
+<li>人工审批和紧急停止；</li>
+<li>幂等、重试和补偿；</li>
+<li>Token、时延与工具成本；</li>
+<li>运行轨迹、指标和告警；</li>
+<li>离线评测与线上回归；</li>
+<li>记忆和 Skill 的纠错与删除。</li>
+</ul>
+<p>Harness 可以提供这些机制的起点，但不会自动替业务定义安全策略和成功标准。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Agent 架构选型的核心，不是找“功能最多”的项目，而是确定团队真正需要控制哪一层。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">只增加能力       → Plugin / Extension / Skill</span><br><span class="line">开发自己的产品   → SDK</span><br><span class="line">改变执行系统本身 → 核心插件或源码</span><br></pre></td></tr></table></figure>
+
+<p>Claude Agent SDK 和 Deep Agents 倾向于让团队快速复用完整执行能力；Pi 用极简核心换取控制权；OpenCode 围绕软件开发提供完整产品工作流；OpenClaw 与 Hermes Agent 面向长期运行的个人助手；DeepSeek Harness 则把 Harness 本身变成可组合和替换的开发平台。</p>
+<p>更稳妥的决策方式是：先画出业务闭环，标记不可妥协的控制点，再选择最高可接受的抽象层。复用成熟能力可以节省大量工程成本，但任何被复用的默认机制，都应该先经过真实任务、权限边界和恢复路径的验证。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://www.douyin.com/video/7704500449094339875">抖音：Agent 开发架构怎么选？7 个代表项目系统对比</a></p>
+<p>[cite:2] <a href="https://code.claude.com/docs/en/agent-sdk/overview">Claude Code Docs：Agent SDK Overview</a></p>
+<p>[cite:3] <a href="https://docs.langchain.com/oss/python/deepagents/overview">LangChain Docs：Deep Agents Overview</a></p>
+<p>[cite:4] <a href="https://pi.dev/">Pi：Minimal Agent Harness</a></p>
+<p>[cite:5] <a href="https://opencode.ai/docs/agents">OpenCode Docs：Agents</a></p>
+<p>[cite:6] <a href="https://docs.openclaw.ai/">OpenClaw Docs</a></p>
+<p>[cite:7] <a href="https://hermes-agent.nousresearch.com/docs">Nous Research：Hermes Agent Docs</a></p>
+<p>[cite:8] <a href="https://deepseek.com/harness/en/">DeepSeek Harness：Everything Is a Plugin</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Agent/" rel="tag"># AI Agent</a>
+              <a href="/tags/Agent-Harness/" rel="tag"># Agent Harness</a>
+              <a href="/tags/Claude-Agent-SDK/" rel="tag"># Claude Agent SDK</a>
+              <a href="/tags/Deep-Agents/" rel="tag"># Deep Agents</a>
+              <a href="/tags/Pi/" rel="tag"># Pi</a>
+              <a href="/tags/OpenCode/" rel="tag"># OpenCode</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/11/02/%E9%9B%85%E6%80%9D%E5%8F%A3%E8%AF%AD%E9%AB%98%E5%88%86%E7%9F%AD%E8%AF%AD%E5%8A%A8%E8%AF%8D-15%E4%B8%AA%E8%AE%A9%E8%A1%A8%E8%BE%BE%E6%9B%B4%E8%87%AA%E7%84%B6%E7%9A%84Phrasal-Verbs/" rel="prev" title="雅思口语高分短语动词：15 个让表达更自然的 Phrasal Verbs">
+                  <i class="fa fa-angle-left"></i> 雅思口语高分短语动词：15 个让表达更自然的 Phrasal Verbs
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2016 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Andrew Yu</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

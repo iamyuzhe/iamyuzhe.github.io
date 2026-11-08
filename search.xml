@@ -491,6 +491,416 @@
       </tags>
   </entry>
   <entry>
+    <title>Agent 开发架构怎么选：Framework、Runtime、Harness 与 7 个代表项目</title>
+    <url>/2026/11/08/Agent%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84%E6%80%8E%E4%B9%88%E9%80%89-Framework-Runtime-Harness%E4%B8%8E7%E4%B8%AA%E4%BB%A3%E8%A1%A8%E9%A1%B9%E7%9B%AE/</url>
+    <content><![CDATA[<p>开发一个 Agent，最先要决定的往往不是模型，而是<strong>从哪一层开始搭建</strong>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">从模型和工具开始，自己实现循环？</span><br><span class="line">复用带状态管理的 Runtime？</span><br><span class="line">还是直接采用一套现成 Harness？</span><br></pre></td></tr></table></figure>
+
+<p>起点选得太低，团队会重复实现上下文、权限、文件、会话和恢复机制；起点选得太高，又可能发现关键流程被封装，业务差异无法落地。</p>
+<p>这篇文章整理自 AI 产品千媚的视频 <strong>《Agent 开发架构怎么选？7 个代表项目系统对比》</strong>。视频比较了 Claude Agent SDK、Deep Agents、Pi、OpenCode、OpenClaw、Hermes Agent 和 DeepSeek Harness，并用“默认实现了多少机制”和“开放了多少控制权”两条轴解释选型差异。[cite:1]</p>
+<span id="more"></span>
+
+<h2 id="一、先区分-Framework、Runtime-与-Harness"><a href="#一、先区分-Framework、Runtime-与-Harness" class="headerlink" title="一、先区分 Framework、Runtime 与 Harness"></a>一、先区分 Framework、Runtime 与 Harness</h2><p>这三个词经常混用，但它们解决的问题并不相同。</p>
+<h3 id="Framework：提供构建模块"><a href="#Framework：提供构建模块" class="headerlink" title="Framework：提供构建模块"></a>Framework：提供构建模块</h3><p>Framework 主要负责把模型、工具、提示词和流程节点连接起来。开发者通常可以自由设计：</p>
+<ul>
+<li>模型如何接收上下文；</li>
+<li>工具如何注册和调用；</li>
+<li>多个步骤如何连接；</li>
+<li>不同 Agent 如何协作；</li>
+<li>业务状态如何在节点间传递。</li>
+</ul>
+<p>Framework 的优势是灵活，代价是大量基础机制仍要自己补齐。工具权限、上下文压缩、任务恢复、文件系统、会话持久化、审计和评测，通常不会因为“已经能调用工具”就自动成立。</p>
+<h3 id="Runtime：保证流程能够持续执行"><a href="#Runtime：保证流程能够持续执行" class="headerlink" title="Runtime：保证流程能够持续执行"></a>Runtime：保证流程能够持续执行</h3><p>Runtime 更关注执行过程：</p>
+<ul>
+<li>状态保存与恢复；</li>
+<li>长任务和中断续跑；</li>
+<li>事件流与流式输出；</li>
+<li>并发和任务调度；</li>
+<li>人工审批；</li>
+<li>错误重试与检查点。</li>
+</ul>
+<p>它回答的是“这条流程怎样可靠地跑下去”，而不一定替开发者决定 Agent 应该拥有哪些工具、记忆和工作方式。</p>
+<h3 id="Harness：提供完整的执行系统"><a href="#Harness：提供完整的执行系统" class="headerlink" title="Harness：提供完整的执行系统"></a>Harness：提供完整的执行系统</h3><p>Harness 位于更高层。它通常把模型、工具、上下文、Agent Loop、文件系统、权限、会话、记忆、子 Agent、Skills 和可观测性组合成一套可直接使用的执行系统。</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Framework：给积木</span><br><span class="line">Runtime：让流程稳定运行</span><br><span class="line">Harness：给出一套可工作的 Agent 执行环境</span><br></pre></td></tr></table></figure>
+
+<p>视频把技术演进概括为从 Framework、Runtime 到 Harness。这个时间线适合帮助理解开发起点的变化，但不是严格的行业分期：很多项目同时跨越多层，边界也会随版本演进而变化。[cite:1]</p>
+<h2 id="二、Harness-解决的不是一次工具调用"><a href="#二、Harness-解决的不是一次工具调用" class="headerlink" title="二、Harness 解决的不是一次工具调用"></a>二、Harness 解决的不是一次工具调用</h2><p>一个简单 Agent 可能只需要：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">读取商品信息</span><br><span class="line">→ 查询库存、价格和佣金</span><br><span class="line">→ 商品打分</span><br><span class="line">→ 生成选品结果</span><br></pre></td></tr></table></figure>
+
+<p>但真实业务很快会出现更多要求：</p>
+<ul>
+<li>某一步失败后从哪里重试；</li>
+<li>长结果是否写入文件而不是塞回上下文；</li>
+<li>哪些工具可以自动执行，哪些必须审批；</li>
+<li>如何避免 Agent 反复调用同一个工具；</li>
+<li>会话怎样恢复；</li>
+<li>多个子任务怎样隔离上下文；</li>
+<li>运行轨迹怎样审计；</li>
+<li>模型切换后行为是否退化。</li>
+</ul>
+<p>课程用“研究一家公司的产品”说明了同一个目标可能需要搜索资料、验证关键信息、编写代码分析数据，再根据中间结果继续迭代。真正复杂的不是某个工具，而是工具之间的组织、状态、边界和恢复。[cite:1]</p>
+<p>因此，选 Harness 时不应只看工具数量，而应该看它默认替团队解决了多少执行问题。</p>
+<h2 id="三、两条选型轴：默认机制与控制权"><a href="#三、两条选型轴：默认机制与控制权" class="headerlink" title="三、两条选型轴：默认机制与控制权"></a>三、两条选型轴：默认机制与控制权</h2><p>视频采用了两个很实用的比较维度：</p>
+<h3 id="默认实现了多少机制"><a href="#默认实现了多少机制" class="headerlink" title="默认实现了多少机制"></a>默认实现了多少机制</h3><p>默认机制越多，通常意味着更快启动：</p>
+<ul>
+<li>内置 Agent Loop；</li>
+<li>文件读写和命令执行；</li>
+<li>上下文管理与压缩；</li>
+<li>会话与恢复；</li>
+<li>权限和 Hook；</li>
+<li>子 Agent；</li>
+<li>Skills、记忆与计划；</li>
+<li>日志和运行轨迹。</li>
+</ul>
+<p>但默认机制越多，也意味着团队要先理解项目预设的工作方式。</p>
+<h3 id="开放了多少控制权"><a href="#开放了多少控制权" class="headerlink" title="开放了多少控制权"></a>开放了多少控制权</h3><p>控制权关注的是：</p>
+<ul>
+<li>能否替换模型、工具和存储；</li>
+<li>能否控制上下文进入方式；</li>
+<li>能否改变循环和停止条件；</li>
+<li>能否插入审批、审计与策略；</li>
+<li>能否替换执行环境；</li>
+<li>能否把核心机制嵌入自己的产品。</li>
+</ul>
+<p>这两条轴并不是简单的“功能多”和“功能少”。一个项目可以同时拥有丰富默认能力和较强扩展性，只是学习成本和改造边界不同。</p>
+<h2 id="四、七个代表项目的定位"><a href="#四、七个代表项目的定位" class="headerlink" title="四、七个代表项目的定位"></a>四、七个代表项目的定位</h2><h3 id="1-Claude-Agent-SDK：复用-Claude-Code-的执行系统"><a href="#1-Claude-Agent-SDK：复用-Claude-Code-的执行系统" class="headerlink" title="1. Claude Agent SDK：复用 Claude Code 的执行系统"></a>1. Claude Agent SDK：复用 Claude Code 的执行系统</h3><p>Claude Agent SDK 将 Claude Code 的 Agent Loop、上下文管理和工具能力封装为 Python 与 TypeScript 库。官方列出的能力包括内置工具、Hooks、子 Agent、MCP、权限、会话、Skills、记忆和插件。[cite:2]</p>
+<p>它适合：</p>
+<ul>
+<li>希望快速得到成熟 Agent 执行能力；</li>
+<li>业务能够接受 Claude Code 的核心工作方式；</li>
+<li>需要通过 Hook 增加审批、审计或业务规则；</li>
+<li>希望把 Agent 嵌入现有 Python 或 TypeScript 服务。</li>
+</ul>
+<p>它的关键价值不是“调用 Claude API 更方便”，而是直接复用已经形成的 Agent Harness。与普通 Client SDK 相比，开发者不需要重新实现完整工具循环。</p>
+<p>需要注意的是，复用成熟 Loop 也意味着底层执行哲学已有明确预设。如果业务必须彻底改变循环、上下文策略或模型选择边界，需要先确认 SDK 暴露的扩展点是否足够。</p>
+<h3 id="2-Deep-Agents：默认完整，同时强调模块化"><a href="#2-Deep-Agents：默认完整，同时强调模块化" class="headerlink" title="2. Deep Agents：默认完整，同时强调模块化"></a>2. Deep Agents：默认完整，同时强调模块化</h3><p>Deep Agents 在 LangChain 和 LangGraph 之上提供面向复杂多步任务的 Harness。官方能力包括计划、虚拟文件系统、上下文管理、长期记忆、子 Agent、人工审批和可插拔 Backend。[cite:3]</p>
+<p>它适合：</p>
+<ul>
+<li>研究、数据分析、文档处理等综合任务；</li>
+<li>需要模型和工具供应商选择空间；</li>
+<li>需要自定义文件或执行 Backend；</li>
+<li>既希望有完整默认能力，又希望通过 Middleware 调整行为。</li>
+</ul>
+<p>Deep Agents 的特点是“默认完整，但仍保留模块化入口”。例如，虚拟文件系统可以映射到内存、本地磁盘、持久化 Store 或自定义 Backend；子 Agent 可以隔离长任务上下文；Middleware 可以替换或扩展特定能力。[cite:3]</p>
+<p>代价是系统层次较多。团队需要理解 LangChain、LangGraph、Middleware、Backend 与 Deep Agents Harness 之间的职责，否则容易在错误层次修改问题。</p>
+<h3 id="3-Pi：保持核心极简，把选择权交给开发者"><a href="#3-Pi：保持核心极简，把选择权交给开发者" class="headerlink" title="3. Pi：保持核心极简，把选择权交给开发者"></a>3. Pi：保持核心极简，把选择权交给开发者</h3><p>Pi 将自己定义为 minimal agent harness。它提供基本 Coding Agent 能力、会话树、上下文压缩、Skills、扩展、RPC 和 SDK，但有意不把子 Agent、Plan Mode、权限弹窗等工作方式写死在核心中。[cite:4]</p>
+<p>它适合：</p>
+<ul>
+<li>希望精确控制上下文和工具；</li>
+<li>不认同现成 Coding Agent 的默认流程；</li>
+<li>愿意通过 TypeScript Extension 构建能力；</li>
+<li>希望将极简核心嵌入自己的产品。</li>
+</ul>
+<p>Pi 的思路是“提供 primitives，而不是预设所有 features”。扩展可以访问工具、命令、事件、键盘交互和 TUI，因此团队能够构建自己的权限门、计划模式、沙箱、SSH 执行或子 Agent。[cite:4]</p>
+<p>这种自由度的代价很明确：缺少的默认机制不会凭空出现。安全、审批、任务恢复、并发和观测需要由团队选择插件、编写扩展或在外层补齐。</p>
+<h3 id="4-OpenCode：围绕软件开发提供完整工作流"><a href="#4-OpenCode：围绕软件开发提供完整工作流" class="headerlink" title="4. OpenCode：围绕软件开发提供完整工作流"></a>4. OpenCode：围绕软件开发提供完整工作流</h3><p>OpenCode 面向软件开发场景，内置 Build、Plan、General、Explore 等角色。Build 可以执行文件修改和系统命令，Plan 默认限制写操作，General 与 Explore 则分别承担通用多步任务和只读代码探索。[cite:5]</p>
+<p>它适合：</p>
+<ul>
+<li>目标明确是代码探索、修改、执行和验证；</li>
+<li>希望直接获得角色分工和权限边界；</li>
+<li>需要通过配置定义模型、提示词、工具权限和子 Agent；</li>
+<li>不想从零搭建 Coding Agent 交互流程。</li>
+</ul>
+<p>OpenCode 的优势是完整的软件开发产品形态。视频将它与 Pi 对比：Pi 更像可自由设计执行方式的极简核心，OpenCode 则已经替用户定义了更完整的开发路径。[cite:1]</p>
+<p>如果业务目标不是 Coding Agent，直接改造 OpenCode 可能不如从更通用的 SDK 或极简 Harness 出发。</p>
+<h3 id="5-OpenClaw：以-Gateway-连接个人工作入口"><a href="#5-OpenClaw：以-Gateway-连接个人工作入口" class="headerlink" title="5. OpenClaw：以 Gateway 连接个人工作入口"></a>5. OpenClaw：以 Gateway 连接个人工作入口</h3><p>OpenClaw 的重点不只在 Agent Loop，而在 Gateway。它可以连接多种消息渠道，并围绕会话、记忆、多 Agent 路由、Skills、插件、定时任务和 Webhook 形成个人助手的管理中心。[cite:6]</p>
+<p>它适合：</p>
+<ul>
+<li>从飞书、Slack、Telegram、WhatsApp 等入口接收任务；</li>
+<li>需要持续在线的个人或团队助手；</li>
+<li>需要定时任务、Webhook 和跨渠道投递；</li>
+<li>希望把 Agent 作为长期运行的服务，而不是一次 CLI 调用。</li>
+</ul>
+<p>这类系统的核心复杂度是“入口与运行治理”：身份、会话归属、渠道路由、长期记忆、权限和自动化都比单次推理更重要。</p>
+<h3 id="6-Hermes-Agent：强调持续学习与能力沉淀"><a href="#6-Hermes-Agent：强调持续学习与能力沉淀" class="headerlink" title="6. Hermes Agent：强调持续学习与能力沉淀"></a>6. Hermes Agent：强调持续学习与能力沉淀</h3><p>Hermes Agent 同样提供消息渠道、持久记忆、定时任务、子 Agent 和 Skills，但官方定位特别强调闭环学习：Agent 可以从经验中创建 Skills，在使用过程中改进，并把跨会话信息沉淀为可复用能力。[cite:7]</p>
+<p>它适合：</p>
+<ul>
+<li>Agent 会长期服务同一用户或团队；</li>
+<li>需要把重复任务沉淀成 Skills；</li>
+<li>希望记忆、用户模型和自动化共同演进；</li>
+<li>需要在本地、容器、SSH 或云端执行环境间切换。</li>
+</ul>
+<p>视频用“写周报”举例：Agent 不只完成一次周报，还能总结方法、保存为 Skill，并在后续任务中直接复用。[cite:1]</p>
+<p>这类“持续学习”需要更严格的治理。错误经验如果未经评测就固化为记忆或 Skill，长期影响可能比一次错误回答更大。</p>
+<h3 id="7-DeepSeek-Harness：连核心机制也插件化"><a href="#7-DeepSeek-Harness：连核心机制也插件化" class="headerlink" title="7. DeepSeek Harness：连核心机制也插件化"></a>7. DeepSeek Harness：连核心机制也插件化</h3><p>DeepSeek Harness 采用 “Everything is a plugin” 架构。模型、工具、Skills、会话、沙箱、存储、Agent Loop、调度和 UI 都可以作为插件组合或替换。[cite:8]</p>
+<p>它适合：</p>
+<ul>
+<li>研究不同 Agent Loop；</li>
+<li>构建自己的 Harness 平台；</li>
+<li>希望替换核心执行机制；</li>
+<li>需要完整运行轨迹、恢复、分叉和回放。</li>
+</ul>
+<p>官方还提供 Standard、Code、Minimal 和 Creator 等运行模式，并通过追加写 Session Log 记录模型看到的提示词、推理、工具调用、子 Agent 调度和上下文注入。[cite:8]</p>
+<p>这带来很高的可塑性，也带来更高的系统责任。DeepSeek Harness 目前仍处于 Developer Preview，核心 API 和插件接口可能继续变化，生产采用时必须评估升级和兼容成本。[cite:8]</p>
+<h2 id="五、不要按“综合任务”和“编码任务”画死边界"><a href="#五、不要按“综合任务”和“编码任务”画死边界" class="headerlink" title="五、不要按“综合任务”和“编码任务”画死边界"></a>五、不要按“综合任务”和“编码任务”画死边界</h2><p>视频先把项目粗略分为综合任务类与编码类：</p>
+<table>
+<thead>
+<tr>
+<th>粗略类型</th>
+<th>代表项目</th>
+<th>默认优化方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>综合任务</td>
+<td>Claude Agent SDK、Deep Agents</td>
+<td>研究、数据分析、文档处理、代码执行</td>
+</tr>
+<tr>
+<td>编码任务</td>
+<td>Pi、OpenCode</td>
+<td>代码探索、文件修改、命令执行、测试验证</td>
+</tr>
+<tr>
+<td>个人助手与长期运行</td>
+<td>OpenClaw、Hermes Agent</td>
+<td>多渠道、记忆、自动化、持续任务</td>
+</tr>
+<tr>
+<td>Harness 平台</td>
+<td>DeepSeek Harness</td>
+<td>核心机制组合、替换和实验</td>
+</tr>
+</tbody></table>
+<p>但分类不等于严格边界。Claude Agent SDK 来自 Claude Code，却可以构建非编码 Agent；Pi 可以通过 Extension 发展成个人工作流；OpenClaw 可以把其他 Coding Harness 作为执行后端；DeepSeek Harness 也提供完整 Coding Agent 模式。</p>
+<p>真正的区别不是“能不能做”，而是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">默认提供了哪些能力？</span><br><span class="line">围绕哪类任务做了优化？</span><br><span class="line">为了改成目标形态，需要修改多少层？</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、七个项目的横向比较"><a href="#六、七个项目的横向比较" class="headerlink" title="六、七个项目的横向比较"></a>六、七个项目的横向比较</h2><p>下面的表格综合视频观点与各项目官方文档。它描述的是<strong>架构倾向</strong>，不是性能排名。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>默认完整度</th>
+<th>控制方式</th>
+<th>更适合的起点</th>
+<th>主要代价</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Claude Agent SDK</td>
+<td>高</td>
+<td>Hooks、工具、权限、插件、SDK 配置</td>
+<td>快速复用成熟 Agent Loop</td>
+<td>核心执行方式已有较强预设</td>
+</tr>
+<tr>
+<td>Deep Agents</td>
+<td>高</td>
+<td>Middleware、Backend、模型与工具配置</td>
+<td>综合任务与可定制执行环境</td>
+<td>需要理解多层抽象</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td>较低</td>
+<td>Extension、Skill、RPC、SDK</td>
+<td>极简 Coding Agent 与自定义工作流</td>
+<td>大量机制需要自行选择或实现</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td>高</td>
+<td>Agent 配置、Prompt、模型、细粒度权限</td>
+<td>完整软件开发流程</td>
+<td>非编码场景可能需要逆向改造</td>
+</tr>
+<tr>
+<td>OpenClaw</td>
+<td>高</td>
+<td>Gateway、插件、渠道、Agent 路由</td>
+<td>多渠道个人或团队助手</td>
+<td>部署与权限治理复杂</td>
+</tr>
+<tr>
+<td>Hermes Agent</td>
+<td>高</td>
+<td>Skills、记忆、Bot、Gateway、Backend</td>
+<td>长期运行和持续学习</td>
+<td>学习闭环需要评测与纠错</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td>中到高</td>
+<td>几乎所有机制插件化</td>
+<td>Harness 研究和平台开发</td>
+<td>Preview 阶段，集成责任较大</td>
+</tr>
+</tbody></table>
+<p>如果只看功能清单，这些项目会显得越来越相似。更有区分度的问题是：</p>
+<ul>
+<li>Agent Loop 能否改变；</li>
+<li>上下文和状态由谁管理；</li>
+<li>工具执行发生在哪里；</li>
+<li>权限在什么层生效；</li>
+<li>持久化格式能否迁移；</li>
+<li>运行轨迹能否审计和回放；</li>
+<li>业务需要承担多少基础设施责任。</li>
+</ul>
+<h2 id="七、用三层需求决定改造方式"><a href="#七、用三层需求决定改造方式" class="headerlink" title="七、用三层需求决定改造方式"></a>七、用三层需求决定改造方式</h2><p>视频最后把开发需求拆成三个层次，这比直接比较项目 Star 数更实用。</p>
+<h3 id="第一层：扩展现有-Agent"><a href="#第一层：扩展现有-Agent" class="headerlink" title="第一层：扩展现有 Agent"></a>第一层：扩展现有 Agent</h3><p>如果已有 Agent 产品，只需要增加：</p>
+<ul>
+<li>一个工具；</li>
+<li>一套固定工作流；</li>
+<li>领域知识；</li>
+<li>自动化命令；</li>
+<li>特定审批规则。</li>
+</ul>
+<p>优先选择：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Plugin / Extension / Skill</span><br></pre></td></tr></table></figure>
+
+<p>以 Pi 为例，可以通过 Extension 增加自动检查、按要求生成 PR 描述或新的工具；产品仍然是 Pi，只是能力被扩展。[cite:1][cite:4]</p>
+<p>这一层不应轻易 Fork 源码。插件边界通常更容易升级、测试和移除。</p>
+<h3 id="第二层：开发自己的-Agent-产品"><a href="#第二层：开发自己的-Agent-产品" class="headerlink" title="第二层：开发自己的 Agent 产品"></a>第二层：开发自己的 Agent 产品</h3><p>如果需要自己的界面、用户体系、任务系统和业务流程，但不想重写 Agent Loop，可以采用：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Agent SDK / Harness SDK</span><br></pre></td></tr></table></figure>
+
+<p>这时产品属于自己，底层复用 Claude Agent SDK、Deep Agents 或 Pi SDK 等执行能力。重点是确认：</p>
+<ul>
+<li>SDK 是否支持目标语言；</li>
+<li>会话能否外部持久化；</li>
+<li>事件是否可流式消费；</li>
+<li>工具与权限是否可注入；</li>
+<li>是否支持取消、恢复和并发；</li>
+<li>授权与商业条款是否匹配。</li>
+</ul>
+<h3 id="第三层：改造底层-Harness"><a href="#第三层：改造底层-Harness" class="headerlink" title="第三层：改造底层 Harness"></a>第三层：改造底层 Harness</h3><p>只有当需求涉及下面这些问题时，才应该进入源码或核心插件层：</p>
+<ul>
+<li>改变 Agent Loop；</li>
+<li>替换调度或上下文机制；</li>
+<li>研究新的工具编排方式；</li>
+<li>构建 Harness 平台；</li>
+<li>对运行轨迹和恢复机制有特殊要求。</li>
+</ul>
+<p>此时可以选择 DeepSeek Harness 这类核心机制可替换的系统，或 Fork 一个足够小、足够清楚的代码库。</p>
+<p>代价不只是初次开发，还包括：</p>
+<ul>
+<li>跟进上游安全修复；</li>
+<li>维护模型和工具协议变化；</li>
+<li>处理状态格式迁移；</li>
+<li>建立兼容测试；</li>
+<li>为团队提供调试和观测工具。</li>
+</ul>
+<h2 id="八、一套可执行的选型流程"><a href="#八、一套可执行的选型流程" class="headerlink" title="八、一套可执行的选型流程"></a>八、一套可执行的选型流程</h2><h3 id="1-先写业务闭环"><a href="#1-先写业务闭环" class="headerlink" title="1. 先写业务闭环"></a>1. 先写业务闭环</h3><p>不要先列框架名称。先画出真实任务：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">输入从哪里来</span><br><span class="line">→ Agent 需要哪些上下文</span><br><span class="line">→ 调用哪些工具</span><br><span class="line">→ 哪些操作需要审批</span><br><span class="line">→ 中断后怎样恢复</span><br><span class="line">→ 结果保存到哪里</span><br><span class="line">→ 如何判断任务成功</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-标记不可妥协的控制点"><a href="#2-标记不可妥协的控制点" class="headerlink" title="2. 标记不可妥协的控制点"></a>2. 标记不可妥协的控制点</h3><p>例如：</p>
+<ul>
+<li>模型必须可替换；</li>
+<li>工具必须运行在内网沙箱；</li>
+<li>所有写操作必须审批；</li>
+<li>会话必须存储在自有数据库；</li>
+<li>运行轨迹必须可审计；</li>
+<li>必须支持飞书入口；</li>
+<li>必须允许自定义 Agent Loop。</li>
+</ul>
+<p>这些要求会直接排除不合适的抽象层。</p>
+<h3 id="3-选择最高可接受起点"><a href="#3-选择最高可接受起点" class="headerlink" title="3. 选择最高可接受起点"></a>3. 选择最高可接受起点</h3><p>一个实用原则是：</p>
+<blockquote>
+<p>在不失去关键控制权的前提下，选择能够复用最多成熟机制的最高层起点。</p>
+</blockquote>
+<p>这样可以减少重复建设，但不会把业务差异埋在无法修改的黑盒中。</p>
+<h3 id="4-用同一条任务做小型验证"><a href="#4-用同一条任务做小型验证" class="headerlink" title="4. 用同一条任务做小型验证"></a>4. 用同一条任务做小型验证</h3><p>不要只跑“查询天气”Demo。选一条接近生产的任务，至少验证：</p>
+<ul>
+<li>多步工具调用；</li>
+<li>长上下文；</li>
+<li>文件读写；</li>
+<li>权限拒绝；</li>
+<li>中断和恢复；</li>
+<li>错误重试；</li>
+<li>日志与轨迹；</li>
+<li>模型切换；</li>
+<li>任务成功标准。</li>
+</ul>
+<h3 id="5-评估升级而不只是开发"><a href="#5-评估升级而不只是开发" class="headerlink" title="5. 评估升级而不只是开发"></a>5. 评估升级而不只是开发</h3><p>PoC 能跑通不代表长期成本可控。还要检查：</p>
+<ul>
+<li>上游发布节奏；</li>
+<li>配置和状态格式是否稳定；</li>
+<li>扩展点是否有兼容承诺；</li>
+<li>核心能力是否依赖单一模型；</li>
+<li>Fork 后与上游同步的成本；</li>
+<li>团队能否定位 Harness 内部问题。</li>
+</ul>
+<h2 id="九、不同目标下的推荐起点"><a href="#九、不同目标下的推荐起点" class="headerlink" title="九、不同目标下的推荐起点"></a>九、不同目标下的推荐起点</h2><table>
+<thead>
+<tr>
+<th>目标</th>
+<th>优先考察</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>尽快获得成熟的通用 Agent 执行能力</td>
+<td>Claude Agent SDK</td>
+</tr>
+<tr>
+<td>综合任务，且需要 Backend、模型与 Middleware 定制</td>
+<td>Deep Agents</td>
+</tr>
+<tr>
+<td>构建极简、强定制的 Coding Agent</td>
+<td>Pi</td>
+</tr>
+<tr>
+<td>直接使用完整的软件开发工作流</td>
+<td>OpenCode</td>
+</tr>
+<tr>
+<td>从多个聊天渠道运营长期个人助手</td>
+<td>OpenClaw</td>
+</tr>
+<tr>
+<td>让记忆与 Skills 随长期使用持续沉淀</td>
+<td>Hermes Agent</td>
+</tr>
+<tr>
+<td>研究或搭建可替换核心机制的 Harness 平台</td>
+<td>DeepSeek Harness</td>
+</tr>
+</tbody></table>
+<p>这不是唯一答案。同一个业务也可以组合多层：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">OpenClaw 负责渠道和会话入口</span><br><span class="line">        ↓</span><br><span class="line">Claude Agent SDK / Pi 负责具体执行</span><br><span class="line">        ↓</span><br><span class="line">自有沙箱、存储和审计系统负责治理</span><br></pre></td></tr></table></figure>
+
+<p>组合的前提是明确每一层的状态所有权、身份边界和失败责任。</p>
+<h2 id="十、生产环境还要补齐的能力"><a href="#十、生产环境还要补齐的能力" class="headerlink" title="十、生产环境还要补齐的能力"></a>十、生产环境还要补齐的能力</h2><p>视频重点讨论开发起点和控制权。进入生产环境后，还要单独评估：</p>
+<ul>
+<li>Prompt Injection 与工具输入校验；</li>
+<li>文件、网络和命令沙箱；</li>
+<li>用户身份与租户隔离；</li>
+<li>凭据管理；</li>
+<li>人工审批和紧急停止；</li>
+<li>幂等、重试和补偿；</li>
+<li>Token、时延与工具成本；</li>
+<li>运行轨迹、指标和告警；</li>
+<li>离线评测与线上回归；</li>
+<li>记忆和 Skill 的纠错与删除。</li>
+</ul>
+<p>Harness 可以提供这些机制的起点，但不会自动替业务定义安全策略和成功标准。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Agent 架构选型的核心，不是找“功能最多”的项目，而是确定团队真正需要控制哪一层。</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">只增加能力       → Plugin / Extension / Skill</span><br><span class="line">开发自己的产品   → SDK</span><br><span class="line">改变执行系统本身 → 核心插件或源码</span><br></pre></td></tr></table></figure>
+
+<p>Claude Agent SDK 和 Deep Agents 倾向于让团队快速复用完整执行能力；Pi 用极简核心换取控制权；OpenCode 围绕软件开发提供完整产品工作流；OpenClaw 与 Hermes Agent 面向长期运行的个人助手；DeepSeek Harness 则把 Harness 本身变成可组合和替换的开发平台。</p>
+<p>更稳妥的决策方式是：先画出业务闭环，标记不可妥协的控制点，再选择最高可接受的抽象层。复用成熟能力可以节省大量工程成本，但任何被复用的默认机制，都应该先经过真实任务、权限边界和恢复路径的验证。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://www.douyin.com/video/7704500449094339875">抖音：Agent 开发架构怎么选？7 个代表项目系统对比</a></p>
+<p>[cite:2] <a href="https://code.claude.com/docs/en/agent-sdk/overview">Claude Code Docs：Agent SDK Overview</a></p>
+<p>[cite:3] <a href="https://docs.langchain.com/oss/python/deepagents/overview">LangChain Docs：Deep Agents Overview</a></p>
+<p>[cite:4] <a href="https://pi.dev/">Pi：Minimal Agent Harness</a></p>
+<p>[cite:5] <a href="https://opencode.ai/docs/agents">OpenCode Docs：Agents</a></p>
+<p>[cite:6] <a href="https://docs.openclaw.ai/">OpenClaw Docs</a></p>
+<p>[cite:7] <a href="https://hermes-agent.nousresearch.com/docs">Nous Research：Hermes Agent Docs</a></p>
+<p>[cite:8] <a href="https://deepseek.com/harness/en/">DeepSeek Harness：Everything Is a Plugin</a></p>
+]]></content>
+      <categories>
+        <category>ai-engineering</category>
+      </categories>
+      <tags>
+        <tag>AI Agent</tag>
+        <tag>Agent Harness</tag>
+        <tag>Claude Agent SDK</tag>
+        <tag>Deep Agents</tag>
+        <tag>Pi</tag>
+        <tag>OpenCode</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Android Studio 常见问题</title>
     <url>/2017/05/21/Android-Studio-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[]]></content>
@@ -688,6 +1098,66 @@
       </tags>
   </entry>
   <entry>
+    <title>C#使用</title>
+    <url>/2016/10/15/C-%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="1-模拟登陆"><a href="#1-模拟登陆" class="headerlink" title="1. 模拟登陆"></a>1. 模拟登陆</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">HttpWebRequest request = <span class="literal">null</span>;  <span class="comment">//提供 WebRequest 类的 HTTP 特定的实现。</span></span><br><span class="line">HttpWebResponse response = <span class="literal">null</span>;    <span class="comment">//提供 WebResponse 类的 HTTP 特定的实现</span></span><br><span class="line"><span class="keyword">try</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//提交的信息，包括用户名和密码等信息</span></span><br><span class="line">    <span class="built_in">string</span> postdata = <span class="string">&quot;uid=&quot;</span> + account + <span class="string">&quot;&amp;pwd=&quot;</span> + password;</span><br><span class="line">    <span class="comment">//抽象类的静态方法可直接调用,初始化新的WebRequest实例化web访问类</span></span><br><span class="line">    request = (HttpWebRequest)WebRequest.Create(loginUrl);</span><br><span class="line">    <span class="comment">//request.Credentials:获取或设置请求的身份验证信息;</span></span><br><span class="line">    <span class="comment">//CredentialCache.DefaultCredentials:获取应用程序的系统凭据,</span></span><br><span class="line">    <span class="comment">//对于 ASP.NET应用程序，默认凭据是已登录的用户或正被模拟的用户的用户凭据。</span></span><br><span class="line">    request.Credentials = CredentialCache.DefaultCredentials;</span><br><span class="line">    request.Method = <span class="string">&quot;POST&quot;</span>;<span class="comment">//数据提交方式为POST</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//request.ContentType:获取或设置传入请求的 MIME 内容类型。</span></span><br><span class="line">    request.ContentType = <span class="string">&quot;application/x-www-form-urlencoded&quot;</span>;    <span class="comment">//模拟头 </span></span><br><span class="line">    <span class="comment">//request.AllowAutoRedirect：获取或设置一个值，该值指示请求是否应跟随重定向响应；</span></span><br><span class="line">    <span class="comment">//如果请求应自动跟随 Internet 资源的重定向响应，则为 true，否则为 false。默认值为 true。</span></span><br><span class="line">    request.AllowAutoRedirect = <span class="literal">false</span>;   <span class="comment">// 不用需自动跳转</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//必须设置CookieContainer存储请求返回的Cookies</span></span><br><span class="line">    <span class="keyword">if</span> (CookieContainer != <span class="literal">null</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = <span class="keyword">new</span> CookieContainer();</span><br><span class="line">        CookieContainer = request.CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//保持TCP连接</span></span><br><span class="line">    request.KeepAlive = <span class="literal">true</span>;</span><br><span class="line">    <span class="comment">//提交请求  </span></span><br><span class="line">    <span class="built_in">byte</span>[] postdatabytes = Encoding.UTF8.GetBytes(postdata); <span class="comment">//对指定字符集进行编码</span></span><br><span class="line">    request.ContentLength = postdatabytes.Length;</span><br><span class="line">    Stream stream;</span><br><span class="line">    stream = request.GetRequestStream();  <span class="comment">//返回一个数据流为HttpWebRequest发送数据</span></span><br><span class="line">    <span class="comment">//设置POST 数据，向当前流中写入postdatabytes字节序列，其中0为postdatabytes从0开始的字节偏移量</span></span><br><span class="line">    <span class="comment">//postdatabytes.Length要写入当前流的字节数。</span></span><br><span class="line">    stream.Write(postdatabytes, <span class="number">0</span>, postdatabytes.Length); </span><br><span class="line">    stream.Close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//接收响应</span></span><br><span class="line">    response = (HttpWebResponse)request.GetResponse(); <span class="comment">//返回对 Internet 请求的响应。</span></span><br><span class="line">    <span class="comment">//获取包含与特定 URI（request.RequestUri） 关联的 Cookie 实例的 CookieCollection。</span></span><br><span class="line">    response.Cookies = request.CookieContainer.GetCookies(request.RequestUri);</span><br><span class="line">    CookieCollection cook = response.Cookies;</span><br><span class="line">    <span class="comment">//返回一个 HTTP Cookie 标头，其中包含表示由分号分隔的与特定 URI 关联的Cookie 实例的字符串。</span></span><br><span class="line">    <span class="built_in">string</span> strcookieheader = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br><span class="line">    CookiesString = strcookieheader;</span><br><span class="line">    <span class="comment">//取下一次GET跳转地址  </span></span><br><span class="line">    <span class="comment">//实现一个 TextReader，使其以gb2312编码从字节流中读取字符。</span></span><br><span class="line">    StreamReader sr = <span class="keyword">new</span> StreamReader(response.GetResponseStream(), Encoding.GetEncoding(<span class="string">&quot;gb2312&quot;</span>));</span><br><span class="line">    <span class="built_in">string</span> content = sr.ReadToEnd(); <span class="comment">//读取来自流的当前位置到结尾的所有字符。</span></span><br><span class="line">    sr.Close(); <span class="comment">//关闭 StreamReader 对象和基础流，并释放与读取器关联的所有系统资源</span></span><br><span class="line">    request.Abort();    <span class="comment">//取消对 Internet 资源的请求。</span></span><br><span class="line">    response.Close();   <span class="comment">//Close 方法关闭响应流，并通过其他请求将释放与重复使用的资源的连接。</span></span><br><span class="line">    <span class="comment">//依据登陆成功后返回的Page信息，求出下次请求的url</span></span><br><span class="line">    <span class="comment">//每个网站登陆后加载的Url和顺序不尽相同，以下两步需根据实际情况做特殊处理，从而得到下次请求的URL</span></span><br><span class="line">    <span class="built_in">string</span>[] substr = content.Split(<span class="keyword">new</span> <span class="built_in">char</span>[] &#123; <span class="string">&#x27;&quot;&#x27;</span> &#125;);</span><br><span class="line">    NextRequestUrl = <span class="string">&quot;http://zcgl.wzu.edu.cn/plat/&quot;</span> + substr[<span class="number">1</span>];   </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (WebException ex)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox.Show(<span class="built_in">string</span>.Format(<span class="string">&quot;登陆时出错，详细信息：&#123;0&#125;&quot;</span>, ex.Message));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>补充：</p>
+<ul>
+<li>CookieContainer: 装载返回的cookies的容器</li>
+<li>form的enctype属性为编码方式，分两种：  <ol>
+<li><p>application&#x2F;x-www-form-urlencoded，默认值。action为get时，把form数据转换成一个字串（name1&#x3D;value1&amp;name2&#x3D;value2…），append到url后面，用?分割；当action为post时，浏览器把form数据封装到http body中，然后发送到server。  </p>
+</li>
+<li><p>multipart&#x2F;form-data，type&#x3D;file时使用，浏览器会把整个表单以控件为单位分割，并为每个部分加上Content-Disposition(form-data或者file),Content-Type(默认为text&#x2F;plain),name(控件name)等信息，并加上分割符(boundary)。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h2 id="2-获取指定页面的内容"><a href="#2-获取指定页面的内容" class="headerlink" title="2. 获取指定页面的内容"></a>2. 获取指定页面的内容</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">HttpWebRequest request = <span class="literal">null</span>;</span><br><span class="line">HttpWebResponse response = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">try</span></span><br><span class="line">&#123;</span><br><span class="line">    request = (HttpWebRequest)WebRequest.Create(NextRequestUrl);</span><br><span class="line">    request.Credentials = CredentialCache.DefaultCredentials;</span><br><span class="line">    request.Method = <span class="string">&quot;GET&quot;</span>;</span><br><span class="line">    request.KeepAlive = <span class="literal">true</span>;</span><br><span class="line">    request.Headers.Add(<span class="string">&quot;Cookie:&quot;</span> + CookiesString);</span><br><span class="line">    request.CookieContainer = CookieContainer;</span><br><span class="line">    request.AllowAutoRedirect = <span class="literal">false</span>;</span><br><span class="line">    response = (HttpWebResponse)request.GetResponse();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//设置cookie  </span></span><br><span class="line">    CookiesString = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br><span class="line">    <span class="comment">//取再次跳转链接  </span></span><br><span class="line">    StreamReader sr = <span class="keyword">new</span> StreamReader(response.GetResponseStream(), Encoding.GetEncoding(<span class="string">&quot;gb2312&quot;</span>));</span><br><span class="line">    <span class="built_in">string</span> ss = sr.ReadToEnd();</span><br><span class="line">    sr.Close();</span><br><span class="line">    request.Abort();</span><br><span class="line">    response.Close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//依据登陆成功后返回的Page信息，求出下次请求的url</span></span><br><span class="line">    <span class="comment">//每个网站登陆后加载的Url和顺序不尽相同，以下两步需根据实际情况做特殊处理，从而得到下次请求的URL</span></span><br><span class="line">    <span class="comment">//string[] substr = ss.Split(new char[] &#123; &#x27;&quot;&#x27; &#125;);</span></span><br><span class="line">    <span class="comment">//NextRequestUrl = substr[1];</span></span><br><span class="line">    <span class="comment">//NextRequestUrl = &quot;http://zcgl.wzu.edu.cn/plat/&quot; + substr[1];</span></span><br><span class="line">    ResultHtml = ss;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (WebException ex)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox.Show(<span class="built_in">string</span>.Format(<span class="string">&quot;获取页面HTML信息出错，详细信息：&#123;0&#125;&quot;</span>, ex.Message));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-正則匹配"><a href="#3-正則匹配" class="headerlink" title="3. 正則匹配"></a>3. 正則匹配</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Instrument <span class="title">GetInstrumentInfo</span>(<span class="params">String InstrumentNum</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    Match m = Regex.Match(str, pattern);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (m.Success)</span><br><span class="line">    &#123;</span><br><span class="line">        Instrument instrument = <span class="keyword">new</span> Instrument();</span><br><span class="line">        instrument.Number = InstrumentNum;</span><br><span class="line">        instrument.Unit = m.Groups[<span class="number">1</span>].ToString();</span><br><span class="line">        instrument.Univalence = m.Groups[<span class="number">2</span>].ToString();</span><br><span class="line">        instrument.Name = m.Groups[<span class="number">3</span>].ToString();</span><br><span class="line">        <span class="keyword">return</span> instrument;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-用zxing库生成二维码"><a href="#4-用zxing库生成二维码" class="headerlink" title="4. 用zxing库生成二维码"></a>4. 用zxing库生成二维码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//C#代码</span></span><br><span class="line"><span class="keyword">using</span> com.google.zxing;</span><br><span class="line"><span class="keyword">using</span> ByteMatrix = com.google.zxing.common.ByteMatrix;</span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成二维码</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">CreateQRCode</span>()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//构造二维码内容</span></span><br><span class="line">    <span class="built_in">string</span> content =</span><br><span class="line">        Num_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">0</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Name_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">1</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Person_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">2</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Place_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">3</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Type_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">4</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Univalence_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">5</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Date_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">6</span>].Text;</span><br><span class="line"></span><br><span class="line">    ByteMatrix byteMatrix = <span class="keyword">new</span> MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, <span class="number">200</span>, <span class="number">200</span>);</span><br><span class="line">    Bitmap bitmap = toBitmap(byteMatrix);</span><br><span class="line">    QRCode_pictureBox.Image = bitmap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-用zxing库生成条形码"><a href="#5-用zxing库生成条形码" class="headerlink" title="5. 用zxing库生成条形码"></a>5. 用zxing库生成条形码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成条形码</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">CreateBarCode</span>(<span class="params"><span class="built_in">string</span> content</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    Regex rg = <span class="keyword">new</span> Regex(<span class="string">@&quot;^\d&#123;8&#125;$&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(rg.IsMatch(content))</span><br><span class="line">    &#123;</span><br><span class="line">        ByteMatrix byteMatrix = <span class="keyword">new</span> MultiFormatWriter().encode(content, BarcodeFormat.EAN_8, <span class="number">200</span>, <span class="number">30</span>);</span><br><span class="line">        Bitmap bitmap = toBitmap(byteMatrix);</span><br><span class="line">        BarCodeList.Add(bitmap);</span><br><span class="line">        QRCode_pictureBox.Image = bitmap;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        MessageBox.Show(<span class="string">&quot;非数字，无法生成条形码&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成位图</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;byteMatrix&quot;&gt;</span><span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">private</span> Bitmap <span class="title">toBitmap</span>(<span class="params">ByteMatrix byteMatrix</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">int</span> width = byteMatrix.Width;</span><br><span class="line">    <span class="built_in">int</span> height = byteMatrix.Height;</span><br><span class="line">    Bitmap bitmap = <span class="keyword">new</span> Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);</span><br><span class="line">    <span class="keyword">for</span>(<span class="built_in">int</span> i=<span class="number">0</span>; i&lt; width; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="built_in">int</span> j=<span class="number">0</span>; j &lt; height; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            bitmap.SetPixel(i, j, byteMatrix.get_Renamed(i, j) != <span class="number">-1</span> ? ColorTranslator.FromHtml(<span class="string">&quot;#436EEE&quot;</span>) : ColorTranslator.FromHtml(<span class="string">&quot;#C7C7C7&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> bitmap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-listView顯示信息"><a href="#6-listView顯示信息" class="headerlink" title="6. listView顯示信息"></a>6. listView顯示信息</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//向listView中添加内容</span></span><br><span class="line">ListViewItem lvi = <span class="keyword">new</span> ListViewItem(str0);</span><br><span class="line">lvi.SubItems.Add(str1);</span><br><span class="line">Info_listView.Items.Add(lvi);</span><br><span class="line"></span><br><span class="line"><span class="comment">//读取listView列标题内容</span></span><br><span class="line"><span class="built_in">string</span> str = columnHeader.Text;</span><br><span class="line"></span><br><span class="line"><span class="comment">//读取listView中的index1行，index2+1列的内容</span></span><br><span class="line"><span class="built_in">string</span> str = Info_listView.Items[index1].SubItems[index2].Text;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="7-listView刪除"><a href="#7-listView刪除" class="headerlink" title="7. listView刪除"></a>7. listView刪除</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//删除一条记录</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.Items.Remove(Info_listView.FocusedItem);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//删除多条记录</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.MultiSelect = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">foreach</span> (ListViewItem item <span class="keyword">in</span> Info_listView.Items)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (item.Selected)</span><br><span class="line">            item.Remove();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//清空</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.Items.Clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="8-listView显示圖片"><a href="#8-listView显示圖片" class="headerlink" title="8. listView显示圖片"></a>8. listView显示圖片</h2><blockquote>
+<p>listView有5种视图:LargeIcon, SmallIcon, List, Details, Tile</p>
+</blockquote>
+<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//listView显示图片,视图为LargeIcon</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">showCode</span>()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (QRCodeList.Count &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//QRCode_listView属性设置</span></span><br><span class="line">        QRCode_listView.View = View.LargeIcon;</span><br><span class="line">        QRCode_listView.LargeImageList = QRCode_imageList;</span><br><span class="line">        QRCode_listView.BeginUpdate();</span><br><span class="line"></span><br><span class="line">        QRCode_listView.LargeImageList.ImageSize = <span class="keyword">new</span> System.Drawing.Size(<span class="number">200</span>, <span class="number">200</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; QRCodeList.Count; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            QRCode_imageList.Images.Add(QRCodeList[i]);</span><br><span class="line">            ListViewItem lvi = <span class="keyword">new</span> ListViewItem(Info_listView.Items[i].SubItems[<span class="number">0</span>].Text);</span><br><span class="line">            QRCode_listView.Items.Add(lvi);</span><br><span class="line">            QRCode_listView.Items[i].ImageIndex = QRCode_imageList.Images.Count - <span class="number">1</span> ;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        QRCode_listView.EndUpdate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="9-保存图片"><a href="#9-保存图片" class="headerlink" title="9. 保存图片"></a>9. 保存图片</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">FolderBrowserDialog folderDlg = <span class="keyword">new</span> FolderBrowserDialog();</span><br><span class="line">folderDlg.Description = <span class="string">&quot;请选择文件夹&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (folderDlg.ShowDialog() == DialogResult.OK)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">string</span> path = folderDlg.SelectedPath;</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; QRCodeList.Count; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        QRCodeList[i].Save(path + <span class="string">@&quot;\&quot;</span> + Info_listView.Items[i].SubItems[<span class="number">0</span>].Text + <span class="string">&quot;.bmp&quot;</span>, System.Drawing.Imaging.ImageFormat.Bmp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-VS2013工程資源文件的保存和使用"><a href="#10-VS2013工程資源文件的保存和使用" class="headerlink" title="10. VS2013工程資源文件的保存和使用"></a>10. VS2013工程資源文件的保存和使用</h2><p><a href="http://blog.csdn.net/mengdong_zy/article/details/8971154">C#将图片保存到资源文件并调用</a></p>
+<h2 id="11-網絡請求重定向"><a href="#11-網絡請求重定向" class="headerlink" title="11. 網絡請求重定向"></a>11. 網絡請求重定向</h2><p>在通过get和post获取网络数据时，如果遇到重定向的网址，一定要把HttpWebRequest的重定向参数值设为true,并重新获取当前页面的Cookie</p>
+<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">request.AllowAutoRedirect = <span class="literal">true</span>;</span><br><span class="line">response = (HttpWebResponse)request.GetResponse();</span><br><span class="line"><span class="comment">//获取cookie  </span></span><br><span class="line">CookiesString = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br></pre></td></tr></table></figure>
+
+<h2 id="12-ListView添加checkBox問題"><a href="#12-ListView添加checkBox問題" class="headerlink" title="12. ListView添加checkBox問題"></a>12. ListView添加checkBox問題</h2><p>取消某一个已选中的项，會取消所有已选中的项，在网上找的参考代码在ItemChecked方法中多了一句代码：</p>
+<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">e.Item.Selected = e.Item.Checked;</span><br></pre></td></tr></table></figure>
+<p>將这句代码的意思应该是把checked的复选框也设制为selected的，注釋該劇代碼就解決了。</p>
+<h2 id="13-设置窗体不能拉大或拖小"><a href="#13-设置窗体不能拉大或拖小" class="headerlink" title="13. 设置窗体不能拉大或拖小"></a>13. 设置窗体不能拉大或拖小</h2><p>將FormBorderStyle設爲为Fix即可，如Fix3D;</p>
+<h2 id="14-Base64编码解码"><a href="#14-Base64编码解码" class="headerlink" title="14. Base64编码解码"></a>14. Base64编码解码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 編碼</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;data&quot;&gt;</span>需要編碼的数据<span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="built_in">string</span> <span class="title">Encode</span>(<span class="params"><span class="built_in">string</span> data</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    System.Text.Encoding encode = System.Text.Encoding.UTF8;</span><br><span class="line">    <span class="built_in">byte</span>[] bytedata = encode.GetBytes(data);</span><br><span class="line">    <span class="built_in">string</span> result = Convert.ToBase64String(bytedata, <span class="number">0</span>, bytedata.Length);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 解碼</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;data&quot;&gt;</span>需要解碼的数据<span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="built_in">string</span> <span class="title">Decode</span>(<span class="params"><span class="built_in">string</span> data</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">byte</span>[] bpath = Convert.FromBase64String(data);</span><br><span class="line">    <span class="built_in">string</span> result = System.Text.ASCIIEncoding.UTF8.GetString(bpath);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>拓展：<a href="http://www.cnblogs.com/chengxiaohui/articles/3951129.html">从原理上搞定编码– Base64编码</a></p>
+]]></content>
+      <categories>
+        <category>desktop development</category>
+      </categories>
+      <tags>
+        <tag>C#</tag>
+        <tag>模拟登录</tag>
+        <tag>ListView</tag>
+        <tag>正則匹配</tag>
+        <tag>ZXing</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>EndNote使用</title>
     <url>/2016/11/20/EndNote%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<blockquote>
@@ -830,66 +1300,6 @@
       </tags>
   </entry>
   <entry>
-    <title>C#使用</title>
-    <url>/2016/10/15/C-%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="1-模拟登陆"><a href="#1-模拟登陆" class="headerlink" title="1. 模拟登陆"></a>1. 模拟登陆</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">HttpWebRequest request = <span class="literal">null</span>;  <span class="comment">//提供 WebRequest 类的 HTTP 特定的实现。</span></span><br><span class="line">HttpWebResponse response = <span class="literal">null</span>;    <span class="comment">//提供 WebResponse 类的 HTTP 特定的实现</span></span><br><span class="line"><span class="keyword">try</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//提交的信息，包括用户名和密码等信息</span></span><br><span class="line">    <span class="built_in">string</span> postdata = <span class="string">&quot;uid=&quot;</span> + account + <span class="string">&quot;&amp;pwd=&quot;</span> + password;</span><br><span class="line">    <span class="comment">//抽象类的静态方法可直接调用,初始化新的WebRequest实例化web访问类</span></span><br><span class="line">    request = (HttpWebRequest)WebRequest.Create(loginUrl);</span><br><span class="line">    <span class="comment">//request.Credentials:获取或设置请求的身份验证信息;</span></span><br><span class="line">    <span class="comment">//CredentialCache.DefaultCredentials:获取应用程序的系统凭据,</span></span><br><span class="line">    <span class="comment">//对于 ASP.NET应用程序，默认凭据是已登录的用户或正被模拟的用户的用户凭据。</span></span><br><span class="line">    request.Credentials = CredentialCache.DefaultCredentials;</span><br><span class="line">    request.Method = <span class="string">&quot;POST&quot;</span>;<span class="comment">//数据提交方式为POST</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//request.ContentType:获取或设置传入请求的 MIME 内容类型。</span></span><br><span class="line">    request.ContentType = <span class="string">&quot;application/x-www-form-urlencoded&quot;</span>;    <span class="comment">//模拟头 </span></span><br><span class="line">    <span class="comment">//request.AllowAutoRedirect：获取或设置一个值，该值指示请求是否应跟随重定向响应；</span></span><br><span class="line">    <span class="comment">//如果请求应自动跟随 Internet 资源的重定向响应，则为 true，否则为 false。默认值为 true。</span></span><br><span class="line">    request.AllowAutoRedirect = <span class="literal">false</span>;   <span class="comment">// 不用需自动跳转</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//必须设置CookieContainer存储请求返回的Cookies</span></span><br><span class="line">    <span class="keyword">if</span> (CookieContainer != <span class="literal">null</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = <span class="keyword">new</span> CookieContainer();</span><br><span class="line">        CookieContainer = request.CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//保持TCP连接</span></span><br><span class="line">    request.KeepAlive = <span class="literal">true</span>;</span><br><span class="line">    <span class="comment">//提交请求  </span></span><br><span class="line">    <span class="built_in">byte</span>[] postdatabytes = Encoding.UTF8.GetBytes(postdata); <span class="comment">//对指定字符集进行编码</span></span><br><span class="line">    request.ContentLength = postdatabytes.Length;</span><br><span class="line">    Stream stream;</span><br><span class="line">    stream = request.GetRequestStream();  <span class="comment">//返回一个数据流为HttpWebRequest发送数据</span></span><br><span class="line">    <span class="comment">//设置POST 数据，向当前流中写入postdatabytes字节序列，其中0为postdatabytes从0开始的字节偏移量</span></span><br><span class="line">    <span class="comment">//postdatabytes.Length要写入当前流的字节数。</span></span><br><span class="line">    stream.Write(postdatabytes, <span class="number">0</span>, postdatabytes.Length); </span><br><span class="line">    stream.Close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//接收响应</span></span><br><span class="line">    response = (HttpWebResponse)request.GetResponse(); <span class="comment">//返回对 Internet 请求的响应。</span></span><br><span class="line">    <span class="comment">//获取包含与特定 URI（request.RequestUri） 关联的 Cookie 实例的 CookieCollection。</span></span><br><span class="line">    response.Cookies = request.CookieContainer.GetCookies(request.RequestUri);</span><br><span class="line">    CookieCollection cook = response.Cookies;</span><br><span class="line">    <span class="comment">//返回一个 HTTP Cookie 标头，其中包含表示由分号分隔的与特定 URI 关联的Cookie 实例的字符串。</span></span><br><span class="line">    <span class="built_in">string</span> strcookieheader = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br><span class="line">    CookiesString = strcookieheader;</span><br><span class="line">    <span class="comment">//取下一次GET跳转地址  </span></span><br><span class="line">    <span class="comment">//实现一个 TextReader，使其以gb2312编码从字节流中读取字符。</span></span><br><span class="line">    StreamReader sr = <span class="keyword">new</span> StreamReader(response.GetResponseStream(), Encoding.GetEncoding(<span class="string">&quot;gb2312&quot;</span>));</span><br><span class="line">    <span class="built_in">string</span> content = sr.ReadToEnd(); <span class="comment">//读取来自流的当前位置到结尾的所有字符。</span></span><br><span class="line">    sr.Close(); <span class="comment">//关闭 StreamReader 对象和基础流，并释放与读取器关联的所有系统资源</span></span><br><span class="line">    request.Abort();    <span class="comment">//取消对 Internet 资源的请求。</span></span><br><span class="line">    response.Close();   <span class="comment">//Close 方法关闭响应流，并通过其他请求将释放与重复使用的资源的连接。</span></span><br><span class="line">    <span class="comment">//依据登陆成功后返回的Page信息，求出下次请求的url</span></span><br><span class="line">    <span class="comment">//每个网站登陆后加载的Url和顺序不尽相同，以下两步需根据实际情况做特殊处理，从而得到下次请求的URL</span></span><br><span class="line">    <span class="built_in">string</span>[] substr = content.Split(<span class="keyword">new</span> <span class="built_in">char</span>[] &#123; <span class="string">&#x27;&quot;&#x27;</span> &#125;);</span><br><span class="line">    NextRequestUrl = <span class="string">&quot;http://zcgl.wzu.edu.cn/plat/&quot;</span> + substr[<span class="number">1</span>];   </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (WebException ex)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox.Show(<span class="built_in">string</span>.Format(<span class="string">&quot;登陆时出错，详细信息：&#123;0&#125;&quot;</span>, ex.Message));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>补充：</p>
-<ul>
-<li>CookieContainer: 装载返回的cookies的容器</li>
-<li>form的enctype属性为编码方式，分两种：  <ol>
-<li><p>application&#x2F;x-www-form-urlencoded，默认值。action为get时，把form数据转换成一个字串（name1&#x3D;value1&amp;name2&#x3D;value2…），append到url后面，用?分割；当action为post时，浏览器把form数据封装到http body中，然后发送到server。  </p>
-</li>
-<li><p>multipart&#x2F;form-data，type&#x3D;file时使用，浏览器会把整个表单以控件为单位分割，并为每个部分加上Content-Disposition(form-data或者file),Content-Type(默认为text&#x2F;plain),name(控件name)等信息，并加上分割符(boundary)。</p>
-</li>
-</ol>
-</li>
-</ul>
-<h2 id="2-获取指定页面的内容"><a href="#2-获取指定页面的内容" class="headerlink" title="2. 获取指定页面的内容"></a>2. 获取指定页面的内容</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">HttpWebRequest request = <span class="literal">null</span>;</span><br><span class="line">HttpWebResponse response = <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">try</span></span><br><span class="line">&#123;</span><br><span class="line">    request = (HttpWebRequest)WebRequest.Create(NextRequestUrl);</span><br><span class="line">    request.Credentials = CredentialCache.DefaultCredentials;</span><br><span class="line">    request.Method = <span class="string">&quot;GET&quot;</span>;</span><br><span class="line">    request.KeepAlive = <span class="literal">true</span>;</span><br><span class="line">    request.Headers.Add(<span class="string">&quot;Cookie:&quot;</span> + CookiesString);</span><br><span class="line">    request.CookieContainer = CookieContainer;</span><br><span class="line">    request.AllowAutoRedirect = <span class="literal">false</span>;</span><br><span class="line">    response = (HttpWebResponse)request.GetResponse();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//设置cookie  </span></span><br><span class="line">    CookiesString = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br><span class="line">    <span class="comment">//取再次跳转链接  </span></span><br><span class="line">    StreamReader sr = <span class="keyword">new</span> StreamReader(response.GetResponseStream(), Encoding.GetEncoding(<span class="string">&quot;gb2312&quot;</span>));</span><br><span class="line">    <span class="built_in">string</span> ss = sr.ReadToEnd();</span><br><span class="line">    sr.Close();</span><br><span class="line">    request.Abort();</span><br><span class="line">    response.Close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//依据登陆成功后返回的Page信息，求出下次请求的url</span></span><br><span class="line">    <span class="comment">//每个网站登陆后加载的Url和顺序不尽相同，以下两步需根据实际情况做特殊处理，从而得到下次请求的URL</span></span><br><span class="line">    <span class="comment">//string[] substr = ss.Split(new char[] &#123; &#x27;&quot;&#x27; &#125;);</span></span><br><span class="line">    <span class="comment">//NextRequestUrl = substr[1];</span></span><br><span class="line">    <span class="comment">//NextRequestUrl = &quot;http://zcgl.wzu.edu.cn/plat/&quot; + substr[1];</span></span><br><span class="line">    ResultHtml = ss;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (WebException ex)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox.Show(<span class="built_in">string</span>.Format(<span class="string">&quot;获取页面HTML信息出错，详细信息：&#123;0&#125;&quot;</span>, ex.Message));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-正則匹配"><a href="#3-正則匹配" class="headerlink" title="3. 正則匹配"></a>3. 正則匹配</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Instrument <span class="title">GetInstrumentInfo</span>(<span class="params">String InstrumentNum</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    Match m = Regex.Match(str, pattern);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (m.Success)</span><br><span class="line">    &#123;</span><br><span class="line">        Instrument instrument = <span class="keyword">new</span> Instrument();</span><br><span class="line">        instrument.Number = InstrumentNum;</span><br><span class="line">        instrument.Unit = m.Groups[<span class="number">1</span>].ToString();</span><br><span class="line">        instrument.Univalence = m.Groups[<span class="number">2</span>].ToString();</span><br><span class="line">        instrument.Name = m.Groups[<span class="number">3</span>].ToString();</span><br><span class="line">        <span class="keyword">return</span> instrument;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="4-用zxing库生成二维码"><a href="#4-用zxing库生成二维码" class="headerlink" title="4. 用zxing库生成二维码"></a>4. 用zxing库生成二维码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//C#代码</span></span><br><span class="line"><span class="keyword">using</span> com.google.zxing;</span><br><span class="line"><span class="keyword">using</span> ByteMatrix = com.google.zxing.common.ByteMatrix;</span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成二维码</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">CreateQRCode</span>()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//构造二维码内容</span></span><br><span class="line">    <span class="built_in">string</span> content =</span><br><span class="line">        Num_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">0</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Name_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">1</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Person_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">2</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Place_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">3</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Type_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">4</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Univalence_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">5</span>].Text + <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">        Date_columnHeader.Text + <span class="string">&quot;：&quot;</span> + Info_listView.Items[<span class="number">1</span>].SubItems[<span class="number">6</span>].Text;</span><br><span class="line"></span><br><span class="line">    ByteMatrix byteMatrix = <span class="keyword">new</span> MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, <span class="number">200</span>, <span class="number">200</span>);</span><br><span class="line">    Bitmap bitmap = toBitmap(byteMatrix);</span><br><span class="line">    QRCode_pictureBox.Image = bitmap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="5-用zxing库生成条形码"><a href="#5-用zxing库生成条形码" class="headerlink" title="5. 用zxing库生成条形码"></a>5. 用zxing库生成条形码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成条形码</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">CreateBarCode</span>(<span class="params"><span class="built_in">string</span> content</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    Regex rg = <span class="keyword">new</span> Regex(<span class="string">@&quot;^\d&#123;8&#125;$&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(rg.IsMatch(content))</span><br><span class="line">    &#123;</span><br><span class="line">        ByteMatrix byteMatrix = <span class="keyword">new</span> MultiFormatWriter().encode(content, BarcodeFormat.EAN_8, <span class="number">200</span>, <span class="number">30</span>);</span><br><span class="line">        Bitmap bitmap = toBitmap(byteMatrix);</span><br><span class="line">        BarCodeList.Add(bitmap);</span><br><span class="line">        QRCode_pictureBox.Image = bitmap;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        MessageBox.Show(<span class="string">&quot;非数字，无法生成条形码&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 生成位图</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;byteMatrix&quot;&gt;</span><span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">private</span> Bitmap <span class="title">toBitmap</span>(<span class="params">ByteMatrix byteMatrix</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">int</span> width = byteMatrix.Width;</span><br><span class="line">    <span class="built_in">int</span> height = byteMatrix.Height;</span><br><span class="line">    Bitmap bitmap = <span class="keyword">new</span> Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);</span><br><span class="line">    <span class="keyword">for</span>(<span class="built_in">int</span> i=<span class="number">0</span>; i&lt; width; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="built_in">int</span> j=<span class="number">0</span>; j &lt; height; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            bitmap.SetPixel(i, j, byteMatrix.get_Renamed(i, j) != <span class="number">-1</span> ? ColorTranslator.FromHtml(<span class="string">&quot;#436EEE&quot;</span>) : ColorTranslator.FromHtml(<span class="string">&quot;#C7C7C7&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> bitmap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="6-listView顯示信息"><a href="#6-listView顯示信息" class="headerlink" title="6. listView顯示信息"></a>6. listView顯示信息</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//向listView中添加内容</span></span><br><span class="line">ListViewItem lvi = <span class="keyword">new</span> ListViewItem(str0);</span><br><span class="line">lvi.SubItems.Add(str1);</span><br><span class="line">Info_listView.Items.Add(lvi);</span><br><span class="line"></span><br><span class="line"><span class="comment">//读取listView列标题内容</span></span><br><span class="line"><span class="built_in">string</span> str = columnHeader.Text;</span><br><span class="line"></span><br><span class="line"><span class="comment">//读取listView中的index1行，index2+1列的内容</span></span><br><span class="line"><span class="built_in">string</span> str = Info_listView.Items[index1].SubItems[index2].Text;</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="7-listView刪除"><a href="#7-listView刪除" class="headerlink" title="7. listView刪除"></a>7. listView刪除</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//删除一条记录</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.Items.Remove(Info_listView.FocusedItem);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//删除多条记录</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.MultiSelect = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">foreach</span> (ListViewItem item <span class="keyword">in</span> Info_listView.Items)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (item.Selected)</span><br><span class="line">            item.Remove();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//清空</span></span><br><span class="line"><span class="keyword">if</span> (Info_listView.Items.Count &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    Info_listView.Items.Clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="8-listView显示圖片"><a href="#8-listView显示圖片" class="headerlink" title="8. listView显示圖片"></a>8. listView显示圖片</h2><blockquote>
-<p>listView有5种视图:LargeIcon, SmallIcon, List, Details, Tile</p>
-</blockquote>
-<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//listView显示图片,视图为LargeIcon</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">showCode</span>()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (QRCodeList.Count &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//QRCode_listView属性设置</span></span><br><span class="line">        QRCode_listView.View = View.LargeIcon;</span><br><span class="line">        QRCode_listView.LargeImageList = QRCode_imageList;</span><br><span class="line">        QRCode_listView.BeginUpdate();</span><br><span class="line"></span><br><span class="line">        QRCode_listView.LargeImageList.ImageSize = <span class="keyword">new</span> System.Drawing.Size(<span class="number">200</span>, <span class="number">200</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; QRCodeList.Count; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            QRCode_imageList.Images.Add(QRCodeList[i]);</span><br><span class="line">            ListViewItem lvi = <span class="keyword">new</span> ListViewItem(Info_listView.Items[i].SubItems[<span class="number">0</span>].Text);</span><br><span class="line">            QRCode_listView.Items.Add(lvi);</span><br><span class="line">            QRCode_listView.Items[i].ImageIndex = QRCode_imageList.Images.Count - <span class="number">1</span> ;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        QRCode_listView.EndUpdate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="9-保存图片"><a href="#9-保存图片" class="headerlink" title="9. 保存图片"></a>9. 保存图片</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">FolderBrowserDialog folderDlg = <span class="keyword">new</span> FolderBrowserDialog();</span><br><span class="line">folderDlg.Description = <span class="string">&quot;请选择文件夹&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (folderDlg.ShowDialog() == DialogResult.OK)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">string</span> path = folderDlg.SelectedPath;</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; QRCodeList.Count; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        QRCodeList[i].Save(path + <span class="string">@&quot;\&quot;</span> + Info_listView.Items[i].SubItems[<span class="number">0</span>].Text + <span class="string">&quot;.bmp&quot;</span>, System.Drawing.Imaging.ImageFormat.Bmp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="10-VS2013工程資源文件的保存和使用"><a href="#10-VS2013工程資源文件的保存和使用" class="headerlink" title="10. VS2013工程資源文件的保存和使用"></a>10. VS2013工程資源文件的保存和使用</h2><p><a href="http://blog.csdn.net/mengdong_zy/article/details/8971154">C#将图片保存到资源文件并调用</a></p>
-<h2 id="11-網絡請求重定向"><a href="#11-網絡請求重定向" class="headerlink" title="11. 網絡請求重定向"></a>11. 網絡請求重定向</h2><p>在通过get和post获取网络数据时，如果遇到重定向的网址，一定要把HttpWebRequest的重定向参数值设为true,并重新获取当前页面的Cookie</p>
-<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">request.AllowAutoRedirect = <span class="literal">true</span>;</span><br><span class="line">response = (HttpWebResponse)request.GetResponse();</span><br><span class="line"><span class="comment">//获取cookie  </span></span><br><span class="line">CookiesString = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br></pre></td></tr></table></figure>
-
-<h2 id="12-ListView添加checkBox問題"><a href="#12-ListView添加checkBox問題" class="headerlink" title="12. ListView添加checkBox問題"></a>12. ListView添加checkBox問題</h2><p>取消某一个已选中的项，會取消所有已选中的项，在网上找的参考代码在ItemChecked方法中多了一句代码：</p>
-<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">e.Item.Selected = e.Item.Checked;</span><br></pre></td></tr></table></figure>
-<p>將这句代码的意思应该是把checked的复选框也设制为selected的，注釋該劇代碼就解決了。</p>
-<h2 id="13-设置窗体不能拉大或拖小"><a href="#13-设置窗体不能拉大或拖小" class="headerlink" title="13. 设置窗体不能拉大或拖小"></a>13. 设置窗体不能拉大或拖小</h2><p>將FormBorderStyle設爲为Fix即可，如Fix3D;</p>
-<h2 id="14-Base64编码解码"><a href="#14-Base64编码解码" class="headerlink" title="14. Base64编码解码"></a>14. Base64编码解码</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 編碼</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;data&quot;&gt;</span>需要編碼的数据<span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="built_in">string</span> <span class="title">Encode</span>(<span class="params"><span class="built_in">string</span> data</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    System.Text.Encoding encode = System.Text.Encoding.UTF8;</span><br><span class="line">    <span class="built_in">byte</span>[] bytedata = encode.GetBytes(data);</span><br><span class="line">    <span class="built_in">string</span> result = Convert.ToBase64String(bytedata, <span class="number">0</span>, bytedata.Length);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> 解碼</span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;/summary&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;param name=&quot;data&quot;&gt;</span>需要解碼的数据<span class="doctag">&lt;/param&gt;</span></span></span><br><span class="line"><span class="comment"><span class="doctag">///</span> <span class="doctag">&lt;returns&gt;</span><span class="doctag">&lt;/returns&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="built_in">string</span> <span class="title">Decode</span>(<span class="params"><span class="built_in">string</span> data</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">byte</span>[] bpath = Convert.FromBase64String(data);</span><br><span class="line">    <span class="built_in">string</span> result = System.Text.ASCIIEncoding.UTF8.GetString(bpath);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>拓展：<a href="http://www.cnblogs.com/chengxiaohui/articles/3951129.html">从原理上搞定编码– Base64编码</a></p>
-]]></content>
-      <categories>
-        <category>desktop development</category>
-      </categories>
-      <tags>
-        <tag>C#</tag>
-        <tag>模拟登录</tag>
-        <tag>ListView</tag>
-        <tag>正則匹配</tag>
-        <tag>ZXing</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Fexo</title>
     <url>/2016/10/22/Fexo/</url>
     <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Fexo是Hexo的一款极简主题之一</p>
@@ -981,69 +1391,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Hexo搭建個人博客</title>
-    <url>/2016/10/15/Hexo%E6%90%AD%E5%BB%BA%E5%80%8B%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h2 id="搭建個人博客"><a href="#搭建個人博客" class="headerlink" title="搭建個人博客"></a>搭建個人博客</h2><h3 id="環境配置"><a href="#環境配置" class="headerlink" title="環境配置"></a>環境配置</h3><h4 id="安裝Git"><a href="#安裝Git" class="headerlink" title="安裝Git"></a>安裝Git</h4><h4 id="安裝node-js"><a href="#安裝node-js" class="headerlink" title="安裝node.js"></a>安裝node.js</h4><h3 id="配置Github"><a href="#配置Github" class="headerlink" title="配置Github"></a>配置Github</h3><h3 id="安裝Hexo"><a href="#安裝Hexo" class="headerlink" title="安裝Hexo"></a>安裝Hexo</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ npm install hexo-cli -g</span><br><span class="line">$ hexo init blog</span><br><span class="line">$ cd blog</span><br><span class="line">$ npm install</span><br></pre></td></tr></table></figure>
-
-<p>【PS】 <code>hexo init blog</code> 命令执行完后，会在当前目录下生成 blog 目录，blog 目录即为博客所在的目录</p>
-<p><a href="http://blog.csdn.net/lzrreach/article/details/52863798">手把手教你使用Hexo + Github Pages搭建个人独立博客</a></p>
-<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>blog目录下配置文件作如下修改</p>
-<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repository:</span> <span class="string">git@github.com:bruceyu1994/bruceyu1994.github.io</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="安装扩展"><a href="#安装扩展" class="headerlink" title="安装扩展"></a>安装扩展</h4><p><code>$ npm install hexo-deployer-git --save</code></p>
-<p>现在你就可以执行命令进行部署了</p>
-<h2 id="常見問題"><a href="#常見問題" class="headerlink" title="常見問題"></a>常見問題</h2><h3 id="无法识别带-号的标题"><a href="#无法识别带-号的标题" class="headerlink" title="无法识别带#号的标题"></a>无法识别带#号的标题</h3><p>如执行如下命令：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ hexo n &quot;C#使用&quot;</span><br></pre></td></tr></table></figure>
-<p>则在_posts文件夹下生成”C-使用”，而不是”C#使用”</p>
-<blockquote>
-<p>貌似衹是文件名不支持#號,title生成沒有問題。</p>
-</blockquote>
-<h3 id="themes文件fexo主題无法push到Git服務器"><a href="#themes文件fexo主題无法push到Git服務器" class="headerlink" title="themes文件fexo主題无法push到Git服務器"></a>themes文件fexo主題无法push到Git服務器</h3><p>具體描述：無法add，執行 <code>git add .</code> 之後還是會提示fexo主題文件夾需要add</p>
-<p>【解決方案】</p>
-<p>将fexo目录下的 .git&#x2F; 文件夹删除即可 <code>add</code> 并 <code>push</code></p>
-<h3 id="部署時出現錯誤"><a href="#部署時出現錯誤" class="headerlink" title="部署時出現錯誤"></a>部署時出現錯誤</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ hexo d</span><br><span class="line">ERROR Deployer not found: git</span><br></pre></td></tr></table></figure>
-<p>可能原因：git部署工具沒有安裝，執行如下命令即可</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install hexo-deployer-git --save 改了之后执行，然后再部署试试</span><br></pre></td></tr></table></figure>
-
-<h3 id="启用搜索页面，却无法进行搜索"><a href="#启用搜索页面，却无法进行搜索" class="headerlink" title="启用搜索页面，却无法进行搜索"></a>启用搜索页面，却无法进行搜索</h3><p>原因：没有安装 hexo-search 插件</p>
-<p>执行如下命令安装hexo-search插件，即可解决</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ npm install hexo-search --save</span><br></pre></td></tr></table></figure>
-
-<h3 id="warning-LF-will-be-replaced-by-CRLF"><a href="#warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="warning: LF will be replaced by CRLF"></a>warning: LF will be replaced by CRLF</h3><p>原因：windows中的换行符为 CRLF， 而在Linux下的换行符为LF，所以hexo执行git add . 时出现提示</p>
-<p>解决方案：</p>
-<ol>
-<li><p>删除你hexo根目录下面的.deploy_git文件夹</p>
-</li>
-<li><p>执行 <code>$ git config --global core.autocrlf false</code>  &#x2F;&#x2F;禁用自动转换</p>
-</li>
-<li><p>重新执行如下命令，发现已没有之前的警告了</p>
-<p> <code>$ hexo clean</code><br> <code>$ hexo d -g</code></p>
-</li>
-<li><p>打开博客网址，进行验证是否成功</p>
-<p> <a href="https://www.zhihu.com/question/38219432/answer/123443945">参考链接</a></p>
-</li>
-</ol>
-<p>注：</p>
-<blockquote>
-<p>CRLF表示句尾使用回车换行两个字符(即我们常在Windows编程时使用”\r\n”换行)<br>LF表示表示句尾，只使用换行<br>CR表示只使用回车  </p>
-</blockquote>
-<h3 id="Permission-denied-publickey"><a href="#Permission-denied-publickey" class="headerlink" title="Permission denied (publickey)."></a>Permission denied (publickey).</h3><p>部署时执行 <code>hexo d</code> 命令时出现该错误</p>
-<blockquote>
-<p>fatal: Could not read from remote repository.</p>
-</blockquote>
-<p>【Reason】You’ve probably not added a public key to your SSH keys</p>
-<p>生成 publickey ，命令：<code>$ ssh-keygen -t rsa</code>; 然后将 publickey 添加到远程服务器即可。</p>
-<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2>]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>博客</tag>
-        <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Gprinter打印机驱动安装及设置</title>
     <url>/2016/10/15/Gprinter%E6%89%93%E5%8D%B0%E6%9C%BA%E9%A9%B1%E5%8A%A8%E5%AE%89%E8%A3%85%E5%8F%8A%E8%AE%BE%E7%BD%AE/</url>
     <content><![CDATA[<h2 id="驱动安装"><a href="#驱动安装" class="headerlink" title="驱动安装"></a>驱动安装</h2><ol>
@@ -1112,6 +1459,69 @@
       </tags>
   </entry>
   <entry>
+    <title>Hexo搭建個人博客</title>
+    <url>/2016/10/15/Hexo%E6%90%AD%E5%BB%BA%E5%80%8B%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h2 id="搭建個人博客"><a href="#搭建個人博客" class="headerlink" title="搭建個人博客"></a>搭建個人博客</h2><h3 id="環境配置"><a href="#環境配置" class="headerlink" title="環境配置"></a>環境配置</h3><h4 id="安裝Git"><a href="#安裝Git" class="headerlink" title="安裝Git"></a>安裝Git</h4><h4 id="安裝node-js"><a href="#安裝node-js" class="headerlink" title="安裝node.js"></a>安裝node.js</h4><h3 id="配置Github"><a href="#配置Github" class="headerlink" title="配置Github"></a>配置Github</h3><h3 id="安裝Hexo"><a href="#安裝Hexo" class="headerlink" title="安裝Hexo"></a>安裝Hexo</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ npm install hexo-cli -g</span><br><span class="line">$ hexo init blog</span><br><span class="line">$ cd blog</span><br><span class="line">$ npm install</span><br></pre></td></tr></table></figure>
+
+<p>【PS】 <code>hexo init blog</code> 命令执行完后，会在当前目录下生成 blog 目录，blog 目录即为博客所在的目录</p>
+<p><a href="http://blog.csdn.net/lzrreach/article/details/52863798">手把手教你使用Hexo + Github Pages搭建个人独立博客</a></p>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>blog目录下配置文件作如下修改</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repository:</span> <span class="string">git@github.com:bruceyu1994/bruceyu1994.github.io</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="安装扩展"><a href="#安装扩展" class="headerlink" title="安装扩展"></a>安装扩展</h4><p><code>$ npm install hexo-deployer-git --save</code></p>
+<p>现在你就可以执行命令进行部署了</p>
+<h2 id="常見問題"><a href="#常見問題" class="headerlink" title="常見問題"></a>常見問題</h2><h3 id="无法识别带-号的标题"><a href="#无法识别带-号的标题" class="headerlink" title="无法识别带#号的标题"></a>无法识别带#号的标题</h3><p>如执行如下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ hexo n &quot;C#使用&quot;</span><br></pre></td></tr></table></figure>
+<p>则在_posts文件夹下生成”C-使用”，而不是”C#使用”</p>
+<blockquote>
+<p>貌似衹是文件名不支持#號,title生成沒有問題。</p>
+</blockquote>
+<h3 id="themes文件fexo主題无法push到Git服務器"><a href="#themes文件fexo主題无法push到Git服務器" class="headerlink" title="themes文件fexo主題无法push到Git服務器"></a>themes文件fexo主題无法push到Git服務器</h3><p>具體描述：無法add，執行 <code>git add .</code> 之後還是會提示fexo主題文件夾需要add</p>
+<p>【解決方案】</p>
+<p>将fexo目录下的 .git&#x2F; 文件夹删除即可 <code>add</code> 并 <code>push</code></p>
+<h3 id="部署時出現錯誤"><a href="#部署時出現錯誤" class="headerlink" title="部署時出現錯誤"></a>部署時出現錯誤</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ hexo d</span><br><span class="line">ERROR Deployer not found: git</span><br></pre></td></tr></table></figure>
+<p>可能原因：git部署工具沒有安裝，執行如下命令即可</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install hexo-deployer-git --save 改了之后执行，然后再部署试试</span><br></pre></td></tr></table></figure>
+
+<h3 id="启用搜索页面，却无法进行搜索"><a href="#启用搜索页面，却无法进行搜索" class="headerlink" title="启用搜索页面，却无法进行搜索"></a>启用搜索页面，却无法进行搜索</h3><p>原因：没有安装 hexo-search 插件</p>
+<p>执行如下命令安装hexo-search插件，即可解决</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ npm install hexo-search --save</span><br></pre></td></tr></table></figure>
+
+<h3 id="warning-LF-will-be-replaced-by-CRLF"><a href="#warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="warning: LF will be replaced by CRLF"></a>warning: LF will be replaced by CRLF</h3><p>原因：windows中的换行符为 CRLF， 而在Linux下的换行符为LF，所以hexo执行git add . 时出现提示</p>
+<p>解决方案：</p>
+<ol>
+<li><p>删除你hexo根目录下面的.deploy_git文件夹</p>
+</li>
+<li><p>执行 <code>$ git config --global core.autocrlf false</code>  &#x2F;&#x2F;禁用自动转换</p>
+</li>
+<li><p>重新执行如下命令，发现已没有之前的警告了</p>
+<p> <code>$ hexo clean</code><br> <code>$ hexo d -g</code></p>
+</li>
+<li><p>打开博客网址，进行验证是否成功</p>
+<p> <a href="https://www.zhihu.com/question/38219432/answer/123443945">参考链接</a></p>
+</li>
+</ol>
+<p>注：</p>
+<blockquote>
+<p>CRLF表示句尾使用回车换行两个字符(即我们常在Windows编程时使用”\r\n”换行)<br>LF表示表示句尾，只使用换行<br>CR表示只使用回车  </p>
+</blockquote>
+<h3 id="Permission-denied-publickey"><a href="#Permission-denied-publickey" class="headerlink" title="Permission denied (publickey)."></a>Permission denied (publickey).</h3><p>部署时执行 <code>hexo d</code> 命令时出现该错误</p>
+<blockquote>
+<p>fatal: Could not read from remote repository.</p>
+</blockquote>
+<p>【Reason】You’ve probably not added a public key to your SSH keys</p>
+<p>生成 publickey ，命令：<code>$ ssh-keygen -t rsa</code>; 然后将 publickey 添加到远程服务器即可。</p>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2>]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>博客</tag>
+        <tag>Github</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Markdown 常见问题</title>
     <url>/2016/10/15/Markdown%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h2><ol>
@@ -1169,26 +1579,6 @@
       <tags>
         <tag>RecyclerView</tag>
         <tag>Exception</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows常见问题</title>
-    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
-<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
-<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
-<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
-<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
-<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
-<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
-<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>windows</tag>
-        <tag>win10</tag>
       </tags>
   </entry>
   <entry>
@@ -1313,13 +1703,42 @@
       </tags>
   </entry>
   <entry>
-    <title>test</title>
-    <url>/2016/10/23/test/</url>
-    <content><![CDATA[<p>測試博客</p>
+    <title>Windows常见问题</title>
+    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
+<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
+<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
+<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
+<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
+<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
+<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
+<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>tools</category>
       </categories>
+      <tags>
+        <tag>windows</tag>
+        <tag>win10</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Word常见问题</title>
+    <url>/2017/03/06/Word%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="Word-2016"><a href="#Word-2016" class="headerlink" title="Word 2016"></a>Word 2016</h2><h3 id="文字重叠"><a href="#文字重叠" class="headerlink" title="文字重叠"></a>文字重叠</h3><p>【Reason】计算机中没有相应的字体  </p>
+<p>【Solution】</p>
+<ul>
+<li>选中重叠字体，查看字体类型</li>
+<li>百度或谷歌搜索相应的字体并下载</li>
+<li>将下载的字体复制到 “C:\Windows\Fonts” 目录下即可</li>
+</ul>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Word</tag>
+      </tags>
   </entry>
   <entry>
     <title>Git之旅</title>
@@ -1393,7 +1812,7 @@
 </ul>
 <ol>
 <li>先输入$ git remote rm origin</li>
-<li>再输入$ git remote add origin <a href="mailto:&#103;&#x69;&#116;&#64;&#99;&#110;&#x62;&#x2e;&#x63;&#x6f;&#111;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
+<li>再输入$ git remote add origin <a href="mailto:&#x67;&#105;&#116;&#64;&#99;&#x6e;&#98;&#x2e;&#x63;&#x6f;&#111;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
 </ol>
 <h3 id="2-warning-LF-will-be-replaced-by-CRLF"><a href="#2-warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="2. warning: LF will be replaced by CRLF"></a>2. warning: LF will be replaced by CRLF</h3><p>运行如下命令时；</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">warning: LF will be replaced by CRLF in _config.yml.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br></pre></td></tr></table></figure>
@@ -1448,62 +1867,13 @@
       </tags>
   </entry>
   <entry>
-    <title>Word常见问题</title>
-    <url>/2017/03/06/Word%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="Word-2016"><a href="#Word-2016" class="headerlink" title="Word 2016"></a>Word 2016</h2><h3 id="文字重叠"><a href="#文字重叠" class="headerlink" title="文字重叠"></a>文字重叠</h3><p>【Reason】计算机中没有相应的字体  </p>
-<p>【Solution】</p>
-<ul>
-<li>选中重叠字体，查看字体类型</li>
-<li>百度或谷歌搜索相应的字体并下载</li>
-<li>将下载的字体复制到 “C:\Windows\Fonts” 目录下即可</li>
-</ul>
+    <title>test</title>
+    <url>/2016/10/23/test/</url>
+    <content><![CDATA[<p>測試博客</p>
 ]]></content>
       <categories>
         <category>tools</category>
       </categories>
-      <tags>
-        <tag>Word</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>我的书架</title>
-    <url>/2017/01/14/%E6%88%91%E7%9A%84%E4%B9%A6%E6%9E%B6/</url>
-    <content><![CDATA[<h2 id="The-First-Floor-Computer"><a href="#The-First-Floor-Computer" class="headerlink" title="The First Floor(Computer)"></a>The First Floor(Computer)</h2><blockquote>
-<ul>
-<li>硅谷之光</li>
-<li>失控</li>
-<li>人月神话</li>
-<li>大教堂与集市（开源运动的《圣经》）</li>
-</ul>
-</blockquote>
-<h2 id="The-Second-Floor-Philosophy"><a href="#The-Second-Floor-Philosophy" class="headerlink" title="The Second Floor(Philosophy)"></a>The Second Floor(Philosophy)</h2><blockquote>
-<ul>
-<li>苏菲的世界</li>
-</ul>
-</blockquote>
-<h2 id="The-Third-Floor-國學"><a href="#The-Third-Floor-國學" class="headerlink" title="The Third Floor(國學)"></a>The Third Floor(國學)</h2><blockquote>
-<ul>
-<li>心经</li>
-<li>坛经</li>
-<li>传习录</li>
-</ul>
-</blockquote>
-<h2 id="The-Fourth-Floor-Others"><a href="#The-Fourth-Floor-Others" class="headerlink" title="The Fourth Floor(Others)"></a>The Fourth Floor(Others)</h2><blockquote>
-<ul>
-<li>卓有成效的管理者</li>
-<li>高效能人士的7个习惯</li>
-<li>自私的基因</li>
-</ul>
-</blockquote>
-]]></content>
-      <categories>
-        <category>hobbies</category>
-      </categories>
-      <tags>
-        <tag>书籍</tag>
-        <tag>book</tag>
-        <tag>reading</tag>
-      </tags>
   </entry>
   <entry>
     <title>在华为昇腾上部署 DeepSeek V4，并接入本地 Claude Code</title>
@@ -1728,6 +2098,46 @@
         <tag>vLLM</tag>
         <tag>Claude Code</tag>
         <tag>大模型部署</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>我的书架</title>
+    <url>/2017/01/14/%E6%88%91%E7%9A%84%E4%B9%A6%E6%9E%B6/</url>
+    <content><![CDATA[<h2 id="The-First-Floor-Computer"><a href="#The-First-Floor-Computer" class="headerlink" title="The First Floor(Computer)"></a>The First Floor(Computer)</h2><blockquote>
+<ul>
+<li>硅谷之光</li>
+<li>失控</li>
+<li>人月神话</li>
+<li>大教堂与集市（开源运动的《圣经》）</li>
+</ul>
+</blockquote>
+<h2 id="The-Second-Floor-Philosophy"><a href="#The-Second-Floor-Philosophy" class="headerlink" title="The Second Floor(Philosophy)"></a>The Second Floor(Philosophy)</h2><blockquote>
+<ul>
+<li>苏菲的世界</li>
+</ul>
+</blockquote>
+<h2 id="The-Third-Floor-國學"><a href="#The-Third-Floor-國學" class="headerlink" title="The Third Floor(國學)"></a>The Third Floor(國學)</h2><blockquote>
+<ul>
+<li>心经</li>
+<li>坛经</li>
+<li>传习录</li>
+</ul>
+</blockquote>
+<h2 id="The-Fourth-Floor-Others"><a href="#The-Fourth-Floor-Others" class="headerlink" title="The Fourth Floor(Others)"></a>The Fourth Floor(Others)</h2><blockquote>
+<ul>
+<li>卓有成效的管理者</li>
+<li>高效能人士的7个习惯</li>
+<li>自私的基因</li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>hobbies</category>
+      </categories>
+      <tags>
+        <tag>书籍</tag>
+        <tag>book</tag>
+        <tag>reading</tag>
       </tags>
   </entry>
   <entry>
@@ -2011,6 +2421,69 @@
       <tags>
         <tag>诗词</tag>
         <tag>life</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>软件开发流程</title>
+    <url>/2016/10/15/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/</url>
+    <content><![CDATA[<p><em><strong>参考自<a href="http://baike.baidu.com/link?url=cD6VLiJSqMkCLSe-7X6yB5oapMb5aD3_Vgh0PsVGkTaE8pd5rvKXUGEfKpIkZB_xnZyZ1z7Zb9WW5wwnO5mMrCaHgDhu-Nl-k8IQuNeXxyIVEhCHNrxNyrk-84CnGqU44iLJa4F3Vswkm6aYCAYK5a">百度百科</a></strong></em></p>
+<h2 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h2><ol>
+<li>了解需求</li>
+<li>大功能</li>
+<li>小功能</li>
+<li>用户群体</li>
+</ol>
+<h2 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h2><ol>
+<li>基本处理流程</li>
+<li>系统组织结构</li>
+<li>模块划分</li>
+<li>功能分配</li>
+<li>接口设计</li>
+<li>运行设计</li>
+<li>数据结构设计</li>
+<li>出错处理设计</li>
+</ol>
+<h2 id="详细设计"><a href="#详细设计" class="headerlink" title="详细设计"></a>详细设计</h2><ol>
+<li>算法</li>
+<li>数据结构</li>
+<li>类的层次结构及调用关系</li>
+</ol>
+<blockquote>
+<p>PS: 应当足够详细，能够根据详细设计进行编码</p>
+</blockquote>
+<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><ul>
+<li>实现各模块功能</li>
+</ul>
+<blockquote>
+<p>PS: 通常占软件开发1&#x2F;3的时间</p>
+</blockquote>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><ol>
+<li>按照执行方：内部测试&#x2F;外部测试</li>
+<li>按照测试范围： 模块测试&#x2F;整体联调</li>
+<li>按照条件： 正常操作情况测试&#x2F;异常操作情况测试</li>
+<li>按照测试输入范围： 全覆盖测试&#x2F;抽样测试</li>
+</ol>
+<blockquote>
+<p>PS: 测试同样是项目研发中一个相当重要步骤</p>
+</blockquote>
+<h2 id="软件交付"><a href="#软件交付" class="headerlink" title="软件交付"></a>软件交付</h2><ol>
+<li>目标程序</li>
+<li>数据字典</li>
+<li>《用户使用指南》</li>
+<li>需求报告</li>
+<li>设计报告</li>
+<li>测试报告</li>
+</ol>
+<h2 id="验收"><a href="#验收" class="headerlink" title="验收"></a>验收</h2><h2 id="维护"><a href="#维护" class="headerlink" title="维护"></a>维护</h2><ul>
+<li>需求&#x2F;环境变化 –&gt; 全部&#x2F;部分修改</li>
+</ul>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>软件开发</tag>
+        <tag>流程</tag>
       </tags>
   </entry>
   <entry>
@@ -2315,69 +2788,6 @@
         <tag>雅思口语</tag>
         <tag>英语学习</tag>
         <tag>News</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>软件开发流程</title>
-    <url>/2016/10/15/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B/</url>
-    <content><![CDATA[<p><em><strong>参考自<a href="http://baike.baidu.com/link?url=cD6VLiJSqMkCLSe-7X6yB5oapMb5aD3_Vgh0PsVGkTaE8pd5rvKXUGEfKpIkZB_xnZyZ1z7Zb9WW5wwnO5mMrCaHgDhu-Nl-k8IQuNeXxyIVEhCHNrxNyrk-84CnGqU44iLJa4F3Vswkm6aYCAYK5a">百度百科</a></strong></em></p>
-<h2 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h2><ol>
-<li>了解需求</li>
-<li>大功能</li>
-<li>小功能</li>
-<li>用户群体</li>
-</ol>
-<h2 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h2><ol>
-<li>基本处理流程</li>
-<li>系统组织结构</li>
-<li>模块划分</li>
-<li>功能分配</li>
-<li>接口设计</li>
-<li>运行设计</li>
-<li>数据结构设计</li>
-<li>出错处理设计</li>
-</ol>
-<h2 id="详细设计"><a href="#详细设计" class="headerlink" title="详细设计"></a>详细设计</h2><ol>
-<li>算法</li>
-<li>数据结构</li>
-<li>类的层次结构及调用关系</li>
-</ol>
-<blockquote>
-<p>PS: 应当足够详细，能够根据详细设计进行编码</p>
-</blockquote>
-<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><ul>
-<li>实现各模块功能</li>
-</ul>
-<blockquote>
-<p>PS: 通常占软件开发1&#x2F;3的时间</p>
-</blockquote>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><ol>
-<li>按照执行方：内部测试&#x2F;外部测试</li>
-<li>按照测试范围： 模块测试&#x2F;整体联调</li>
-<li>按照条件： 正常操作情况测试&#x2F;异常操作情况测试</li>
-<li>按照测试输入范围： 全覆盖测试&#x2F;抽样测试</li>
-</ol>
-<blockquote>
-<p>PS: 测试同样是项目研发中一个相当重要步骤</p>
-</blockquote>
-<h2 id="软件交付"><a href="#软件交付" class="headerlink" title="软件交付"></a>软件交付</h2><ol>
-<li>目标程序</li>
-<li>数据字典</li>
-<li>《用户使用指南》</li>
-<li>需求报告</li>
-<li>设计报告</li>
-<li>测试报告</li>
-</ol>
-<h2 id="验收"><a href="#验收" class="headerlink" title="验收"></a>验收</h2><h2 id="维护"><a href="#维护" class="headerlink" title="维护"></a>维护</h2><ul>
-<li>需求&#x2F;环境变化 –&gt; 全部&#x2F;部分修改</li>
-</ul>
-]]></content>
-      <categories>
-        <category>mobile development</category>
-      </categories>
-      <tags>
-        <tag>软件开发</tag>
-        <tag>流程</tag>
       </tags>
   </entry>
   <entry>
