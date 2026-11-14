@@ -1080,6 +1080,24 @@
       </tags>
   </entry>
   <entry>
+    <title>Android开发中的空指针异常</title>
+    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
+    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
+
+<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>空指针异常</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>C#使用</title>
     <url>/2016/10/15/C-%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h2 id="1-模拟登陆"><a href="#1-模拟登陆" class="headerlink" title="1. 模拟登陆"></a>1. 模拟登陆</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">HttpWebRequest request = <span class="literal">null</span>;  <span class="comment">//提供 WebRequest 类的 HTTP 特定的实现。</span></span><br><span class="line">HttpWebResponse response = <span class="literal">null</span>;    <span class="comment">//提供 WebResponse 类的 HTTP 特定的实现</span></span><br><span class="line"><span class="keyword">try</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//提交的信息，包括用户名和密码等信息</span></span><br><span class="line">    <span class="built_in">string</span> postdata = <span class="string">&quot;uid=&quot;</span> + account + <span class="string">&quot;&amp;pwd=&quot;</span> + password;</span><br><span class="line">    <span class="comment">//抽象类的静态方法可直接调用,初始化新的WebRequest实例化web访问类</span></span><br><span class="line">    request = (HttpWebRequest)WebRequest.Create(loginUrl);</span><br><span class="line">    <span class="comment">//request.Credentials:获取或设置请求的身份验证信息;</span></span><br><span class="line">    <span class="comment">//CredentialCache.DefaultCredentials:获取应用程序的系统凭据,</span></span><br><span class="line">    <span class="comment">//对于 ASP.NET应用程序，默认凭据是已登录的用户或正被模拟的用户的用户凭据。</span></span><br><span class="line">    request.Credentials = CredentialCache.DefaultCredentials;</span><br><span class="line">    request.Method = <span class="string">&quot;POST&quot;</span>;<span class="comment">//数据提交方式为POST</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//request.ContentType:获取或设置传入请求的 MIME 内容类型。</span></span><br><span class="line">    request.ContentType = <span class="string">&quot;application/x-www-form-urlencoded&quot;</span>;    <span class="comment">//模拟头 </span></span><br><span class="line">    <span class="comment">//request.AllowAutoRedirect：获取或设置一个值，该值指示请求是否应跟随重定向响应；</span></span><br><span class="line">    <span class="comment">//如果请求应自动跟随 Internet 资源的重定向响应，则为 true，否则为 false。默认值为 true。</span></span><br><span class="line">    request.AllowAutoRedirect = <span class="literal">false</span>;   <span class="comment">// 不用需自动跳转</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//必须设置CookieContainer存储请求返回的Cookies</span></span><br><span class="line">    <span class="keyword">if</span> (CookieContainer != <span class="literal">null</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = <span class="keyword">new</span> CookieContainer();</span><br><span class="line">        CookieContainer = request.CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//保持TCP连接</span></span><br><span class="line">    request.KeepAlive = <span class="literal">true</span>;</span><br><span class="line">    <span class="comment">//提交请求  </span></span><br><span class="line">    <span class="built_in">byte</span>[] postdatabytes = Encoding.UTF8.GetBytes(postdata); <span class="comment">//对指定字符集进行编码</span></span><br><span class="line">    request.ContentLength = postdatabytes.Length;</span><br><span class="line">    Stream stream;</span><br><span class="line">    stream = request.GetRequestStream();  <span class="comment">//返回一个数据流为HttpWebRequest发送数据</span></span><br><span class="line">    <span class="comment">//设置POST 数据，向当前流中写入postdatabytes字节序列，其中0为postdatabytes从0开始的字节偏移量</span></span><br><span class="line">    <span class="comment">//postdatabytes.Length要写入当前流的字节数。</span></span><br><span class="line">    stream.Write(postdatabytes, <span class="number">0</span>, postdatabytes.Length); </span><br><span class="line">    stream.Close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//接收响应</span></span><br><span class="line">    response = (HttpWebResponse)request.GetResponse(); <span class="comment">//返回对 Internet 请求的响应。</span></span><br><span class="line">    <span class="comment">//获取包含与特定 URI（request.RequestUri） 关联的 Cookie 实例的 CookieCollection。</span></span><br><span class="line">    response.Cookies = request.CookieContainer.GetCookies(request.RequestUri);</span><br><span class="line">    CookieCollection cook = response.Cookies;</span><br><span class="line">    <span class="comment">//返回一个 HTTP Cookie 标头，其中包含表示由分号分隔的与特定 URI 关联的Cookie 实例的字符串。</span></span><br><span class="line">    <span class="built_in">string</span> strcookieheader = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br><span class="line">    CookiesString = strcookieheader;</span><br><span class="line">    <span class="comment">//取下一次GET跳转地址  </span></span><br><span class="line">    <span class="comment">//实现一个 TextReader，使其以gb2312编码从字节流中读取字符。</span></span><br><span class="line">    StreamReader sr = <span class="keyword">new</span> StreamReader(response.GetResponseStream(), Encoding.GetEncoding(<span class="string">&quot;gb2312&quot;</span>));</span><br><span class="line">    <span class="built_in">string</span> content = sr.ReadToEnd(); <span class="comment">//读取来自流的当前位置到结尾的所有字符。</span></span><br><span class="line">    sr.Close(); <span class="comment">//关闭 StreamReader 对象和基础流，并释放与读取器关联的所有系统资源</span></span><br><span class="line">    request.Abort();    <span class="comment">//取消对 Internet 资源的请求。</span></span><br><span class="line">    response.Close();   <span class="comment">//Close 方法关闭响应流，并通过其他请求将释放与重复使用的资源的连接。</span></span><br><span class="line">    <span class="comment">//依据登陆成功后返回的Page信息，求出下次请求的url</span></span><br><span class="line">    <span class="comment">//每个网站登陆后加载的Url和顺序不尽相同，以下两步需根据实际情况做特殊处理，从而得到下次请求的URL</span></span><br><span class="line">    <span class="built_in">string</span>[] substr = content.Split(<span class="keyword">new</span> <span class="built_in">char</span>[] &#123; <span class="string">&#x27;&quot;&#x27;</span> &#125;);</span><br><span class="line">    NextRequestUrl = <span class="string">&quot;http://zcgl.wzu.edu.cn/plat/&quot;</span> + substr[<span class="number">1</span>];   </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (WebException ex)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox.Show(<span class="built_in">string</span>.Format(<span class="string">&quot;登陆时出错，详细信息：&#123;0&#125;&quot;</span>, ex.Message));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1137,241 +1155,6 @@
         <tag>ListView</tag>
         <tag>正則匹配</tag>
         <tag>ZXing</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Android开发中的空指针异常</title>
-    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
-    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
-
-<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
-]]></content>
-      <categories>
-        <category>mobile development</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>空指针异常</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>EndNote使用</title>
-    <url>/2016/11/20/EndNote%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<blockquote>
-<p>提示：本文以Word2016 和 EndNote7 爲例，默認你已經安裝好EndNote，如果沒有，請先將EndNote安裝好，再繼續閲讀這篇文章</p>
-</blockquote>
-<h2 id="导入文献"><a href="#导入文献" class="headerlink" title="导入文献"></a>导入文献</h2><p>首先將需要參考的文獻導入到EndNote，文件 → 导入 → 文件夹</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_dir.jpg" alt="import directory">
-</p>
-
-<p>出现导入文件夹对话框，如下所示。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_select.jpg" alt="导入文件夹对话框">
-</p>
-
-<p>点击选择按钮，选择的文献所在的文件夹</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_select_dir.jpg" alt="选择文献所在文件夹">
-</p>
-
-<p>选择好之后，点击确定，回到“导入文件夹”对话框，点击“导入”按钮，即可完成文献导入，如下图所示。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_import.jpg" alt="click import">
-</p>
-
-<p>如下為导入结果</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_result.jpg" alt="import result">
-</p>
-
-<h2 id="修改文献格式"><a href="#修改文献格式" class="headerlink" title="修改文献格式"></a>修改文献格式</h2><p>有时候，可能因为文献格式的原因，导出的结果并不理想，如上图，导出的标题莫名其妙含有尖括号，作者栏没有内容等，我们需要手动对其进行修改。</p>
-<p>如图，选中对应的文献，将title两边的尖括号(&lt;&gt;)删除</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/manual_modify.jpg" alt="手动修改">
-</p>
-
-<p>修改好之后，然后点击其他文献，会提示你是否保存修改，点击确定按钮即可完成保存，如下图所示。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/ask_save.jpg" alt="是否保存修改">
-</p>
-
-<p>同样，你同时也可以手动添加或修改Author, Journal等其他信息。</p>
-<p>修改好文献格式后，你就可以在Word中随性地引用文献了。</p>
-<h2 id="插入引用"><a href="#插入引用" class="headerlink" title="插入引用"></a>插入引用</h2><p>在Word中，将光标定位到需要引用文献的地方，点击 Insert Citation 按钮，如下图所示</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_insert_citation.jpg" alt="Insert Citation">
-</p>
-
-<p>如下图所示，跳出文献搜索对话框，在输入框中输入你导入的文献的名称，点击“Find”按钮，即可搜索到你要引用的文献。点击选中对应的文献，点击“Insert”按钮，即可完成引用。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_insert_button.jpg" alt="点击插入按钮">
-</p>
-
-
-<p>文中的引用结果如下:</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/insert_citation_result.jpg" alt="文中的引用结果">
-</p>
-
-<p>此时，你会发现论文的末尾会有一条刚引用的文献，如下图所示。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/insert_citation_result2.jpg" alt="文中的引用结果">
-</p>
-
-<h2 id="设置引用样式"><a href="#设置引用样式" class="headerlink" title="设置引用样式"></a>设置引用样式</h2><p>做到这里，很多读者可能会说，怎么跟我的引用结果不一样，我的引用编号中没有中括号呀，别急，继续往下看，你会发现很神奇的事情。下面就是见证奇迹的时刻了[坏笑]</p>
-<h3 id="设置引用列表布局样式"><a href="#设置引用列表布局样式" class="headerlink" title="设置引用列表布局样式"></a>设置引用列表布局样式</h3><p>一般 Endnote 的默认样式，不是我们想要的样式，这时我们需要手动进行引用样式的修改。我用的样式时Nature样式，具体可通过下拉菜单进行选择，点击“选择另一个样式”，找到Nature,选择即可。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/select_citation_style.jpg" alt="选择另一个样式">
-</p>
-
-<p>点击编辑 → 输出样式 → 编辑”Nature”, 选择 参考文献 → 布局；默认布局如下</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/reference_layout.jpg" alt="引用默认布局">
-</p>
-
-<p>将Bibliography Number前后加上中括号，即“[Bibliography Number]”, 并将其后面的制表符删除，换成2个空格，因为制表符会比较宽，在word中并不美观。编辑结果如下图所示：</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/reference_layout_modify_result.jpg" alt="修改引用布局">
-</p>
-
-<p>点击右上角的叉号</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_cross_button.jpg" alt="点击右上角叉">
-</p>
-
-<p>提示你是否保存之前的修改，点击是，EndNote 跳出重命名对话框，默认 “Nature 复制”，点击保存即可。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/ask_save_style.jpg" alt="保存修改样式">
-</p>
-
-<p>然后在word中选择，EndNote工具栏 → Style → Select Another Style, 选择新保存的”Nature 复制”样式，这时你会发现，文章最后的引用文献列表已经发生了变化。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/switch_word_refrence_style.jpg" alt="word中切换EndNote样式">
-</p>
-
-<h3 id="设置文中引用处编号样式"><a href="#设置文中引用处编号样式" class="headerlink" title="设置文中引用处编号样式"></a>设置文中引用处编号样式</h3><p>细心的读者可能会发现，文章中引用处的编号没有中括号“[]”,如下所示</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/citation_no_bracket.jpg" alt="word中切换EndNote样式">
-</p>
-
-<p>在EndNote中编辑 “Nature 复制”输出样式，选择 “引用” → “模板”，将 Citation 下的 “Bibliography Number”前后添加中括号，即“[Bibliography Number]”，修改结果如下：</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/citation_add_bracket.jpg" alt="引用序号添加中括号">
-</p>
-
-<p>点击右上角的叉，保存修改，然后在word中更新引用即可。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/update_citations_and_bibliography.jpg" alt="更新引用">
-</p>
-
-<h3 id="引用列表缩进"><a href="#引用列表缩进" class="headerlink" title="引用列表缩进"></a>引用列表缩进</h3><p>到了这里，有强迫症的同胞可能会发现，如果引用列表中，如果引用过长，第二行会顶格显示，想把该引用的第二行设置悬挂缩进，和第一行对齐，简单，继续往下看。</p>
-<p>将光标定位到引用列表，右击，Edit Citation(s) → More</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/edit_citation_more.jpg" alt="更新引用">
-</p>
-
-<p>选择 Tools → Format Bibliography</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/tools_format_bibliography.jpg" alt="更新引用">
-</p>
-
-<p>选择 Layout，设置 Hanging即可，这里我设置的為0.848cm。</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/layout_hanging.jpg" alt="更新引用">
-</p>
-
-
-
-
-
-
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>EndNote</tag>
-        <tag>Word</tag>
-        <tag>文献引用</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Fexo</title>
-    <url>/2016/10/22/Fexo/</url>
-    <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Fexo是Hexo的一款极简主题之一</p>
-<h2 id="自定义Fexo"><a href="#自定义Fexo" class="headerlink" title="自定义Fexo"></a>自定义Fexo</h2><h3 id="添加评论数量显示"><a href="#添加评论数量显示" class="headerlink" title="添加评论数量显示"></a>添加评论数量显示</h3><h4 id="添加显示的代码段"><a href="#添加显示的代码段" class="headerlink" title="添加显示的代码段"></a>添加显示的代码段</h4><p>首先,确认你的评论系统用的是多说,如果不是,那就不用继续往下看了</p>
-<p>在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.duoshuo_shortname)&#123; %&gt;</span><br><span class="line">&lt;i class=&quot;icon-comment&quot;&gt;&lt;/i&gt; </span><br><span class="line">&lt;span class=&quot;ds-thread-count&quot; data-thread-key=&quot;&lt;%= url %&gt;&quot;&gt;&lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt;条评论</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
-
-<p>尤其注意data-thread-key的设置,它和你之前配置多说的时候是一致的,每篇文章有一个独一无二的key。</p>
-<p>Fexo已经集成了多说，fexo&#x2F;layout&#x2F;_partial&#x2F;component&#x2F;duoshuo.ejs文件中，我们可以看到</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">data-thread-key=&quot;&lt;%= url %&gt;&quot;</span><br></pre></td></tr></table></figure>
-
-<p>注：</p>
-<ul>
-<li><p>不是fexo&#x2F;layout&#x2F;_partial&#x2F;duoshuo.ejs文件</p>
-</li>
-<li><p>使用<code>class=&quot;fa fa-spinner fa-spin&quot;</code>图标(没加载出来前就显示个菊花转转转)，需要引入引入font-awesome字体，在fexo&#x2F;layout&#x2F;_partial&#x2F;head.esj中head标签中添加如下引用</p>
-</li>
-</ul>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">href</span>=<span class="string">&quot;//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<h4 id="多说自定义文本设置"><a href="#多说自定义文本设置" class="headerlink" title="多说自定义文本设置"></a>多说自定义文本设置</h4><p>主要设置三个参数：暂无评论，1条评论，{num}条评论</p>
-<p>设置结果如下所示：</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E5%A4%9A%E8%AF%B4%E8%87%AA%E5%AE%9A%E4%B9%89%E6%96%87%E6%9C%AC.png" alt="多说自定义文本设置">
-</p>
-
-<h4 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h4><p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C01.png" alt="fexo主题添加评论数运行结果01">
-</p>
-
-<p>发现无法显示访问数，没有达到预期的效果，顿时要崩溃了</p>
-<h4 id="一线生机"><a href="#一线生机" class="headerlink" title="一线生机"></a>一线生机</h4><p>查看多说官方文档，有如下发现：</p>
-<blockquote>
-<p>data-thread-key中:和,即冒号和逗号有特别的用途，请不要使用url或其他有这两个符号的内容作为data-thread-key。</p>
-</blockquote>
-<p><a href="http://dev.duoshuo.com/docs/5003ecd94cab3e7250000008">评论框调用代码参数说明</a></p>
-<p>Fexo主题默认的多说data-thread-key是url,包含”:”,这是Fexo主题的一大不足</p>
-<h4 id="重拾信心"><a href="#重拾信心" class="headerlink" title="重拾信心"></a>重拾信心</h4><p>将fexo&#x2F;layout&#x2F;_partial&#x2F;component&#x2F;duoshuo.ejs文件中data-thread-key改为如下：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 多说评论框 start --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;ds-thread&quot;</span> <span class="attr">data-thread-key</span>=<span class="string">&quot;&lt;%= page.layout %&gt;-&lt;%= page.slug %&gt;&quot;</span> </span></span><br><span class="line"><span class="tag"><span class="attr">data-title</span>=<span class="string">&quot;&lt;%= page.title %&gt;&quot;</span> <span class="attr">data-url</span>=<span class="string">&quot;&lt;%= url %&gt;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 多说评论框 end --&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>将fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中评论显示代码改为如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.duoshuo_shortname)&#123; %&gt;</span><br><span class="line">	&lt;i class=&quot;icon-comment&quot;&gt;&lt;/i&gt; </span><br><span class="line">	&lt;span class=&quot;ds-thread-count&quot; data-thread-key=&quot;&lt;%= page.layout %&gt;-&lt;%= page.slug %&gt;&quot;&gt;</span><br><span class="line">	&lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt; 条评论</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
-
-<p>运行观察结果,成功！</p>
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C02.png" alt="fexo主题添加评论数运行结果01">
-</p>
-
-<h3 id="添加访问量显示"><a href="#添加访问量显示" class="headerlink" title="添加访问量显示"></a>添加访问量显示</h3><p>关于访问量统计这事儿,静态博客不太好搞,我找到了这个<a href="http://ibruce.info/2015/04/04/busuanzi/">不蒜子</a>,这位非著名码农自己做的访问统计,哈哈,点个赞</p>
-<h4 id="安装脚本"><a href="#安装脚本" class="headerlink" title="安装脚本"></a>安装脚本</h4><p>在fexo&#x2F;layout&#x2F;_partial&#x2F;head.esj文件的head标签中引入不算子js文件</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">async</span> <span class="attr">src</span>=<span class="string">&quot;//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="安装标签"><a href="#安装标签" class="headerlink" title="安装标签"></a>安装标签</h4><p>在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.busuanzi)&#123; %&gt;</span><br><span class="line">&lt;i class=&quot;fa fa-eye&quot;&gt;&lt;/i&gt; </span><br><span class="line">&lt;span id=&quot;busuanzi_container_page_pv&quot;&gt;</span><br><span class="line">   &amp;nbsp热度 &lt;span id=&quot;busuanzi_value_page_pv&quot;&gt;</span><br><span class="line">   &lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt;℃</span><br><span class="line">&lt;/span&gt;</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
-<p>注：&amp;nbsp表示空格，是爲了增加”fa fa-eye” icon 與“熱度”的距離</p>
-<h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>hexo&#x2F;_config.yml添加如下设置：</p>
-<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 不算子 站点访问量及文章访问量统计</span></span><br><span class="line"><span class="attr">busuanzi:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
-
-<p>至此大功告成，运行结果如上图所示！</p>
-<h2 id="小技巧"><a href="#小技巧" class="headerlink" title="小技巧"></a>小技巧</h2><p>如上述的font-awesome字体库,若要查看网址链接的CSS有哪些class icon图标,可以通过开发者工具将CSS文件下载到本地，一般CSS样式是压缩过的，可以用sublime的HTML-CSS-JS Prettify插件，将css代码格式化(只需右击选择HTML&#x2F;CSS&#x2F;JS Prettify -&gt; Prettify Code即可)，再查找有哪些class icon。</p>
-<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ol>
-<li><a href="http://bblove.me/2015/05/30/hexo-setting-with-comments-and-visitors/">给hexo配置上评论和访问量</a></li>
-<li><a href="http://dev.duoshuo.com/docs/5003ecd94cab3e7250000008">多说官方文档：评论框调用代码参数说明</a></li>
-<li><a href="http://ibruce.info/2015/04/04/busuanzi/">不算子</a></li>
-<li><a href="https://bruceyu1994.github.io/2016/10/22/Fexo/">我的博客展示地址</a></li>
-</ol>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>Fexo</tag>
-        <tag>Hexo</tag>
       </tags>
   </entry>
   <entry>
@@ -1643,6 +1426,239 @@
       </tags>
   </entry>
   <entry>
+    <title>EndNote使用</title>
+    <url>/2016/11/20/EndNote%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<blockquote>
+<p>提示：本文以Word2016 和 EndNote7 爲例，默認你已經安裝好EndNote，如果沒有，請先將EndNote安裝好，再繼續閲讀這篇文章</p>
+</blockquote>
+<h2 id="导入文献"><a href="#导入文献" class="headerlink" title="导入文献"></a>导入文献</h2><p>首先將需要參考的文獻導入到EndNote，文件 → 导入 → 文件夹</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_dir.jpg" alt="import directory">
+</p>
+
+<p>出现导入文件夹对话框，如下所示。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_select.jpg" alt="导入文件夹对话框">
+</p>
+
+<p>点击选择按钮，选择的文献所在的文件夹</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_select_dir.jpg" alt="选择文献所在文件夹">
+</p>
+
+<p>选择好之后，点击确定，回到“导入文件夹”对话框，点击“导入”按钮，即可完成文献导入，如下图所示。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_import.jpg" alt="click import">
+</p>
+
+<p>如下為导入结果</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/import_result.jpg" alt="import result">
+</p>
+
+<h2 id="修改文献格式"><a href="#修改文献格式" class="headerlink" title="修改文献格式"></a>修改文献格式</h2><p>有时候，可能因为文献格式的原因，导出的结果并不理想，如上图，导出的标题莫名其妙含有尖括号，作者栏没有内容等，我们需要手动对其进行修改。</p>
+<p>如图，选中对应的文献，将title两边的尖括号(&lt;&gt;)删除</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/manual_modify.jpg" alt="手动修改">
+</p>
+
+<p>修改好之后，然后点击其他文献，会提示你是否保存修改，点击确定按钮即可完成保存，如下图所示。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/ask_save.jpg" alt="是否保存修改">
+</p>
+
+<p>同样，你同时也可以手动添加或修改Author, Journal等其他信息。</p>
+<p>修改好文献格式后，你就可以在Word中随性地引用文献了。</p>
+<h2 id="插入引用"><a href="#插入引用" class="headerlink" title="插入引用"></a>插入引用</h2><p>在Word中，将光标定位到需要引用文献的地方，点击 Insert Citation 按钮，如下图所示</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_insert_citation.jpg" alt="Insert Citation">
+</p>
+
+<p>如下图所示，跳出文献搜索对话框，在输入框中输入你导入的文献的名称，点击“Find”按钮，即可搜索到你要引用的文献。点击选中对应的文献，点击“Insert”按钮，即可完成引用。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_insert_button.jpg" alt="点击插入按钮">
+</p>
+
+
+<p>文中的引用结果如下:</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/insert_citation_result.jpg" alt="文中的引用结果">
+</p>
+
+<p>此时，你会发现论文的末尾会有一条刚引用的文献，如下图所示。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/insert_citation_result2.jpg" alt="文中的引用结果">
+</p>
+
+<h2 id="设置引用样式"><a href="#设置引用样式" class="headerlink" title="设置引用样式"></a>设置引用样式</h2><p>做到这里，很多读者可能会说，怎么跟我的引用结果不一样，我的引用编号中没有中括号呀，别急，继续往下看，你会发现很神奇的事情。下面就是见证奇迹的时刻了[坏笑]</p>
+<h3 id="设置引用列表布局样式"><a href="#设置引用列表布局样式" class="headerlink" title="设置引用列表布局样式"></a>设置引用列表布局样式</h3><p>一般 Endnote 的默认样式，不是我们想要的样式，这时我们需要手动进行引用样式的修改。我用的样式时Nature样式，具体可通过下拉菜单进行选择，点击“选择另一个样式”，找到Nature,选择即可。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/select_citation_style.jpg" alt="选择另一个样式">
+</p>
+
+<p>点击编辑 → 输出样式 → 编辑”Nature”, 选择 参考文献 → 布局；默认布局如下</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/reference_layout.jpg" alt="引用默认布局">
+</p>
+
+<p>将Bibliography Number前后加上中括号，即“[Bibliography Number]”, 并将其后面的制表符删除，换成2个空格，因为制表符会比较宽，在word中并不美观。编辑结果如下图所示：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/reference_layout_modify_result.jpg" alt="修改引用布局">
+</p>
+
+<p>点击右上角的叉号</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/click_cross_button.jpg" alt="点击右上角叉">
+</p>
+
+<p>提示你是否保存之前的修改，点击是，EndNote 跳出重命名对话框，默认 “Nature 复制”，点击保存即可。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/ask_save_style.jpg" alt="保存修改样式">
+</p>
+
+<p>然后在word中选择，EndNote工具栏 → Style → Select Another Style, 选择新保存的”Nature 复制”样式，这时你会发现，文章最后的引用文献列表已经发生了变化。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/switch_word_refrence_style.jpg" alt="word中切换EndNote样式">
+</p>
+
+<h3 id="设置文中引用处编号样式"><a href="#设置文中引用处编号样式" class="headerlink" title="设置文中引用处编号样式"></a>设置文中引用处编号样式</h3><p>细心的读者可能会发现，文章中引用处的编号没有中括号“[]”,如下所示</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/citation_no_bracket.jpg" alt="word中切换EndNote样式">
+</p>
+
+<p>在EndNote中编辑 “Nature 复制”输出样式，选择 “引用” → “模板”，将 Citation 下的 “Bibliography Number”前后添加中括号，即“[Bibliography Number]”，修改结果如下：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/citation_add_bracket.jpg" alt="引用序号添加中括号">
+</p>
+
+<p>点击右上角的叉，保存修改，然后在word中更新引用即可。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/update_citations_and_bibliography.jpg" alt="更新引用">
+</p>
+
+<h3 id="引用列表缩进"><a href="#引用列表缩进" class="headerlink" title="引用列表缩进"></a>引用列表缩进</h3><p>到了这里，有强迫症的同胞可能会发现，如果引用列表中，如果引用过长，第二行会顶格显示，想把该引用的第二行设置悬挂缩进，和第一行对齐，简单，继续往下看。</p>
+<p>将光标定位到引用列表，右击，Edit Citation(s) → More</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/edit_citation_more.jpg" alt="更新引用">
+</p>
+
+<p>选择 Tools → Format Bibliography</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/tools_format_bibliography.jpg" alt="更新引用">
+</p>
+
+<p>选择 Layout，设置 Hanging即可，这里我设置的為0.848cm。</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/EndNote/layout_hanging.jpg" alt="更新引用">
+</p>
+
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>EndNote</tag>
+        <tag>Word</tag>
+        <tag>文献引用</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Fexo</title>
+    <url>/2016/10/22/Fexo/</url>
+    <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Fexo是Hexo的一款极简主题之一</p>
+<h2 id="自定义Fexo"><a href="#自定义Fexo" class="headerlink" title="自定义Fexo"></a>自定义Fexo</h2><h3 id="添加评论数量显示"><a href="#添加评论数量显示" class="headerlink" title="添加评论数量显示"></a>添加评论数量显示</h3><h4 id="添加显示的代码段"><a href="#添加显示的代码段" class="headerlink" title="添加显示的代码段"></a>添加显示的代码段</h4><p>首先,确认你的评论系统用的是多说,如果不是,那就不用继续往下看了</p>
+<p>在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.duoshuo_shortname)&#123; %&gt;</span><br><span class="line">&lt;i class=&quot;icon-comment&quot;&gt;&lt;/i&gt; </span><br><span class="line">&lt;span class=&quot;ds-thread-count&quot; data-thread-key=&quot;&lt;%= url %&gt;&quot;&gt;&lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt;条评论</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+
+<p>尤其注意data-thread-key的设置,它和你之前配置多说的时候是一致的,每篇文章有一个独一无二的key。</p>
+<p>Fexo已经集成了多说，fexo&#x2F;layout&#x2F;_partial&#x2F;component&#x2F;duoshuo.ejs文件中，我们可以看到</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">data-thread-key=&quot;&lt;%= url %&gt;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>注：</p>
+<ul>
+<li><p>不是fexo&#x2F;layout&#x2F;_partial&#x2F;duoshuo.ejs文件</p>
+</li>
+<li><p>使用<code>class=&quot;fa fa-spinner fa-spin&quot;</code>图标(没加载出来前就显示个菊花转转转)，需要引入引入font-awesome字体，在fexo&#x2F;layout&#x2F;_partial&#x2F;head.esj中head标签中添加如下引用</p>
+</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">href</span>=<span class="string">&quot;//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="多说自定义文本设置"><a href="#多说自定义文本设置" class="headerlink" title="多说自定义文本设置"></a>多说自定义文本设置</h4><p>主要设置三个参数：暂无评论，1条评论，{num}条评论</p>
+<p>设置结果如下所示：</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E5%A4%9A%E8%AF%B4%E8%87%AA%E5%AE%9A%E4%B9%89%E6%96%87%E6%9C%AC.png" alt="多说自定义文本设置">
+</p>
+
+<h4 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h4><p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C01.png" alt="fexo主题添加评论数运行结果01">
+</p>
+
+<p>发现无法显示访问数，没有达到预期的效果，顿时要崩溃了</p>
+<h4 id="一线生机"><a href="#一线生机" class="headerlink" title="一线生机"></a>一线生机</h4><p>查看多说官方文档，有如下发现：</p>
+<blockquote>
+<p>data-thread-key中:和,即冒号和逗号有特别的用途，请不要使用url或其他有这两个符号的内容作为data-thread-key。</p>
+</blockquote>
+<p><a href="http://dev.duoshuo.com/docs/5003ecd94cab3e7250000008">评论框调用代码参数说明</a></p>
+<p>Fexo主题默认的多说data-thread-key是url,包含”:”,这是Fexo主题的一大不足</p>
+<h4 id="重拾信心"><a href="#重拾信心" class="headerlink" title="重拾信心"></a>重拾信心</h4><p>将fexo&#x2F;layout&#x2F;_partial&#x2F;component&#x2F;duoshuo.ejs文件中data-thread-key改为如下：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 多说评论框 start --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;ds-thread&quot;</span> <span class="attr">data-thread-key</span>=<span class="string">&quot;&lt;%= page.layout %&gt;-&lt;%= page.slug %&gt;&quot;</span> </span></span><br><span class="line"><span class="tag"><span class="attr">data-title</span>=<span class="string">&quot;&lt;%= page.title %&gt;&quot;</span> <span class="attr">data-url</span>=<span class="string">&quot;&lt;%= url %&gt;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 多说评论框 end --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>将fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中评论显示代码改为如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.duoshuo_shortname)&#123; %&gt;</span><br><span class="line">	&lt;i class=&quot;icon-comment&quot;&gt;&lt;/i&gt; </span><br><span class="line">	&lt;span class=&quot;ds-thread-count&quot; data-thread-key=&quot;&lt;%= page.layout %&gt;-&lt;%= page.slug %&gt;&quot;&gt;</span><br><span class="line">	&lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt; 条评论</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+
+<p>运行观察结果,成功！</p>
+<p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/fexo/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C02.png" alt="fexo主题添加评论数运行结果01">
+</p>
+
+<h3 id="添加访问量显示"><a href="#添加访问量显示" class="headerlink" title="添加访问量显示"></a>添加访问量显示</h3><p>关于访问量统计这事儿,静态博客不太好搞,我找到了这个<a href="http://ibruce.info/2015/04/04/busuanzi/">不蒜子</a>,这位非著名码农自己做的访问统计,哈哈,点个赞</p>
+<h4 id="安装脚本"><a href="#安装脚本" class="headerlink" title="安装脚本"></a>安装脚本</h4><p>在fexo&#x2F;layout&#x2F;_partial&#x2F;head.esj文件的head标签中引入不算子js文件</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">async</span> <span class="attr">src</span>=<span class="string">&quot;//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="安装标签"><a href="#安装标签" class="headerlink" title="安装标签"></a>安装标签</h4><p>在fexo&#x2F;layout&#x2F;_partial&#x2F;article.esj的header标签内的div标签中添加如下代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;% if (theme.busuanzi)&#123; %&gt;</span><br><span class="line">&lt;i class=&quot;fa fa-eye&quot;&gt;&lt;/i&gt; </span><br><span class="line">&lt;span id=&quot;busuanzi_container_page_pv&quot;&gt;</span><br><span class="line">   &amp;nbsp热度 &lt;span id=&quot;busuanzi_value_page_pv&quot;&gt;</span><br><span class="line">   &lt;i class=&quot;fa fa-spinner fa-spin&quot;&gt;&lt;/i&gt;&lt;/span&gt;℃</span><br><span class="line">&lt;/span&gt;</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+<p>注：&amp;nbsp表示空格，是爲了增加”fa fa-eye” icon 與“熱度”的距離</p>
+<h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>hexo&#x2F;_config.yml添加如下设置：</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 不算子 站点访问量及文章访问量统计</span></span><br><span class="line"><span class="attr">busuanzi:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>至此大功告成，运行结果如上图所示！</p>
+<h2 id="小技巧"><a href="#小技巧" class="headerlink" title="小技巧"></a>小技巧</h2><p>如上述的font-awesome字体库,若要查看网址链接的CSS有哪些class icon图标,可以通过开发者工具将CSS文件下载到本地，一般CSS样式是压缩过的，可以用sublime的HTML-CSS-JS Prettify插件，将css代码格式化(只需右击选择HTML&#x2F;CSS&#x2F;JS Prettify -&gt; Prettify Code即可)，再查找有哪些class icon。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ol>
+<li><a href="http://bblove.me/2015/05/30/hexo-setting-with-comments-and-visitors/">给hexo配置上评论和访问量</a></li>
+<li><a href="http://dev.duoshuo.com/docs/5003ecd94cab3e7250000008">多说官方文档：评论框调用代码参数说明</a></li>
+<li><a href="http://ibruce.info/2015/04/04/busuanzi/">不算子</a></li>
+<li><a href="https://bruceyu1994.github.io/2016/10/22/Fexo/">我的博客展示地址</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Fexo</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Fiddler常見問題</title>
+    <url>/2016/10/16/Fiddler%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C/</url>
+    <content><![CDATA[<h2 id="无法显示会话结果"><a href="#无法显示会话结果" class="headerlink" title="无法显示会话结果"></a>无法显示会话结果</h2><p>可能是编码原因，一般Fiddler也会提示：</p>
+<blockquote>
+<p>“Response body is encoded. Click to decoded”</p>
+</blockquote>
+<p>只需点击提示按钮即可显示get到的信息，或者选择对应的Session，右击选择“decode selected session”即可。</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Fiddler</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Gprinter打印机驱动安装及设置</title>
     <url>/2016/10/15/Gprinter%E6%89%93%E5%8D%B0%E6%9C%BA%E9%A9%B1%E5%8A%A8%E5%AE%89%E8%A3%85%E5%8F%8A%E8%AE%BE%E7%BD%AE/</url>
     <content><![CDATA[<h2 id="驱动安装"><a href="#驱动安装" class="headerlink" title="驱动安装"></a>驱动安装</h2><ol>
@@ -1711,54 +1727,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Fiddler常見問題</title>
-    <url>/2016/10/16/Fiddler%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C/</url>
-    <content><![CDATA[<h2 id="无法显示会话结果"><a href="#无法显示会话结果" class="headerlink" title="无法显示会话结果"></a>无法显示会话结果</h2><p>可能是编码原因，一般Fiddler也会提示：</p>
-<blockquote>
-<p>“Response body is encoded. Click to decoded”</p>
-</blockquote>
-<p>只需点击提示按钮即可显示get到的信息，或者选择对应的Session，右击选择“decode selected session”即可。</p>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>Fiddler</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Markdown 常见问题</title>
-    <url>/2016/10/15/Markdown%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h2><ol>
-<li>方法一</li>
-</ol>
-<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">center</span>&gt;</span></span></span><br><span class="line"><span class="code">	![图片说明](https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg &quot;金鱼&quot;)</span></span><br><span class="line"><span class="code">&lt;/center&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-<ol start="2">
-<li>方法二</li>
-</ol>
-<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">align</span>=<span class="string">&quot;center&quot;</span>&gt;</span></span> </span><br><span class="line"><span class="code">	&lt;img src=&quot;https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg&quot; alt=&quot;CSDN图标&quot; /&gt;</span></span><br><span class="line"><span class="code">&lt;/div&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h2><ul>
-<li><code>&lt;p&gt;</code>:换行并加一行空白行</li>
-<li>连续两个空格会变成一个 <code>&lt;br&gt;</code></li>
-</ul>
-<p><a href="http://lutaf.com/markdown-simple-usage.htm">参考链接</a></p>
-<h2 id="Markdown哲学"><a href="#Markdown哲学" class="headerlink" title="Markdown哲学"></a>Markdown哲学</h2><p>内容與樣式分開，让思绪自由流畅不受阻，让创作回归内容本身。</p>
-<h2 id="使用感悟"><a href="#使用感悟" class="headerlink" title="使用感悟"></a>使用感悟</h2><ul>
-<li>格式越简单越好</li>
-</ul>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>Markdown</tag>
-        <tag>图片</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hexo搭建個人博客</title>
     <url>/2016/10/15/Hexo%E6%90%AD%E5%BB%BA%E5%80%8B%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
     <content><![CDATA[<h2 id="搭建個人博客"><a href="#搭建個人博客" class="headerlink" title="搭建個人博客"></a>搭建個人博客</h2><h3 id="環境配置"><a href="#環境配置" class="headerlink" title="環境配置"></a>環境配置</h3><h4 id="安裝Git"><a href="#安裝Git" class="headerlink" title="安裝Git"></a>安裝Git</h4><h4 id="安裝node-js"><a href="#安裝node-js" class="headerlink" title="安裝node.js"></a>安裝node.js</h4><h3 id="配置Github"><a href="#配置Github" class="headerlink" title="配置Github"></a>配置Github</h3><h3 id="安裝Hexo"><a href="#安裝Hexo" class="headerlink" title="安裝Hexo"></a>安裝Hexo</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ npm install hexo-cli -g</span><br><span class="line">$ hexo init blog</span><br><span class="line">$ cd blog</span><br><span class="line">$ npm install</span><br></pre></td></tr></table></figure>
@@ -1822,6 +1790,252 @@
       </tags>
   </entry>
   <entry>
+    <title>KV Cache 与 Prompt Caching：为什么稳定前缀能降低 Agent 成本</title>
+    <url>/2026/11/14/KV-Cache%E4%B8%8EPrompt-Caching-%E4%B8%BA%E4%BB%80%E4%B9%88%E7%A8%B3%E5%AE%9A%E5%89%8D%E7%BC%80%E8%83%BD%E9%99%8D%E4%BD%8EAgent%E6%88%90%E6%9C%AC/</url>
+    <content><![CDATA[<p>长时间运行的 Agent 有一个很容易被忽略的成本来源：每一轮调用模型时，系统提示词、工具定义、项目说明和历史消息都会再次出现在输入中。</p>
+<p>如果其中有 2 万个 Token 在 50 轮中保持不变，那么仅这段稳定内容就会累计形成 100 万个输入 Token。Prompt Caching 的价值，就是识别并复用这些相同前缀已经完成的计算。</p>
+<p>小红书作者“万有引力 AI”的视频《KV Cache 超轻入门，一篇就够了》围绕这一问题，介绍了 KV Cache、Prompt Caching，以及 Claude Code 如何通过稳定前缀提高缓存复用率。[cite:1] 本文在视频内容基础上，结合 Anthropic、Hugging Face、AWS 与案例原文，进一步区分几个经常混用的概念，并整理成可直接应用到 Agent 系统的工程方法。</p>
+<span id="more"></span>
+
+<h2 id="一、先区分三个容易混用的概念"><a href="#一、先区分三个容易混用的概念" class="headerlink" title="一、先区分三个容易混用的概念"></a>一、先区分三个容易混用的概念</h2><p>KV Cache、Prefix Caching 和 Prompt Caching 有关联，但不是同一个层次的概念。</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>作用范围</th>
+<th>核心作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>KV Cache</td>
+<td>一次生成过程内部</td>
+<td>复用已经处理过的历史 Token 的 Key、Value</td>
+</tr>
+<tr>
+<td>Prefix Caching</td>
+<td>多个请求之间</td>
+<td>识别相同前缀并复用其计算状态</td>
+</tr>
+<tr>
+<td>Prompt Caching</td>
+<td>API 产品能力</td>
+<td>让开发者指定或自动管理可跨请求复用的提示词前缀</td>
+</tr>
+</tbody></table>
+<p>最基础的是 KV Cache。跨请求的前缀缓存通常会复用与相同前缀对应的模型状态，而 Prompt Caching 则是模型服务商暴露给开发者的控制和计费接口。</p>
+<p>需要注意的是，API 文档通常只保证“相同前缀可被缓存和复用”，并不一定公开服务端如何存储、索引和调度底层张量。因此，“Prompt Caching 就是把 KV 张量按哈希永久保存”适合作为理解模型，不应被当成所有供应商都已公开确认的实现细节。</p>
+<h2 id="二、为什么生成模型需要-KV-Cache"><a href="#二、为什么生成模型需要-KV-Cache" class="headerlink" title="二、为什么生成模型需要 KV Cache"></a>二、为什么生成模型需要 KV Cache</h2><p>Decoder-only Transformer 的推理可以分成两个阶段：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">输入 Prompt</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">Prefill：并行处理全部输入 Token</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">Decode：逐个生成新的 Token</span><br></pre></td></tr></table></figure>
+
+<h3 id="Prefill：处理完整输入"><a href="#Prefill：处理完整输入" class="headerlink" title="Prefill：处理完整输入"></a>Prefill：处理完整输入</h3><p>Prefill 会一次性读取完整上下文，并在每一层计算注意力所需的中间状态。这个阶段并行度高，通常更受计算能力限制，并直接影响首 Token 延迟，也就是 TTFT（Time to First Token）。[cite:3]</p>
+<h3 id="Decode：逐-Token-生成"><a href="#Decode：逐-Token-生成" class="headerlink" title="Decode：逐 Token 生成"></a>Decode：逐 Token 生成</h3><p>Decode 每次只产生一个新 Token。每一步都要读取模型权重和此前积累的注意力状态，因此并行度较低，通常更受显存带宽限制。[cite:3]</p>
+<p>注意力机制可以简化理解为：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Attention(Q, K, V) = softmax(QKᵀ / √d) V</span><br></pre></td></tr></table></figure>
+
+<p>对于已经处理过的历史 Token，它们的 Key 和 Value 不会因为后面出现新 Token 而改变。Hugging Face 的文档说明，KV Cache 会按层保存历史 Token 的 K、V；生成新 Token 时，只计算当前 Token 的 Q、K、V，再把新的 K、V 追加到缓存中。[cite:2]</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">历史 Token：复用 K1...Kt-1、V1...Vt-1</span><br><span class="line">当前 Token：计算 Qt、Kt、Vt</span><br><span class="line">下一步：把 Kt、Vt 追加进缓存</span><br></pre></td></tr></table></figure>
+
+<p>没有 KV Cache 时，每一步都要重新计算全部历史 Token 的 K、V；使用缓存后，每一步只需为新 Token 计算新的 K、V。其代价是缓存占用会随序列长度线性增长。[cite:2]</p>
+<h2 id="三、为什么-Agent-特别适合-Prompt-Caching"><a href="#三、为什么-Agent-特别适合-Prompt-Caching" class="headerlink" title="三、为什么 Agent 特别适合 Prompt Caching"></a>三、为什么 Agent 特别适合 Prompt Caching</h2><p>普通问答可能只调用一次模型，但 Agent 往往采用循环结构：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">理解任务</span><br><span class="line">→ 调用工具</span><br><span class="line">→ 读取结果</span><br><span class="line">→ 再次推理</span><br><span class="line">→ 修改文件</span><br><span class="line">→ 运行测试</span><br><span class="line">→ 根据结果继续推理</span><br></pre></td></tr></table></figure>
+
+<p>每一轮请求大致可以拆成两部分。</p>
+<h3 id="静态前缀"><a href="#静态前缀" class="headerlink" title="静态前缀"></a>静态前缀</h3><ul>
+<li>系统指令和行为规则；</li>
+<li>工具名称、说明与参数 Schema；</li>
+<li>项目级规则；</li>
+<li>长文档、示例或背景资料；</li>
+<li>会话期间保持不变的检索结果。</li>
+</ul>
+<h3 id="动态后缀"><a href="#动态后缀" class="headerlink" title="动态后缀"></a>动态后缀</h3><ul>
+<li>新的用户消息；</li>
+<li>模型回复；</li>
+<li>工具调用与返回结果；</li>
+<li>终端输出；</li>
+<li>当前计划和任务状态。</li>
+</ul>
+<p>Agent 每走一步，动态后缀都会增长，但前面的系统指令和工具定义往往完全相同。如果模型服务能够复用稳定前缀，就不需要每一轮都重新完成相同的 Prefill。</p>
+<p>Anthropic 的 Prompt Caching 文档明确规定，Claude API 按 <code>tools</code>、<code>system</code>、<code>messages</code> 的顺序形成可缓存前缀。后续请求命中相同前缀时，可以降低输入成本和处理延迟。[cite:4]</p>
+<h2 id="四、Prompt-Caching-怎样计费"><a href="#四、Prompt-Caching-怎样计费" class="headerlink" title="四、Prompt Caching 怎样计费"></a>四、Prompt Caching 怎样计费</h2><p>截至 2026 年 11 月，Anthropic 的通用定价倍数为：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th align="right">相对基础输入价格</th>
+<th>缓存时长</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>普通输入</td>
+<td align="right">1 倍</td>
+<td>不缓存</td>
+</tr>
+<tr>
+<td>5 分钟缓存写入</td>
+<td align="right">1.25 倍</td>
+<td>5 分钟</td>
+</tr>
+<tr>
+<td>1 小时缓存写入</td>
+<td align="right">2 倍</td>
+<td>1 小时</td>
+</tr>
+<tr>
+<td>缓存读取</td>
+<td align="right">通常为 0.1 倍</td>
+<td>命中后刷新 TTL</td>
+</tr>
+</tbody></table>
+<p>部分最新模型的缓存读取价格更低。例如 Anthropic 文档显示，Claude Opus 5.5 和 Sonnet 5.5 的缓存读取是基础输入价格的 0.05 倍。具体价格会随模型和时间变化，应以官方定价页为准。[cite:4]</p>
+<p>缓存写入比普通输入更贵，因此“开启缓存”并不自动等于省钱。以通用的 0.1 倍读取价格计算：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">5 分钟缓存：</span><br><span class="line">首次写入 1.25 + 第二次读取 0.1 = 1.35</span><br><span class="line">两次普通输入 = 2</span><br><span class="line"></span><br><span class="line">1 小时缓存：</span><br><span class="line">首次写入 2 + 第二次读取 0.1 = 2.1</span><br><span class="line">两次普通输入 = 2</span><br></pre></td></tr></table></figure>
+
+<p>这意味着 5 分钟缓存通常在第一次复用时就开始节省成本；1 小时缓存则需要更多复用次数才能覆盖额外写入成本。真正的收益取决于：</p>
+<ul>
+<li>稳定前缀有多长；</li>
+<li>在 TTL 内能复用多少次；</li>
+<li>命中的是哪个模型及其缓存费率；</li>
+<li>动态后缀占总输入的比例；</li>
+<li>是否频繁改变缓存断点之前的内容。</li>
+</ul>
+<h2 id="五、92-命中率和-81-降本意味着什么"><a href="#五、92-命中率和-81-降本意味着什么" class="headerlink" title="五、92% 命中率和 81% 降本意味着什么"></a>五、92% 命中率和 81% 降本意味着什么</h2><p>视频引用了 Daily Dose of Data Science 对 Claude Code 的分析：一项跟踪案例处理了约 200 万输入 Token，其中约 184 万 Token 属于可复用前缀，前缀复用率约为 92%。按当时 Claude Sonnet 4.5 的价格估算，无缓存成本约为 6 美元，使用缓存后约为 1.15 美元，下降约 81%。[cite:5]</p>
+<p>这个数字来自 LMCache 团队对一次 Claude Code 任务流量的分析。原始实验包含 92 次 LLM 调用，运行约 13 分钟，任务来自 SWE-bench Verified；不同阶段的共享前缀比例从 92% 到接近 98%。[cite:6]</p>
+<p>因此，这组数字应该被理解为：</p>
+<blockquote>
+<p>一个高度依赖固定系统提示词、工具定义和循环调用的 Agent，可以获得非常高的前缀复用率。</p>
+</blockquote>
+<p>它不是 Claude Code 所有任务的官方平均值，也不意味着任意 Agent 打开缓存后都能固定节省 81%。任务长度、工具数量、上下文组织和缓存 TTL 都会改变最终结果。</p>
+<h2 id="六、稳定前缀应该怎样组织"><a href="#六、稳定前缀应该怎样组织" class="headerlink" title="六、稳定前缀应该怎样组织"></a>六、稳定前缀应该怎样组织</h2><p>缓存优化的核心原则可以概括为：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">越稳定的内容越靠前</span><br><span class="line">越动态的内容越靠后</span><br></pre></td></tr></table></figure>
+
+<p>一套实用的上下文顺序如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">1. 工具定义</span><br><span class="line">2. 系统指令与行为规则</span><br><span class="line">3. 项目规则、参考文档和稳定背景</span><br><span class="line">4. 对话历史</span><br><span class="line">5. 工具结果、终端输出和本轮用户输入</span><br></pre></td></tr></table></figure>
+
+<p>其中前 3 层构成相对稳定的基础，后 2 层持续增长。</p>
+<h3 id="不要在稳定前缀中放动态值"><a href="#不要在稳定前缀中放动态值" class="headerlink" title="不要在稳定前缀中放动态值"></a>不要在稳定前缀中放动态值</h3><p>以下内容很容易制造不必要的缓存失效：</p>
+<ul>
+<li>当前时间戳；</li>
+<li>每轮变化的请求 ID；</li>
+<li>用户在线状态；</li>
+<li>随机排序的工具定义；</li>
+<li>不稳定的 JSON 序列化结果；</li>
+<li>每轮都重写的状态摘要。</li>
+</ul>
+<p>这些值应该放到靠后的动态消息中，而不是写进系统提示词。</p>
+<h3 id="会话中不要随意增减工具"><a href="#会话中不要随意增减工具" class="headerlink" title="会话中不要随意增减工具"></a>会话中不要随意增减工具</h3><p>工具定义位于 Claude 提示词结构的最前面。增加工具、删除工具，或改变工具 Schema，都会改变后续前缀。[cite:4]</p>
+<p>如果工具很多，可以在“缓存稳定性”和“上下文体积”之间做权衡：</p>
+<ul>
+<li>高频工具保持固定并提前加载；</li>
+<li>低频工具通过稳定的工具集合分组；</li>
+<li>不要每轮根据临时判断重新排序；</li>
+<li>工具 Schema 的序列化方式保持确定性。</li>
+</ul>
+<h3 id="不要原地修改历史前缀"><a href="#不要原地修改历史前缀" class="headerlink" title="不要原地修改历史前缀"></a>不要原地修改历史前缀</h3><p>状态变化应尽量以新消息追加，而不是修改已经发送过的系统指令或历史消息。追加操作保留旧前缀，原地修改则会产生新的前缀。</p>
+<p>不过，“前面改一个字符，所有缓存都归零”也需要更精确地理解。Anthropic 的显式缓存支持多个断点，并会在每个断点之前向后检查最多 20 个内容块，寻找之前写入过的最长匹配前缀。因此，后部变化不一定使更早的缓存断点失效；真正危险的是修改稳定断点之前的内容。[cite:4]</p>
+<h2 id="七、上下文压缩也要保护缓存"><a href="#七、上下文压缩也要保护缓存" class="headerlink" title="七、上下文压缩也要保护缓存"></a>七、上下文压缩也要保护缓存</h2><p>当对话接近上下文上限时，常见做法是总结旧消息并开启一个较短的新上下文。如果直接重写整个提示词，可能同时失去已有缓存。</p>
+<p>更稳妥的处理方式是：</p>
+<ol>
+<li>保留相同的工具、系统指令和历史前缀；</li>
+<li>在末尾追加“总结当前对话”的请求；</li>
+<li>让总结调用复用已有前缀；</li>
+<li>将总结结果写入下一阶段的新上下文；</li>
+<li>后续会话继续维持新的稳定结构。</li>
+</ol>
+<p>子 Agent 也可以降低主上下文膨胀。让探索 Agent 读取大量文件，再只把结构化结论返回主 Agent，可以避免把全部原始工具输出长期留在主 Agent 的动态后缀中。LMCache 对 Claude Code 的跟踪显示，探索、规划和执行阶段采用了不同上下文，并通过摘要在阶段间传递信息。[cite:6]</p>
+<h2 id="八、怎样监控缓存是否真的生效"><a href="#八、怎样监控缓存是否真的生效" class="headerlink" title="八、怎样监控缓存是否真的生效"></a>八、怎样监控缓存是否真的生效</h2><p>Claude API 的 usage 信息提供三个关键字段：[cite:4]</p>
+<ul>
+<li><code>cache_creation_input_tokens</code>：本次写入缓存的 Token；</li>
+<li><code>cache_read_input_tokens</code>：本次从缓存读取的 Token；</li>
+<li><code>input_tokens</code>：未作为缓存创建或读取处理的输入 Token。</li>
+</ul>
+<p>可以同时观察两个指标。</p>
+<h3 id="缓存复用率"><a href="#缓存复用率" class="headerlink" title="缓存复用率"></a>缓存复用率</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">cache_read_input_tokens</span><br><span class="line">────────────────────────────────────────────────────</span><br><span class="line">cache_read_input_tokens + cache_creation_input_tokens</span><br></pre></td></tr></table></figure>
+
+<p>这个指标关注缓存流量中“读取”相对“新建”的比例。</p>
+<h3 id="总输入缓存占比"><a href="#总输入缓存占比" class="headerlink" title="总输入缓存占比"></a>总输入缓存占比</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">cache_read_input_tokens</span><br><span class="line">──────────────────────────────────────────────────────────────────</span><br><span class="line">cache_read_input_tokens + cache_creation_input_tokens + input_tokens</span><br></pre></td></tr></table></figure>
+
+<p>这个指标更接近“整个输入中有多少内容通过缓存读取”，适合衡量最终成本结构。</p>
+<p>监控时不要只看平均值，还应按以下维度拆分：</p>
+<ul>
+<li>Agent 类型；</li>
+<li>模型；</li>
+<li>工具集合版本；</li>
+<li>会话阶段；</li>
+<li>缓存 TTL；</li>
+<li>系统提示词版本；</li>
+<li>命中和未命中请求的 TTFT；</li>
+<li>每个任务的完整成本。</li>
+</ul>
+<p>如果发布一次提示词改动后命中率突然下降，通常应先检查工具 Schema、系统提示词、消息顺序和序列化是否发生变化。</p>
+<h2 id="九、工程检查清单"><a href="#九、工程检查清单" class="headerlink" title="九、工程检查清单"></a>九、工程检查清单</h2><p>在 Agent 上线前，可以逐项检查：</p>
+<ul>
+<li>系统提示词是否包含时间、ID 等动态数据；</li>
+<li>工具列表与 Schema 是否在会话中保持稳定；</li>
+<li>JSON 和工具定义的序列化顺序是否确定；</li>
+<li>长文档和示例是否放在动态消息之前；</li>
+<li>状态变化是否通过追加消息表达；</li>
+<li>上下文压缩是否复用旧前缀；</li>
+<li>是否根据会话节奏选择 5 分钟或 1 小时 TTL；</li>
+<li>是否记录缓存创建、读取和普通输入 Token；</li>
+<li>是否按完整任务计算成本，而不是只看单次请求；</li>
+<li>是否为不同模型分别评估缓存策略。</li>
+</ul>
+<h2 id="十、结论"><a href="#十、结论" class="headerlink" title="十、结论"></a>十、结论</h2><p>KV Cache 解决的是自回归生成过程中重复计算历史 Token 的问题；Prefix Caching 将这种复用扩展到具有相同前缀的不同请求；Prompt Caching 则把跨请求复用包装成可控制、可计费、可观测的 API 能力。</p>
+<p>对于 Agent，优化重点不只是“打开缓存”，而是设计一个稳定的上下文结构：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">固定工具和系统规则</span><br><span class="line">→ 稳定项目上下文</span><br><span class="line">→ 追加对话与工具结果</span><br><span class="line">→ 监控真实缓存占比</span><br></pre></td></tr></table></figure>
+
+<p>当稳定内容足够长、调用轮次足够多时，Prompt Caching 可以同时降低成本和首 Token 延迟。反过来，如果系统提示词、工具 Schema 或前缀顺序持续变化，缓存写入费用反而可能成为额外开销。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] 万有引力 AI，<a href="https://www.xiaohongshu.com/explore/69fc9f540000000038021597">KV Cache 超轻入门，一篇就够了</a>。</p>
+<p>[cite:2] Hugging Face Transformers, <a href="https://github.com/huggingface/transformers/blob/main/docs/source/en/cache_explanation.md">How caching works</a>.</p>
+<p>[cite:3] AWS Prescriptive Guidance, <a href="https://docs.aws.amazon.com/prescriptive-guidance/latest/gen-ai-inference-architecture-and-best-practices-on-aws/how-ai-inference-works.html">How AI Inference works</a>, 2026-02-11.</p>
+<p>[cite:4] Anthropic, <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching">Prompt caching</a>, accessed 2026-11-14.</p>
+<p>[cite:5] Daily Dose of Data Science, <a href="https://www.dailydoseofds.com/p/prompt-caching-in-llms/">Prompt Caching in LLMs!</a>, 2026-03-10.</p>
+<p>[cite:6] LMCache, <a href="https://blog.lmcache.ai/en/2025/12/23/context-engineering-reuse-pattern-under-the-hood-of-claude-code/">Context Engineering &amp; Reuse Pattern Under the Hood of Claude Code</a>, 2025-12-23.</p>
+]]></content>
+      <categories>
+        <category>ai-engineering</category>
+      </categories>
+      <tags>
+        <tag>AI Agent</tag>
+        <tag>LLM</tag>
+        <tag>Claude Code</tag>
+        <tag>KV Cache</tag>
+        <tag>Prompt Caching</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Markdown 常见问题</title>
+    <url>/2016/10/15/Markdown%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h2><ol>
+<li>方法一</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">center</span>&gt;</span></span></span><br><span class="line"><span class="code">	![图片说明](https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg &quot;金鱼&quot;)</span></span><br><span class="line"><span class="code">&lt;/center&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>方法二</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">align</span>=<span class="string">&quot;center&quot;</span>&gt;</span></span> </span><br><span class="line"><span class="code">	&lt;img src=&quot;https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg&quot; alt=&quot;CSDN图标&quot; /&gt;</span></span><br><span class="line"><span class="code">&lt;/div&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h2><ul>
+<li><code>&lt;p&gt;</code>:换行并加一行空白行</li>
+<li>连续两个空格会变成一个 <code>&lt;br&gt;</code></li>
+</ul>
+<p><a href="http://lutaf.com/markdown-simple-usage.htm">参考链接</a></p>
+<h2 id="Markdown哲学"><a href="#Markdown哲学" class="headerlink" title="Markdown哲学"></a>Markdown哲学</h2><p>内容與樣式分開，让思绪自由流畅不受阻，让创作回归内容本身。</p>
+<h2 id="使用感悟"><a href="#使用感悟" class="headerlink" title="使用感悟"></a>使用感悟</h2><ul>
+<li>格式越简单越好</li>
+</ul>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Markdown</tag>
+        <tag>图片</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>RecyclerView的使用</title>
     <url>/2016/11/20/RecyclerView%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="Rendering-Problems"><a href="#Rendering-Problems" class="headerlink" title="Rendering Problems"></a>Rendering Problems</h3><p>在布局文件中添加 RecyclerView,会出现 Rendering Problems,具体问题如下图所示：</p>
@@ -1847,26 +2061,6 @@
       <tags>
         <tag>RecyclerView</tag>
         <tag>Exception</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows常见问题</title>
-    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
-<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
-<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
-<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
-<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
-<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
-<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
-<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>windows</tag>
-        <tag>win10</tag>
       </tags>
   </entry>
   <entry>
@@ -1991,6 +2185,26 @@
       </tags>
   </entry>
   <entry>
+    <title>Windows常见问题</title>
+    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
+<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
+<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
+<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
+<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
+<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
+<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
+<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>windows</tag>
+        <tag>win10</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Word常见问题</title>
     <url>/2017/03/06/Word%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2 id="Word-2016"><a href="#Word-2016" class="headerlink" title="Word 2016"></a>Word 2016</h2><h3 id="文字重叠"><a href="#文字重叠" class="headerlink" title="文字重叠"></a>文字重叠</h3><p>【Reason】计算机中没有相应的字体  </p>
@@ -2080,7 +2294,7 @@
 </ul>
 <ol>
 <li>先输入$ git remote rm origin</li>
-<li>再输入$ git remote add origin <a href="mailto:&#x67;&#x69;&#116;&#64;&#99;&#x6e;&#98;&#46;&#x63;&#x6f;&#x6f;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
+<li>再输入$ git remote add origin <a href="mailto:&#x67;&#105;&#x74;&#64;&#99;&#110;&#98;&#x2e;&#99;&#111;&#111;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
 </ol>
 <h3 id="2-warning-LF-will-be-replaced-by-CRLF"><a href="#2-warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="2. warning: LF will be replaced by CRLF"></a>2. warning: LF will be replaced by CRLF</h3><p>运行如下命令时；</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">warning: LF will be replaced by CRLF in _config.yml.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br></pre></td></tr></table></figure>
@@ -2133,6 +2347,15 @@
         <tag>git</tag>
         <tag>命令</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>test</title>
+    <url>/2016/10/23/test/</url>
+    <content><![CDATA[<p>測試博客</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
   </entry>
   <entry>
     <title>在华为昇腾上部署 DeepSeek V4，并接入本地 Claude Code</title>
@@ -2398,15 +2621,6 @@
         <tag>book</tag>
         <tag>reading</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>test</title>
-    <url>/2016/10/23/test/</url>
-    <content><![CDATA[<p>測試博客</p>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
   </entry>
   <entry>
     <title>把 Agent 接进飞书：从消息回调到可扩展 Gateway</title>
@@ -2689,202 +2903,6 @@
       <tags>
         <tag>诗词</tag>
         <tag>life</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>雅思口语从 6 分到 7 分：先判断你卡在哪里</title>
-    <url>/2026/11/01/%E9%9B%85%E6%80%9D%E5%8F%A3%E8%AF%AD%E4%BB%8E6%E5%88%86%E5%88%B07%E5%88%86/</url>
-    <content><![CDATA[<p>有些考生第一次拿到雅思口语 6.5，一个月后再考变成 6，再过一段时间还是 6.5。投入了更多时间，成绩却始终没有突破。</p>
-<p>问题可能不是“不够努力”，而是没有判断清楚自己究竟卡在哪里。</p>
-<p>Keith 在 <strong>IELTS Speaking from 6 to 7: Why you are stuck at Band 6</strong> 中提出了一个很实用的诊断模型：雅思分数不是几个孤立的点，而是一个个有宽度的区间。同样拿到 6 分的两个人，真实水平可能处在这个区间的两端，需要采用完全不同的学习策略。[cite:1][cite:2]</p>
-<span id="more"></span>
-
-<h2 id="分数是区间，不是一个点"><a href="#分数是区间，不是一个点" class="headerlink" title="分数是区间，不是一个点"></a>分数是区间，不是一个点</h2><p>很多人会把雅思分数理解成一条刻度线：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">6.0 -------- 7.0 -------- 8.0</span><br></pre></td></tr></table></figure>
-
-<p>仿佛从 6 分到 7 分，只需要沿着这条线前进一步。但实际情况更接近三个相邻的区间：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">|------ Band 6 ------|------ Band 7 ------|------ Band 8 ------|</span><br></pre></td></tr></table></figure>
-
-<p>一个人可能刚刚进入 Band 6，另一个人可能已经接近 Band 7。两个人的成绩单都写着 6，但提分距离完全不同。</p>
-<ul>
-<li><strong>Band 6 区间底部</strong>：核心问题通常是实际口语能力不足。</li>
-<li><strong>Band 6 区间顶部</strong>：语言能力可能已经接近要求，主要问题更可能是考试认知、答题方法或练习不足。</li>
-</ul>
-<p>因此，“怎样从 6 分提高到 7 分”并没有一个适用于所有人的答案。第一步不是背更多单词，而是先确定自己的位置。</p>
-<h2 id="判断自己属于哪一种情况"><a href="#判断自己属于哪一种情况" class="headerlink" title="判断自己属于哪一种情况"></a>判断自己属于哪一种情况</h2><h3 id="情况一：语言能力还没有达到要求"><a href="#情况一：语言能力还没有达到要求" class="headerlink" title="情况一：语言能力还没有达到要求"></a>情况一：语言能力还没有达到要求</h3><p>如果经常提出下面的问题，通常说明基础语言能力仍是主要瓶颈：</p>
-<ul>
-<li>这个答案应该使用哪一种时态？</li>
-<li>这里应该使用哪个介词？</li>
-<li>我知道这个词，但说话时总是想不起来。</li>
-<li>一开口就要先在脑中翻译中文。</li>
-<li>换一个不熟悉的话题就无法持续表达。</li>
-</ul>
-<p>这类考生即使反复刷雅思题，也可能只是在重复暴露同一个问题：语法、词汇和表达还没有转化为自动化的口语能力。</p>
-<h3 id="情况二：应试技巧限制了真实水平"><a href="#情况二：应试技巧限制了真实水平" class="headerlink" title="情况二：应试技巧限制了真实水平"></a>情况二：应试技巧限制了真实水平</h3><p>如果更关心下面的问题，说明可能已经接近 Band 7，但还不够熟悉考试：</p>
-<ul>
-<li>为什么考官总是打断我？</li>
-<li>为什么考官不让我继续说？</li>
-<li>Part 2 只说了一分钟怎么办？</li>
-<li>Part 1 应该说多长？</li>
-<li>Part 3 怎样展开观点？</li>
-</ul>
-<p>考官打断回答不一定意味着表现不好，也可能只是需要控制考试节奏。Part 2 没有说满两分钟，则说明对题卡组织和计时练习还不熟悉。</p>
-<p>这类考生仍然需要提升语言，但复习重点应该更多地转向考试结构、限时表达和模拟练习。</p>
-<h2 id="路径一：先提高真实口语能力"><a href="#路径一：先提高真实口语能力" class="headerlink" title="路径一：先提高真实口语能力"></a>路径一：先提高真实口语能力</h2><p>如果处在 Band 6 的底部，Keith 给出的建议非常直接：<strong>暂时停止刷雅思题，用大约两个月学习通用英语。</strong></p>
-<p>这不是停止学习，而是暂时离开分数压力，把注意力重新放回英语本身。只练雅思题，就像足球运动员只练射门，却不练传球、带球、跑位和临场反应。熟悉题目不等于真正提高了交流能力。</p>
-<h3 id="减少工具，而不是不断收集工具"><a href="#减少工具，而不是不断收集工具" class="headerlink" title="减少工具，而不是不断收集工具"></a>减少工具，而不是不断收集工具</h3><p>常见误区是同时使用十几本书、多个网站和大量 App，最后时间都花在寻找资源、切换平台和比较课程上。</p>
-<p>更有效的做法是只保留一两个主要工具：</p>
-<ul>
-<li>一本系统语法书；</li>
-<li>一本按主题组织的词汇书；</li>
-<li>一个带字幕、查词和生词收藏功能的视频工具；</li>
-<li>一个稳定的口语练习渠道。</li>
-</ul>
-<p>视频中推荐的具体应用可能随着时间变化，但选择工具的原则没有变：它应该让人能够在真实语境中听到表达、理解含义、保存内容并立即练习，而不是不断把注意力带到新的推荐页面。</p>
-<h3 id="用固定线索建立学习习惯"><a href="#用固定线索建立学习习惯" class="headerlink" title="用固定线索建立学习习惯"></a>用固定线索建立学习习惯</h3><p>学习习惯需要一个清晰的触发线索，可以是时间，也可以是地点：</p>
-<ul>
-<li>每天早餐后练习 30 分钟；</li>
-<li>每天下班到家后立即开始；</li>
-<li>坐到固定书桌前，就只做英语练习。</li>
-</ul>
-<p>重点不在于某一天学了多久，而在于能否稳定重复。语言能力来自长期积累，规律、耐心和持续性比偶尔进行一次长时间突击更重要。</p>
-<p>同时，学习内容应该尽量与个人兴趣相关。喜欢科技、电影或旅行，就围绕这些内容听、读和表达。越愿意主动接触，练习越容易持续。</p>
-<h3 id="用“冰箱练习法”提高流利度"><a href="#用“冰箱练习法”提高流利度" class="headerlink" title="用“冰箱练习法”提高流利度"></a>用“冰箱练习法”提高流利度</h3><p>视频介绍了一种来自记忆游戏的练习方法，可以称为 <strong>Fridge Technique</strong>。</p>
-<p>传统游戏会不断重复并增加冰箱里的物品：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">In my fridge, there is a bottle of milk.</span><br><span class="line"></span><br><span class="line">In my fridge, there is a bottle of milk and a slice of cheese.</span><br><span class="line"></span><br><span class="line">In my fridge, there is a bottle of milk, a slice of cheese and some mustard.</span><br></pre></td></tr></table></figure>
-
-<p>口语练习也可以采用相同方式：每次重复已有句子，再增加一个新的短语或从句。</p>
-<p>例如，回答 <code>Where are you from?</code>：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I&#x27;m from Manchester.</span><br><span class="line"></span><br><span class="line">I&#x27;m from Manchester, which is in the north of England.</span><br><span class="line"></span><br><span class="line">I&#x27;m from Manchester, which is in the north of England,</span><br><span class="line">a beautiful part of the country, by the way.</span><br></pre></td></tr></table></figure>
-
-<p>回答 <code>What do you like about your hometown?</code>：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I think it&#x27;s a lovely place.</span><br><span class="line"></span><br><span class="line">I think it&#x27;s a lovely place because it&#x27;s not far from the sea.</span><br><span class="line"></span><br><span class="line">I think it&#x27;s a lovely place because it&#x27;s not far from the sea,</span><br><span class="line">and quite a few tourists visit it.</span><br></pre></td></tr></table></figure>
-
-<p>每轮只增加一个信息单元，通常扩展到三个层次即可。这个过程同时训练了三件事：</p>
-<ol>
-<li>在不重新构思全部内容的情况下继续说话；</li>
-<li>将短句自然连接成长句；</li>
-<li>通过重复降低提取词汇和句型的负担。</li>
-</ol>
-<h3 id="用-Listen、Repeat、Use-激活词汇"><a href="#用-Listen、Repeat、Use-激活词汇" class="headerlink" title="用 Listen、Repeat、Use 激活词汇"></a>用 Listen、Repeat、Use 激活词汇</h3><p>认识一个单词，不代表能在对话中使用它。阅读和听力属于输入能力，口语则要求在有限时间内主动提取语言。</p>
-<p>视频给出的词汇练习循环很简单：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Listen → Repeat → Use</span><br></pre></td></tr></table></figure>
-
-<p>具体可以这样执行：</p>
-<ol>
-<li>从视频、播客或真实对话中听到一个表达；</li>
-<li>模仿语音、重音和上下文，完整重复；</li>
-<li>立即用自己的经历造两到三个句子；</li>
-<li>记录表达，并在之后定期复习；</li>
-<li>在新的话题中再次使用。</li>
-</ol>
-<p>词汇应该在语境中学习，并覆盖不同话题。只背孤立的中文释义，很难建立搭配、语气和使用场景。</p>
-<h2 id="路径二：集中提高考试技巧"><a href="#路径二：集中提高考试技巧" class="headerlink" title="路径二：集中提高考试技巧"></a>路径二：集中提高考试技巧</h2><p>如果已经处于 Band 6 的顶部，继续扩大语言能力当然有帮助，但更高效的做法是系统掌握考试规则。</p>
-<h3 id="理解三个部分的任务差异"><a href="#理解三个部分的任务差异" class="headerlink" title="理解三个部分的任务差异"></a>理解三个部分的任务差异</h3><table>
-<thead>
-<tr>
-<th>部分</th>
-<th>核心任务</th>
-<th>常见问题</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Part 1</td>
-<td>对个人和熟悉话题作出自然回答</td>
-<td>回答过短，或把简单问题讲成演讲</td>
-</tr>
-<tr>
-<td>Part 2</td>
-<td>根据题卡连续表达一到两分钟</td>
-<td>故事过于复杂，时态失控，没有计时训练</td>
-</tr>
-<tr>
-<td>Part 3</td>
-<td>讨论抽象问题并展开观点</td>
-<td>只有结论，没有原因、例子、比较或结果</td>
-</tr>
-</tbody></table>
-<p>IELTS Speaking 不是知识竞赛。遇到建筑、科学或历史等陌生话题时，不需要给出专家观点。考官评估的是能否用英语清楚表达和发展想法。</p>
-<h3 id="使用官方材料建立正确认知"><a href="#使用官方材料建立正确认知" class="headerlink" title="使用官方材料建立正确认知"></a>使用官方材料建立正确认知</h3><p>应优先完成以下练习：</p>
-<ol>
-<li>阅读官方考试格式和评分标准；</li>
-<li>使用官方样题了解问题类型；</li>
-<li>完成一次严格计时的完整模拟；</li>
-<li>分别练习 Part 1、Part 2 和 Part 3；</li>
-<li>回听录音，定位停顿、重复、语法失控和发音问题；</li>
-<li>根据反馈决定下一阶段练什么。</li>
-</ol>
-<p>模拟考试的价值不是得到一个模糊的预估分，而是判断问题来自语言能力、考试技巧，还是两者的组合。</p>
-<h2 id="官方标准中的-Band-6-与-Band-7"><a href="#官方标准中的-Band-6-与-Band-7" class="headerlink" title="官方标准中的 Band 6 与 Band 7"></a>官方标准中的 Band 6 与 Band 7</h2><p>IELTS Speaking 从四个维度评分，每项权重相同，都是 25%：流利度与连贯性、词汇资源、语法范围与准确性、发音。[cite:3][cite:4]</p>
-<table>
-<thead>
-<tr>
-<th>评分维度</th>
-<th>Band 6 的典型表现</th>
-<th>Band 7 的关键提升</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>流利度与连贯性</td>
-<td>愿意持续表达，但重复、自我修正或停顿有时影响连贯</td>
-<td>能较轻松地持续表达，并灵活使用连接和话语标记</td>
-</tr>
-<tr>
-<td>词汇资源</td>
-<td>词汇足以展开话题，也能改述，但存在不恰当用词</td>
-<td>能灵活讨论不同话题，并较自然地使用部分习语和搭配</td>
-</tr>
-<tr>
-<td>语法范围与准确性</td>
-<td>能混合简单和复杂结构，但灵活性有限、错误较多</td>
-<td>经常使用复杂结构，整体控制较好，仍允许出现少量错误</td>
-</tr>
-<tr>
-<td>发音</td>
-<td>大体可以听懂，但语音特征控制不稳定</td>
-<td>整体容易理解，能够较稳定地运用重音、节奏和语调</td>
-</tr>
-</tbody></table>
-<p>这个对比说明，Band 7 并不要求完美：</p>
-<ul>
-<li>仍然可以出现停顿；</li>
-<li>仍然可以犯语法错误；</li>
-<li>仍然可能读错个别单词；</li>
-<li>不需要每句话都使用复杂词汇。</li>
-</ul>
-<p>真正的差异是更强的<strong>持续表达、灵活运用和整体控制</strong>。因此，刻意塞入生僻词、背诵长答案或强行使用复杂句，未必能够提高成绩，反而可能损害自然度和准确性。</p>
-<h2 id="一套可执行的自测方法"><a href="#一套可执行的自测方法" class="headerlink" title="一套可执行的自测方法"></a>一套可执行的自测方法</h2><p>先录制三段回答：</p>
-<ol>
-<li>Part 1：回答一个熟悉话题，持续约 20 秒；</li>
-<li>Part 2：准备一分钟后，连续表达一到两分钟；</li>
-<li>Part 3：对一个抽象问题给出观点、原因和例子。</li>
-</ol>
-<p>回听时不要只问“听起来好不好”，而要逐项记录：</p>
-<ul>
-<li>是否因为想词或组织语法而频繁停顿；</li>
-<li>是否能够换一种方式解释不会的词；</li>
-<li>是否只会使用简单句；</li>
-<li>错误是否反复出现在同一种结构中；</li>
-<li>发音是否影响理解；</li>
-<li>是否真正回答并展开了问题；</li>
-<li>是否熟悉三个部分的节奏。</li>
-</ul>
-<p>如果大部分问题发生在语言生成过程中，应先走“通用英语”路径；如果日常对话比较流畅，但考试中经常答非所问、时间失控或无法展开，则应优先走“考试技巧”路径。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从雅思口语 6 分到 7 分，最重要的不是找到更多资料，而是做出正确诊断。</p>
-<p>处在 Band 6 底部时，应暂时放下刷题，通过规律学习、真实输入、重复模仿、主动使用和互动交流提升整体口语能力。处在 Band 6 顶部时，则应集中理解考试结构，进行限时模拟，并针对三个部分练习不同的回答策略。</p>
-<p>分数只是结果。真正需要提升的是四项可观察的能力：能否持续表达，能否灵活选词，能否较准确地使用多样句型，以及能否让对方轻松听懂。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://www.bilibili.com/video/BV1fK421C7yr/?p=54">Bilibili：IELTS Speaking from 6 to 7，第 54 集</a></p>
-<p>[cite:2] <a href="https://www.youtube.com/watch?v=DUbkdsSK6kk">English Speaking Success：IELTS Speaking from 6 to 7: Why you are stuck at Band 6</a></p>
-<p>[cite:3] <a href="https://ielts.org/news-and-insights/differences-between-ielts-6-and-7-for-productive-skills">IELTS：Differences between IELTS 6 and 7 for productive skills</a></p>
-<p>[cite:4] <a href="https://takeielts.britishcouncil.org/results/how-is-ielts-assessed">British Council：IELTS Assessment Criteria &amp; Band Score Descriptors</a></p>
-]]></content>
-      <categories>
-        <category>english-learning</category>
-      </categories>
-      <tags>
-        <tag>IELTS</tag>
-        <tag>雅思口语</tag>
-        <tag>英语学习</tag>
       </tags>
   </entry>
   <entry>
@@ -3252,6 +3270,202 @@
         <tag>雅思口语</tag>
         <tag>英语学习</tag>
         <tag>News</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>雅思口语从 6 分到 7 分：先判断你卡在哪里</title>
+    <url>/2026/11/01/%E9%9B%85%E6%80%9D%E5%8F%A3%E8%AF%AD%E4%BB%8E6%E5%88%86%E5%88%B07%E5%88%86/</url>
+    <content><![CDATA[<p>有些考生第一次拿到雅思口语 6.5，一个月后再考变成 6，再过一段时间还是 6.5。投入了更多时间，成绩却始终没有突破。</p>
+<p>问题可能不是“不够努力”，而是没有判断清楚自己究竟卡在哪里。</p>
+<p>Keith 在 <strong>IELTS Speaking from 6 to 7: Why you are stuck at Band 6</strong> 中提出了一个很实用的诊断模型：雅思分数不是几个孤立的点，而是一个个有宽度的区间。同样拿到 6 分的两个人，真实水平可能处在这个区间的两端，需要采用完全不同的学习策略。[cite:1][cite:2]</p>
+<span id="more"></span>
+
+<h2 id="分数是区间，不是一个点"><a href="#分数是区间，不是一个点" class="headerlink" title="分数是区间，不是一个点"></a>分数是区间，不是一个点</h2><p>很多人会把雅思分数理解成一条刻度线：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">6.0 -------- 7.0 -------- 8.0</span><br></pre></td></tr></table></figure>
+
+<p>仿佛从 6 分到 7 分，只需要沿着这条线前进一步。但实际情况更接近三个相邻的区间：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">|------ Band 6 ------|------ Band 7 ------|------ Band 8 ------|</span><br></pre></td></tr></table></figure>
+
+<p>一个人可能刚刚进入 Band 6，另一个人可能已经接近 Band 7。两个人的成绩单都写着 6，但提分距离完全不同。</p>
+<ul>
+<li><strong>Band 6 区间底部</strong>：核心问题通常是实际口语能力不足。</li>
+<li><strong>Band 6 区间顶部</strong>：语言能力可能已经接近要求，主要问题更可能是考试认知、答题方法或练习不足。</li>
+</ul>
+<p>因此，“怎样从 6 分提高到 7 分”并没有一个适用于所有人的答案。第一步不是背更多单词，而是先确定自己的位置。</p>
+<h2 id="判断自己属于哪一种情况"><a href="#判断自己属于哪一种情况" class="headerlink" title="判断自己属于哪一种情况"></a>判断自己属于哪一种情况</h2><h3 id="情况一：语言能力还没有达到要求"><a href="#情况一：语言能力还没有达到要求" class="headerlink" title="情况一：语言能力还没有达到要求"></a>情况一：语言能力还没有达到要求</h3><p>如果经常提出下面的问题，通常说明基础语言能力仍是主要瓶颈：</p>
+<ul>
+<li>这个答案应该使用哪一种时态？</li>
+<li>这里应该使用哪个介词？</li>
+<li>我知道这个词，但说话时总是想不起来。</li>
+<li>一开口就要先在脑中翻译中文。</li>
+<li>换一个不熟悉的话题就无法持续表达。</li>
+</ul>
+<p>这类考生即使反复刷雅思题，也可能只是在重复暴露同一个问题：语法、词汇和表达还没有转化为自动化的口语能力。</p>
+<h3 id="情况二：应试技巧限制了真实水平"><a href="#情况二：应试技巧限制了真实水平" class="headerlink" title="情况二：应试技巧限制了真实水平"></a>情况二：应试技巧限制了真实水平</h3><p>如果更关心下面的问题，说明可能已经接近 Band 7，但还不够熟悉考试：</p>
+<ul>
+<li>为什么考官总是打断我？</li>
+<li>为什么考官不让我继续说？</li>
+<li>Part 2 只说了一分钟怎么办？</li>
+<li>Part 1 应该说多长？</li>
+<li>Part 3 怎样展开观点？</li>
+</ul>
+<p>考官打断回答不一定意味着表现不好，也可能只是需要控制考试节奏。Part 2 没有说满两分钟，则说明对题卡组织和计时练习还不熟悉。</p>
+<p>这类考生仍然需要提升语言，但复习重点应该更多地转向考试结构、限时表达和模拟练习。</p>
+<h2 id="路径一：先提高真实口语能力"><a href="#路径一：先提高真实口语能力" class="headerlink" title="路径一：先提高真实口语能力"></a>路径一：先提高真实口语能力</h2><p>如果处在 Band 6 的底部，Keith 给出的建议非常直接：<strong>暂时停止刷雅思题，用大约两个月学习通用英语。</strong></p>
+<p>这不是停止学习，而是暂时离开分数压力，把注意力重新放回英语本身。只练雅思题，就像足球运动员只练射门，却不练传球、带球、跑位和临场反应。熟悉题目不等于真正提高了交流能力。</p>
+<h3 id="减少工具，而不是不断收集工具"><a href="#减少工具，而不是不断收集工具" class="headerlink" title="减少工具，而不是不断收集工具"></a>减少工具，而不是不断收集工具</h3><p>常见误区是同时使用十几本书、多个网站和大量 App，最后时间都花在寻找资源、切换平台和比较课程上。</p>
+<p>更有效的做法是只保留一两个主要工具：</p>
+<ul>
+<li>一本系统语法书；</li>
+<li>一本按主题组织的词汇书；</li>
+<li>一个带字幕、查词和生词收藏功能的视频工具；</li>
+<li>一个稳定的口语练习渠道。</li>
+</ul>
+<p>视频中推荐的具体应用可能随着时间变化，但选择工具的原则没有变：它应该让人能够在真实语境中听到表达、理解含义、保存内容并立即练习，而不是不断把注意力带到新的推荐页面。</p>
+<h3 id="用固定线索建立学习习惯"><a href="#用固定线索建立学习习惯" class="headerlink" title="用固定线索建立学习习惯"></a>用固定线索建立学习习惯</h3><p>学习习惯需要一个清晰的触发线索，可以是时间，也可以是地点：</p>
+<ul>
+<li>每天早餐后练习 30 分钟；</li>
+<li>每天下班到家后立即开始；</li>
+<li>坐到固定书桌前，就只做英语练习。</li>
+</ul>
+<p>重点不在于某一天学了多久，而在于能否稳定重复。语言能力来自长期积累，规律、耐心和持续性比偶尔进行一次长时间突击更重要。</p>
+<p>同时，学习内容应该尽量与个人兴趣相关。喜欢科技、电影或旅行，就围绕这些内容听、读和表达。越愿意主动接触，练习越容易持续。</p>
+<h3 id="用“冰箱练习法”提高流利度"><a href="#用“冰箱练习法”提高流利度" class="headerlink" title="用“冰箱练习法”提高流利度"></a>用“冰箱练习法”提高流利度</h3><p>视频介绍了一种来自记忆游戏的练习方法，可以称为 <strong>Fridge Technique</strong>。</p>
+<p>传统游戏会不断重复并增加冰箱里的物品：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">In my fridge, there is a bottle of milk.</span><br><span class="line"></span><br><span class="line">In my fridge, there is a bottle of milk and a slice of cheese.</span><br><span class="line"></span><br><span class="line">In my fridge, there is a bottle of milk, a slice of cheese and some mustard.</span><br></pre></td></tr></table></figure>
+
+<p>口语练习也可以采用相同方式：每次重复已有句子，再增加一个新的短语或从句。</p>
+<p>例如，回答 <code>Where are you from?</code>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I&#x27;m from Manchester.</span><br><span class="line"></span><br><span class="line">I&#x27;m from Manchester, which is in the north of England.</span><br><span class="line"></span><br><span class="line">I&#x27;m from Manchester, which is in the north of England,</span><br><span class="line">a beautiful part of the country, by the way.</span><br></pre></td></tr></table></figure>
+
+<p>回答 <code>What do you like about your hometown?</code>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I think it&#x27;s a lovely place.</span><br><span class="line"></span><br><span class="line">I think it&#x27;s a lovely place because it&#x27;s not far from the sea.</span><br><span class="line"></span><br><span class="line">I think it&#x27;s a lovely place because it&#x27;s not far from the sea,</span><br><span class="line">and quite a few tourists visit it.</span><br></pre></td></tr></table></figure>
+
+<p>每轮只增加一个信息单元，通常扩展到三个层次即可。这个过程同时训练了三件事：</p>
+<ol>
+<li>在不重新构思全部内容的情况下继续说话；</li>
+<li>将短句自然连接成长句；</li>
+<li>通过重复降低提取词汇和句型的负担。</li>
+</ol>
+<h3 id="用-Listen、Repeat、Use-激活词汇"><a href="#用-Listen、Repeat、Use-激活词汇" class="headerlink" title="用 Listen、Repeat、Use 激活词汇"></a>用 Listen、Repeat、Use 激活词汇</h3><p>认识一个单词，不代表能在对话中使用它。阅读和听力属于输入能力，口语则要求在有限时间内主动提取语言。</p>
+<p>视频给出的词汇练习循环很简单：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Listen → Repeat → Use</span><br></pre></td></tr></table></figure>
+
+<p>具体可以这样执行：</p>
+<ol>
+<li>从视频、播客或真实对话中听到一个表达；</li>
+<li>模仿语音、重音和上下文，完整重复；</li>
+<li>立即用自己的经历造两到三个句子；</li>
+<li>记录表达，并在之后定期复习；</li>
+<li>在新的话题中再次使用。</li>
+</ol>
+<p>词汇应该在语境中学习，并覆盖不同话题。只背孤立的中文释义，很难建立搭配、语气和使用场景。</p>
+<h2 id="路径二：集中提高考试技巧"><a href="#路径二：集中提高考试技巧" class="headerlink" title="路径二：集中提高考试技巧"></a>路径二：集中提高考试技巧</h2><p>如果已经处于 Band 6 的顶部，继续扩大语言能力当然有帮助，但更高效的做法是系统掌握考试规则。</p>
+<h3 id="理解三个部分的任务差异"><a href="#理解三个部分的任务差异" class="headerlink" title="理解三个部分的任务差异"></a>理解三个部分的任务差异</h3><table>
+<thead>
+<tr>
+<th>部分</th>
+<th>核心任务</th>
+<th>常见问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Part 1</td>
+<td>对个人和熟悉话题作出自然回答</td>
+<td>回答过短，或把简单问题讲成演讲</td>
+</tr>
+<tr>
+<td>Part 2</td>
+<td>根据题卡连续表达一到两分钟</td>
+<td>故事过于复杂，时态失控，没有计时训练</td>
+</tr>
+<tr>
+<td>Part 3</td>
+<td>讨论抽象问题并展开观点</td>
+<td>只有结论，没有原因、例子、比较或结果</td>
+</tr>
+</tbody></table>
+<p>IELTS Speaking 不是知识竞赛。遇到建筑、科学或历史等陌生话题时，不需要给出专家观点。考官评估的是能否用英语清楚表达和发展想法。</p>
+<h3 id="使用官方材料建立正确认知"><a href="#使用官方材料建立正确认知" class="headerlink" title="使用官方材料建立正确认知"></a>使用官方材料建立正确认知</h3><p>应优先完成以下练习：</p>
+<ol>
+<li>阅读官方考试格式和评分标准；</li>
+<li>使用官方样题了解问题类型；</li>
+<li>完成一次严格计时的完整模拟；</li>
+<li>分别练习 Part 1、Part 2 和 Part 3；</li>
+<li>回听录音，定位停顿、重复、语法失控和发音问题；</li>
+<li>根据反馈决定下一阶段练什么。</li>
+</ol>
+<p>模拟考试的价值不是得到一个模糊的预估分，而是判断问题来自语言能力、考试技巧，还是两者的组合。</p>
+<h2 id="官方标准中的-Band-6-与-Band-7"><a href="#官方标准中的-Band-6-与-Band-7" class="headerlink" title="官方标准中的 Band 6 与 Band 7"></a>官方标准中的 Band 6 与 Band 7</h2><p>IELTS Speaking 从四个维度评分，每项权重相同，都是 25%：流利度与连贯性、词汇资源、语法范围与准确性、发音。[cite:3][cite:4]</p>
+<table>
+<thead>
+<tr>
+<th>评分维度</th>
+<th>Band 6 的典型表现</th>
+<th>Band 7 的关键提升</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>流利度与连贯性</td>
+<td>愿意持续表达，但重复、自我修正或停顿有时影响连贯</td>
+<td>能较轻松地持续表达，并灵活使用连接和话语标记</td>
+</tr>
+<tr>
+<td>词汇资源</td>
+<td>词汇足以展开话题，也能改述，但存在不恰当用词</td>
+<td>能灵活讨论不同话题，并较自然地使用部分习语和搭配</td>
+</tr>
+<tr>
+<td>语法范围与准确性</td>
+<td>能混合简单和复杂结构，但灵活性有限、错误较多</td>
+<td>经常使用复杂结构，整体控制较好，仍允许出现少量错误</td>
+</tr>
+<tr>
+<td>发音</td>
+<td>大体可以听懂，但语音特征控制不稳定</td>
+<td>整体容易理解，能够较稳定地运用重音、节奏和语调</td>
+</tr>
+</tbody></table>
+<p>这个对比说明，Band 7 并不要求完美：</p>
+<ul>
+<li>仍然可以出现停顿；</li>
+<li>仍然可以犯语法错误；</li>
+<li>仍然可能读错个别单词；</li>
+<li>不需要每句话都使用复杂词汇。</li>
+</ul>
+<p>真正的差异是更强的<strong>持续表达、灵活运用和整体控制</strong>。因此，刻意塞入生僻词、背诵长答案或强行使用复杂句，未必能够提高成绩，反而可能损害自然度和准确性。</p>
+<h2 id="一套可执行的自测方法"><a href="#一套可执行的自测方法" class="headerlink" title="一套可执行的自测方法"></a>一套可执行的自测方法</h2><p>先录制三段回答：</p>
+<ol>
+<li>Part 1：回答一个熟悉话题，持续约 20 秒；</li>
+<li>Part 2：准备一分钟后，连续表达一到两分钟；</li>
+<li>Part 3：对一个抽象问题给出观点、原因和例子。</li>
+</ol>
+<p>回听时不要只问“听起来好不好”，而要逐项记录：</p>
+<ul>
+<li>是否因为想词或组织语法而频繁停顿；</li>
+<li>是否能够换一种方式解释不会的词；</li>
+<li>是否只会使用简单句；</li>
+<li>错误是否反复出现在同一种结构中；</li>
+<li>发音是否影响理解；</li>
+<li>是否真正回答并展开了问题；</li>
+<li>是否熟悉三个部分的节奏。</li>
+</ul>
+<p>如果大部分问题发生在语言生成过程中，应先走“通用英语”路径；如果日常对话比较流畅，但考试中经常答非所问、时间失控或无法展开，则应优先走“考试技巧”路径。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从雅思口语 6 分到 7 分，最重要的不是找到更多资料，而是做出正确诊断。</p>
+<p>处在 Band 6 底部时，应暂时放下刷题，通过规律学习、真实输入、重复模仿、主动使用和互动交流提升整体口语能力。处在 Band 6 顶部时，则应集中理解考试结构，进行限时模拟，并针对三个部分练习不同的回答策略。</p>
+<p>分数只是结果。真正需要提升的是四项可观察的能力：能否持续表达，能否灵活选词，能否较准确地使用多样句型，以及能否让对方轻松听懂。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://www.bilibili.com/video/BV1fK421C7yr/?p=54">Bilibili：IELTS Speaking from 6 to 7，第 54 集</a></p>
+<p>[cite:2] <a href="https://www.youtube.com/watch?v=DUbkdsSK6kk">English Speaking Success：IELTS Speaking from 6 to 7: Why you are stuck at Band 6</a></p>
+<p>[cite:3] <a href="https://ielts.org/news-and-insights/differences-between-ielts-6-and-7-for-productive-skills">IELTS：Differences between IELTS 6 and 7 for productive skills</a></p>
+<p>[cite:4] <a href="https://takeielts.britishcouncil.org/results/how-is-ielts-assessed">British Council：IELTS Assessment Criteria &amp; Band Score Descriptors</a></p>
+]]></content>
+      <categories>
+        <category>english-learning</category>
+      </categories>
+      <tags>
+        <tag>IELTS</tag>
+        <tag>雅思口语</tag>
+        <tag>英语学习</tag>
       </tags>
   </entry>
   <entry>
