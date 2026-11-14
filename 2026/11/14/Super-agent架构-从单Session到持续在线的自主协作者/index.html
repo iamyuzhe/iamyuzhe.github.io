@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/goldfish.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/goldfish.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha256-4Lad8m4ZWW1Lgb9+sMVLYEfnIh7BjV1NQMEe79Pviks=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"iamyuzhe.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.29.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null,"show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="整理 DeepSeek Harness 团队的 Super-agent 架构探索，分析 Router&#x2F;Worker 双层架构、事件路由、上下文管理、异步交互、存算分离与 Watchdog 如何共同支撑持续在线的 Agent。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Super-agent 架构：从单 Session 到持续在线的自主协作者">
+<meta property="og:url" content="https://iamyuzhe.github.io/2026/11/14/Super-agent%E6%9E%B6%E6%9E%84-%E4%BB%8E%E5%8D%95Session%E5%88%B0%E6%8C%81%E7%BB%AD%E5%9C%A8%E7%BA%BF%E7%9A%84%E8%87%AA%E4%B8%BB%E5%8D%8F%E4%BD%9C%E8%80%85/index.html">
+<meta property="og:site_name" content="Andrew 的个人博客">
+<meta property="og:description" content="整理 DeepSeek Harness 团队的 Super-agent 架构探索，分析 Router&#x2F;Worker 双层架构、事件路由、上下文管理、异步交互、存算分离与 Watchdog 如何共同支撑持续在线的 Agent。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-14T15:40:00.000Z">
+<meta property="article:modified_time" content="2026-11-14T15:24:02.906Z">
+<meta property="article:author" content="Andrew Yu">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="DeepSeek Harness">
+<meta property="article:tag" content="Super-agent">
+<meta property="article:tag" content="多智能体">
+<meta property="article:tag" content="系统架构">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://iamyuzhe.github.io/2026/11/14/Super-agent%E6%9E%B6%E6%9E%84-%E4%BB%8E%E5%8D%95Session%E5%88%B0%E6%8C%81%E7%BB%AD%E5%9C%A8%E7%BA%BF%E7%9A%84%E8%87%AA%E4%B8%BB%E5%8D%8F%E4%BD%9C%E8%80%85/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://iamyuzhe.github.io/2026/11/14/Super-agent%E6%9E%B6%E6%9E%84-%E4%BB%8E%E5%8D%95Session%E5%88%B0%E6%8C%81%E7%BB%AD%E5%9C%A8%E7%BA%BF%E7%9A%84%E8%87%AA%E4%B8%BB%E5%8D%8F%E4%BD%9C%E8%80%85/","path":"2026/11/14/Super-agent架构-从单Session到持续在线的自主协作者/","title":"Super-agent 架构：从单 Session 到持续在线的自主协作者"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Super-agent 架构：从单 Session 到持续在线的自主协作者 | Andrew 的个人博客</title>
+  
+
+
+
+
+
+
+
+
+  
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Andrew 的个人博客" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-search popup-trigger" aria-label="搜索" role="button">
+      <i class="fa fa-search fa-fw fa-lg"></i>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Andrew 的个人博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">技术与生活</p>
+  </div>
+
+  <div class="site-nav-toggle" aria-label="切换导航栏" role="button">
+      <i class="fa fa-ellipsis fa-fw fa-lg"></i>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-项目"><a href="/project/" rel="section"><i class="fa fa-code fa-fw"></i>项目</a></li><li class="menu-item menu-item-友链"><a href="/link/" rel="section"><i class="fa fa-link fa-fw"></i>友链</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  
+  <template id="search-popup-template"><div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div></template>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Super-agent-%E4%B8%8D%E6%98%AF%E6%9B%B4%E5%BC%BA%E7%9A%84%E5%8D%95%E4%B8%AA-Agent"><span class="nav-number">1.</span> <span class="nav-text">一、Super-agent 不是更强的单个 Agent</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%EF%BC%9A%E4%BA%94%E4%B8%AA%E6%A8%A1%E5%9D%97%E5%85%B1%E5%90%8C%E8%A7%A3%E5%86%B3%E5%9B%9B%E4%B8%AA%E7%9B%AE%E6%A0%87"><span class="nav-number">2.</span> <span class="nav-text">二、整体架构：五个模块共同解决四个目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%8F%8C%E5%B1%82%E6%9E%B6%E6%9E%84%EF%BC%9ARouter-%E7%AE%A1%E5%85%A8%E5%B1%80%EF%BC%8CWorker-%E5%81%9A%E4%BB%BB%E5%8A%A1"><span class="nav-number">3.</span> <span class="nav-text">三、双层架构：Router 管全局，Worker 做任务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Router-%E5%B1%82%EF%BC%9A%E5%85%A8%E5%B1%80%E5%BA%8F%E7%82%B9"><span class="nav-number">3.1.</span> <span class="nav-text">Router 层：全局序点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Worker-%E5%B1%82%EF%BC%9A%E9%9A%94%E7%A6%BB%E6%89%A7%E8%A1%8C"><span class="nav-number">3.2.</span> <span class="nav-text">Worker 层：隔离执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-Session-%E5%BA%94%E8%AF%A5%E6%88%90%E4%B8%BA%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="nav-number">3.3.</span> <span class="nav-text">为什么 Session 应该成为实现细节</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%EF%BC%9A%E4%BB%8E%E7%AD%89%E5%BE%85-Prompt-%E5%88%B0%E8%A7%82%E5%AF%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">4.</span> <span class="nav-text">四、事件驱动：从等待 Prompt 到观察环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E8%BF%87%E6%BB%A4%E4%B8%8E%E8%B7%AF%E7%94%B1%EF%BC%9A%E6%8A%8A-Fast-Path-%E7%95%99%E7%BB%99%E7%A8%8B%E5%BA%8F"><span class="nav-number">5.</span> <span class="nav-text">五、过滤与路由：把 Fast Path 留给程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E7%BA%A7%E8%BF%87%E6%BB%A4"><span class="nav-number">5.1.</span> <span class="nav-text">两级过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Thread-%E8%AE%A2%E9%98%85%E4%B8%8E%E7%9B%B4%E9%80%9A"><span class="nav-number">5.2.</span> <span class="nav-text">Thread 订阅与直通</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%EF%BC%9A%E6%8A%8A%E7%AA%97%E5%8F%A3%E5%BD%93%E4%BD%9C-Cache"><span class="nav-number">6.</span> <span class="nav-text">六、上下文管理：把窗口当作 Cache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E6%8F%90%E5%89%8D%E8%A1%8C%E5%8A%A8%EF%BC%9A%E7%94%A8%E5%90%8E%E5%8F%B0%E7%AE%97%E5%8A%9B%E6%8D%A2%E4%BA%BA%E7%B1%BB%E7%AD%89%E5%BE%85%E6%97%B6%E9%97%B4"><span class="nav-number">7.</span> <span class="nav-text">七、提前行动：用后台算力换人类等待时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E5%BC%82%E6%AD%A5-ReAct-Loop%EF%BC%9A%E5%90%8E%E5%8F%B0%E4%BB%BB%E5%8A%A1%E4%B8%8D%E8%83%BD%E9%98%BB%E5%A1%9E%E5%AF%B9%E8%AF%9D"><span class="nav-number">8.</span> <span class="nav-text">八、异步 ReAct Loop：后台任务不能阻塞对话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%A4%9A%E4%BF%A1%E9%81%93%E4%BA%A4%E4%BA%92%EF%BC%9A%E8%BE%93%E5%87%BA%E5%B8%A6%E5%AE%BD%E8%A6%81%E5%8C%B9%E9%85%8D%E5%B7%A5%E4%BD%9C%E5%9C%BA%E6%99%AF"><span class="nav-number">9.</span> <span class="nav-text">九、多信道交互：输出带宽要匹配工作场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E8%AE%A1%E7%AE%97%E3%80%81%E7%8A%B6%E6%80%81%E4%B8%8E%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%88%86%E7%A6%BB"><span class="nav-number">10.</span> <span class="nav-text">十、计算、状态与执行环境分离</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E8%AE%A1%E7%AE%97%E4%B8%8E%E7%8A%B6%E6%80%81%E5%88%86%E7%A6%BB"><span class="nav-number">10.1.</span> <span class="nav-text">第一步：计算与状态分离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E8%AE%A1%E7%AE%97%E4%B8%8E%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%88%86%E7%A6%BB"><span class="nav-number">10.2.</span> <span class="nav-text">第二步：计算与执行环境分离</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81Watchdog%EF%BC%9A%E4%B8%8D%E4%BB%85%E7%9C%8B%E8%BF%9B%E7%A8%8B%EF%BC%8C%E8%BF%98%E8%A6%81%E7%9C%8B%E4%BB%BB%E5%8A%A1%E6%98%AF%E5%90%A6%E5%89%8D%E8%BF%9B"><span class="nav-number">11.</span> <span class="nav-text">十一、Watchdog：不仅看进程，还要看任务是否前进</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E5%88%9D%E6%AD%A5%E5%AE%9E%E9%AA%8C%E8%AF%B4%E6%98%8E%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">12.</span> <span class="nav-text">十二、初步实验说明了什么</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E5%B1%82%E6%9E%B6%E6%9E%84%E9%99%8D%E4%BD%8E%E4%BA%86%E5%AE%8C%E6%88%90%E6%97%B6%E9%97%B4%E9%95%BF%E5%B0%BE"><span class="nav-number">12.1.</span> <span class="nav-text">双层架构降低了完成时间长尾</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E9%80%9A%E6%9C%BA%E5%88%B6%E4%B8%BB%E8%A6%81%E8%8A%82%E7%9C%81-Router-%E5%BC%80%E9%94%80"><span class="nav-number">12.2.</span> <span class="nav-text">直通机制主要节省 Router 开销</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Router-%E6%89%B9%E5%A4%84%E7%90%86%E5%90%B8%E6%94%B6%E7%AA%81%E5%8F%91%E4%BA%8B%E4%BB%B6"><span class="nav-number">12.3.</span> <span class="nav-text">Router 批处理吸收突发事件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%89%E3%80%81%E8%90%BD%E5%9C%B0%E6%97%B6%E6%9C%80%E5%AE%B9%E6%98%93%E5%BF%BD%E7%95%A5%E7%9A%84%E8%BE%B9%E7%95%8C"><span class="nav-number">13.</span> <span class="nav-text">十三、落地时最容易忽略的边界</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9E%8B%E4%B8%8D%E7%AD%89%E4%BA%8E%E5%AE%8C%E6%95%B4%E5%AE%9E%E7%8E%B0"><span class="nav-number">13.1.</span> <span class="nav-text">原型不等于完整实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E5%8A%A8%E6%80%A7%E4%BC%9A%E6%89%A9%E5%A4%A7%E5%AE%89%E5%85%A8%E9%A3%8E%E9%99%A9"><span class="nav-number">13.2.</span> <span class="nav-text">主动性会扩大安全风险</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E4%BB%8D%E7%84%B6%E6%B2%A1%E6%9C%89%E9%80%9A%E7%94%A8%E7%AD%94%E6%A1%88"><span class="nav-number">13.3.</span> <span class="nav-text">长期记忆仍然没有通用答案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E5%9B%9B%E3%80%81%E9%80%82%E5%90%88%E5%9B%A2%E9%98%9F%E9%87%87%E7%94%A8%E7%9A%84%E6%B8%90%E8%BF%9B%E8%B7%AF%E7%BA%BF"><span class="nav-number">14.</span> <span class="nav-text">十四、适合团队采用的渐进路线</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%80%EF%BC%9A%E6%8A%8A%E4%BB%BB%E5%8A%A1%E4%B8%8E-Session-%E8%A7%A3%E8%80%A6"><span class="nav-number">14.1.</span> <span class="nav-text">阶段一：把任务与 Session 解耦</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%8C%EF%BC%9A%E5%BC%95%E5%85%A5-Router-Worker-%E8%BE%B9%E7%95%8C"><span class="nav-number">14.2.</span> <span class="nav-text">阶段二：引入 Router&#x2F;Worker 边界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%89%EF%BC%9A%E6%8E%A5%E5%85%A5%E5%8D%95%E4%B8%80%E4%BA%8B%E4%BB%B6%E6%BA%90"><span class="nav-number">14.3.</span> <span class="nav-text">阶段三：接入单一事件源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E5%9B%9B%EF%BC%9A%E5%BB%BA%E7%AB%8B-Thread-%E8%AE%A2%E9%98%85"><span class="nav-number">14.4.</span> <span class="nav-text">阶段四：建立 Thread 订阅</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%94%EF%BC%9A%E5%BC%82%E6%AD%A5%E6%89%A7%E8%A1%8C%E4%B8%8E%E6%8C%81%E4%B9%85%E7%8A%B6%E6%80%81"><span class="nav-number">14.5.</span> <span class="nav-text">阶段五：异步执行与持久状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E5%85%AD%EF%BC%9A%E5%A2%9E%E5%8A%A0-Watchdog-%E4%B8%8E%E5%AE%89%E5%85%A8%E9%97%A8%E7%A6%81"><span class="nav-number">14.6.</span> <span class="nav-text">阶段六：增加 Watchdog 与安全门禁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">15.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">16.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Andrew Yu"
+      src="/images/goldfish.jpg">
+  <p class="site-author-name" itemprop="name">Andrew Yu</p>
+  <div class="site-description" itemprop="description">分享技术，记录生活……</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/category/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tag/">
+        <span class="site-state-item-count">81</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iamyuzhe" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iamyuzhe" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://iamyuzhe.github.io/2026/11/14/Super-agent%E6%9E%B6%E6%9E%84-%E4%BB%8E%E5%8D%95Session%E5%88%B0%E6%8C%81%E7%BB%AD%E5%9C%A8%E7%BA%BF%E7%9A%84%E8%87%AA%E4%B8%BB%E5%8D%8F%E4%BD%9C%E8%80%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/goldfish.jpg">
+      <meta itemprop="name" content="Andrew Yu">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew 的个人博客">
+      <meta itemprop="description" content="分享技术，记录生活……">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Super-agent 架构：从单 Session 到持续在线的自主协作者 | Andrew 的个人博客">
+      <meta itemprop="description" content="整理 DeepSeek Harness 团队的 Super-agent 架构探索，分析 Router&#x2F;Worker 双层架构、事件路由、上下文管理、异步交互、存算分离与 Watchdog 如何共同支撑持续在线的 Agent。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Super-agent 架构：从单 Session 到持续在线的自主协作者
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-11-14 23:40:00" itemprop="dateCreated datePublished" datetime="2026-11-14T23:40:00+08:00">2026-11-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ai-engineering/" itemprop="url" rel="index"><span itemprop="name">ai-engineering</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">整理 DeepSeek Harness 团队的 Super-agent 架构探索，分析 Router/Worker 双层架构、事件路由、上下文管理、异步交互、存算分离与 Watchdog 如何共同支撑持续在线的 Agent。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Coding Agent 已经越来越擅长完成单个复杂任务，但当任务数量增加时，新的瓶颈不再是模型会不会写代码，而是人能否持续跟踪多个 Session。</p>
+<p>每个 Session 都有自己的上下文、进度和待确认事项。用户需要记住“哪个任务在哪个窗口”“哪条信息已经告诉过哪个 Agent”，还要在任务完成、失败或被新消息打断时手动切换。DeepSeek Harness 团队将这种限制概括为：</p>
+<blockquote>
+<p>单任务的上限取决于模型能力，多任务的上限取决于人的注意力。</p>
+</blockquote>
+<p>为突破单会话模式，团队提出了 <strong>Super-agent</strong>：一个能够跨会话保持连续上下文、并行推进多个复杂任务、主动响应环境事件，并在长期运行中自动恢复的 Agent 系统。[cite:1]</p>
+<p>需要先说明的是，原文讨论的是工程架构探索，并非 DeepSeek Harness 的现有产品功能介绍；配套开源仓库也是研究原型，不是 DeepSeek 正式产品或可直接投入生产的软件。[cite:2]</p>
+<span id="more"></span>
+
+<h2 id="一、Super-agent-不是更强的单个-Agent"><a href="#一、Super-agent-不是更强的单个-Agent" class="headerlink" title="一、Super-agent 不是更强的单个 Agent"></a>一、Super-agent 不是更强的单个 Agent</h2><p>Super-agent 的重点不是换一个更大的模型，也不是让一个 ReAct Loop 同时处理所有工作，而是重新设计 Agent 的运行系统。</p>
+<p>它需要同时满足四个特征：</p>
+<table>
+<thead>
+<tr>
+<th>特征</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>连续</td>
+<td>用户可以跨 IM、GitHub、邮件等信道继续同一项工作，不必管理底层 Session</td>
+</tr>
+<tr>
+<td>高效</td>
+<td>能快速响应交互，并行推进多个复杂任务</td>
+</tr>
+<tr>
+<td>主动</td>
+<td>持续观察环境事件，在规则允许时主动处理，不必等待逐条指令</td>
+</tr>
+<tr>
+<td>持久</td>
+<td>始终在线，设备离线或组件异常后仍能恢复</td>
+</tr>
+</tbody></table>
+<p>这四个目标之间存在天然冲突。一个 Session 最容易保持上下文连续，却会被串行执行限制吞吐量；为每条消息新建 Session 可以获得并发，却会丢失全局上下文并制造多头回复。</p>
+<p>因此，Super-agent 本质上是一个分布式 Agent 系统。它需要调度、路由、隔离、持久化、故障恢复和安全边界，而不只是提示词与工具调用。</p>
+<h2 id="二、整体架构：五个模块共同解决四个目标"><a href="#二、整体架构：五个模块共同解决四个目标" class="headerlink" title="二、整体架构：五个模块共同解决四个目标"></a>二、整体架构：五个模块共同解决四个目标</h2><p>原文提出五个核心模块：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">外部信道：IM / GitHub / 邮件 / 日历 / CI</span><br><span class="line">                    │</span><br><span class="line">                    ▼</span><br><span class="line">              事件过滤与路由</span><br><span class="line">                    │</span><br><span class="line">                    ▼</span><br><span class="line">          Router：连续性与全局协调</span><br><span class="line">                    │</span><br><span class="line">         ┌──────────┼──────────┐</span><br><span class="line">         ▼          ▼          ▼</span><br><span class="line">      Worker A   Worker B   Worker C</span><br><span class="line">         │          │          │</span><br><span class="line">         └────── 执行环境与工具 ──────┘</span><br><span class="line"></span><br><span class="line">状态持久化 + 异步交互 + Watchdog</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><strong>Router&#x2F;Worker 双层架构</strong>：分离全局协调与具体执行。</li>
+<li><strong>事件驱动</strong>：让群聊、代码评审和 CI 等环境变化成为输入。</li>
+<li><strong>面向人的异步多信道交互</strong>：后台工作不阻塞前台沟通。</li>
+<li><strong>计算、状态与执行环境分离</strong>：实现跨设备、持久在线。</li>
+<li><strong>Watchdog</strong>：从基础设施故障和任务失控中自动恢复。</li>
+</ol>
+<p>单独实现其中一个模块并不能得到 Super-agent。双层架构解决了并发，却不负责持久化；事件驱动带来主动性，也同时扩大了噪音与攻击面；存算分离提高了可恢复性，却需要额外处理凭据和环境隔离。</p>
+<h2 id="三、双层架构：Router-管全局，Worker-做任务"><a href="#三、双层架构：Router-管全局，Worker-做任务" class="headerlink" title="三、双层架构：Router 管全局，Worker 做任务"></a>三、双层架构：Router 管全局，Worker 做任务</h2><h3 id="Router-层：全局序点"><a href="#Router-层：全局序点" class="headerlink" title="Router 层：全局序点"></a>Router 层：全局序点</h3><p>Router 是常驻的全局协调层，承接所有入口的人类交互，并维护跨任务、跨信道的连续性。</p>
+<p>它主要负责：</p>
+<ul>
+<li>判断新事件是否形成任务；</li>
+<li>将任务分派给合适的 Worker；</li>
+<li>维护任务之间的高层关联；</li>
+<li>汇总 Worker 状态；</li>
+<li>统一向用户提问或交付结果。</li>
+</ul>
+<p>Router 不直接执行具体任务，甚至可以不具备 Bash 等重型工具。这样可以避免全局节点被耗时工作阻塞，也可以使用速度更快、成本更低的模型。</p>
+<p>这与常见 Agent Team 中的 Team Lead 不完全相同。Team Lead 通常深度参与一个复杂任务的拆解和协调；Super-agent 的 Router 只处理不同任务之间的关系，单个任务内部如何规划对它保持透明。</p>
+<h3 id="Worker-层：隔离执行"><a href="#Worker-层：隔离执行" class="headerlink" title="Worker 层：隔离执行"></a>Worker 层：隔离执行</h3><p>Worker 专注完成一个具体任务，拥有独立上下文和完整工具。由于它直接决定代码质量与任务结果，通常应该配置能力更强的模型。</p>
+<p>Worker 之间默认隔离：</p>
+<ul>
+<li>不共享长上下文；</li>
+<li>不直接向用户回复；</li>
+<li>不需要频繁点对点通信；</li>
+<li>可以在内部继续创建 Subagent 或 Agent Team。</li>
+</ul>
+<p>Worker 的过程信息先汇报给 Router，再由 Router 以统一口径对外沟通。这避免了多个 Agent 同时在群里发送进度、追问和结论。</p>
+<h3 id="为什么-Session-应该成为实现细节"><a href="#为什么-Session-应该成为实现细节" class="headerlink" title="为什么 Session 应该成为实现细节"></a>为什么 Session 应该成为实现细节</h3><p>现有 Agent 产品经常把 Session 同时当作上下文容器和项目管理单元。用户被迫按照底层 LLM API 的会话边界管理工作。</p>
+<p>Super-agent 将产品层任务与底层 Session 解耦。用户看到的是一个持续存在的协作者，系统内部则可以为不同话题创建多个 Worker。一个用户会话不再必须对应一个模型 Session。</p>
+<h2 id="四、事件驱动：从等待-Prompt-到观察环境"><a href="#四、事件驱动：从等待-Prompt-到观察环境" class="headerlink" title="四、事件驱动：从等待 Prompt 到观察环境"></a>四、事件驱动：从等待 Prompt 到观察环境</h2><p>Super-agent 的主要输入不是用户在聊天框中逐条键入的 Prompt，而是环境持续产生的半结构化事件：</p>
+<ul>
+<li>IM 群消息；</li>
+<li>GitHub Issue 与 Pull Request 评论；</li>
+<li>CI 成功或失败；</li>
+<li>邮件与日历提醒；</li>
+<li>任务状态变化；</li>
+<li>执行环境上线或离线。</li>
+</ul>
+<p>原文把这些事件称为 <strong>Trigger</strong>。事件驱动让 Agent 获得主动性，也带来三个新问题：事件太多、如何找到负责的 Worker，以及应该把多少上下文送给模型。</p>
+<h2 id="五、过滤与路由：把-Fast-Path-留给程序"><a href="#五、过滤与路由：把-Fast-Path-留给程序" class="headerlink" title="五、过滤与路由：把 Fast Path 留给程序"></a>五、过滤与路由：把 Fast Path 留给程序</h2><h3 id="两级过滤"><a href="#两级过滤" class="headerlink" title="两级过滤"></a>两级过滤</h3><p>真实环境中的绝大多数消息不需要 Agent 介入。如果所有事件都调用大模型判断，成本和延迟都会迅速失控。</p>
+<p>Super-agent 使用 Fast Path &#x2F; Slow Path 两级过滤：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>处理方式</th>
+<th>适用判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>程序层 Fast Path</td>
+<td>确定性代码</td>
+<td>来源、群组、用户白名单、机器人消息、明确忽略规则</td>
+</tr>
+<tr>
+<td>语义层 Slow Path</td>
+<td>LLM 判断</td>
+<td>是否值得介入、是否形成任务、应该采取什么行动</td>
+</tr>
+</tbody></table>
+<p>稳定、高频且确定的判断应固化为代码；只有需要语义理解的候选事件才进入模型。</p>
+<p>这条原则很重要：Agent 系统不应该把所有决策都交给 Agent。确定性规则更便宜、更快，也更容易审计。</p>
+<h3 id="Thread-订阅与直通"><a href="#Thread-订阅与直通" class="headerlink" title="Thread 订阅与直通"></a>Thread 订阅与直通</h3><p>同一个 PR、IM 话题或邮件串中的连续事件可以组成一个 <strong>Thread</strong>。</p>
+<p>Router 只负责 Thread 的第一个事件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">新 Thread</span><br><span class="line">    ↓</span><br><span class="line">Router 判断与分派</span><br><span class="line">    ↓</span><br><span class="line">创建 Worker，并建立订阅</span><br><span class="line">    ↓</span><br><span class="line">后续事件直接进入 Worker</span><br></pre></td></tr></table></figure>
+
+<p>订阅后的事件走 Fast Path，程序直接投递给 Worker，不再经过 Router 的模型推理。未被订阅的新事件才走 Slow Path，由 Router 决定归属。</p>
+<p>Thread 与 Worker 可以是多对多关系。一个 Worker 可以订阅多个相关 Thread，一个 Thread 也可以被多个 Worker 观察。多个 Worker 在同一 PR 发生交集时，会收到相同事件，从而发现冲突。</p>
+<h2 id="六、上下文管理：把窗口当作-Cache"><a href="#六、上下文管理：把窗口当作-Cache" class="headerlink" title="六、上下文管理：把窗口当作 Cache"></a>六、上下文管理：把窗口当作 Cache</h2><p>事件系统会持续产生上下文，但模型窗口始终有限。全部注入会稀释注意力，只给 ID 又会导致模型频繁调用工具。</p>
+<p>原文借用缓存和局部性思想，将上下文管理概括为 <strong>Inline &amp; Spill</strong>：</p>
+<ul>
+<li><strong>Inline</strong>：把近期高概率使用的信息直接放进当前上下文；</li>
+<li><strong>Spill</strong>：把低频或过长内容留在窗口之外，只保留摘要、ID 和读取入口。</li>
+</ul>
+<p>一个实用的渐进策略是：</p>
+<ol>
+<li>先注入当前对象的 ID 和摘要；</li>
+<li>Inline 紧密关联对象的 ID；</li>
+<li>加入时间和空间相邻内容，例如消息上下文或相邻评审评论；</li>
+<li>对长内容设置上限，超出部分 Spill；</li>
+<li>模型需要时再通过工具读取完整内容。</li>
+</ol>
+<p>在 Trigger、Thread 和 Worker Session 之间保留引用关系后，这些对象会形成一张引用图。模型可以从当前消息出发，按需追踪到所在 Thread、相关 Worker，再找到另一个代码评审 Thread。原文将这种多跳按需检索称为 <strong>Chain of Recall</strong>。[cite:1]</p>
+<h2 id="七、提前行动：用后台算力换人类等待时间"><a href="#七、提前行动：用后台算力换人类等待时间" class="headerlink" title="七、提前行动：用后台算力换人类等待时间"></a>七、提前行动：用后台算力换人类等待时间</h2><p>Super-agent 还引入了类似投机执行的策略。</p>
+<p>当环境信号表明某项工作可能有价值时，Agent 可以先在后台尝试：</p>
+<ul>
+<li>收到会议邀请后检查日程冲突并准备回复；</li>
+<li>群里出现缺陷反馈时静默复现；</li>
+<li>讨论修改方案时提前检查代码影响；</li>
+<li>CI 失败后定位原因并准备修复。</li>
+</ul>
+<p>只有确认问题存在并找到有价值的结果后，Agent 才通知用户；没有价值的尝试直接丢弃。</p>
+<p>投机执行的目标不是让 Agent 更活跃，而是用可控的后台算力减少人类等待和沟通成本。它必须受明确规则、资源预算和权限边界约束，否则主动性很容易变成噪音或风险。</p>
+<h2 id="八、异步-ReAct-Loop：后台任务不能阻塞对话"><a href="#八、异步-ReAct-Loop：后台任务不能阻塞对话" class="headerlink" title="八、异步 ReAct Loop：后台任务不能阻塞对话"></a>八、异步 ReAct Loop：后台任务不能阻塞对话</h2><p>经典 ReAct Loop 通常使用同步工具调用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">模型调用 run()</span><br><span class="line">    ↓</span><br><span class="line">等待工具结束</span><br><span class="line">    ↓</span><br><span class="line">模型继续推理</span><br></pre></td></tr></table></figure>
+
+<p>如果命令运行半小时，整个会话在此期间都无法响应新输入。</p>
+<p>Super-agent 将耗时操作改为异步 <code>start()</code> &#x2F; <code>stop()</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">模型调用 start()</span><br><span class="line">    ↓</span><br><span class="line">立即得到 Started</span><br><span class="line">    ↓</span><br><span class="line">继续响应新消息</span><br><span class="line">    ↓</span><br><span class="line">后台完成后以新事件回注结果</span><br></pre></td></tr></table></figure>
+
+<p>这样，前台交互与后台执行实现全双工。用户可以补充条件、改变方向或停止任务，而不必等待当前工具调用结束。</p>
+<p>原文说明，这一异步任务机制已经在 DeepSeek Harness 中实现，但尚未默认开启。[cite:1] DeepSeek Harness 官方将模型、工具、Session、沙箱、存储、循环和 UI 都设计为可替换插件，并通过追加式 Session 日志记录模型看到的内容和工具轨迹，为这种组合式架构提供了基础。[cite:3]</p>
+<h2 id="九、多信道交互：输出带宽要匹配工作场景"><a href="#九、多信道交互：输出带宽要匹配工作场景" class="headerlink" title="九、多信道交互：输出带宽要匹配工作场景"></a>九、多信道交互：输出带宽要匹配工作场景</h2><p>终端、群聊、Pull Request 和邮件的交互习惯不同，不能使用同一种输出策略。</p>
+<table>
+<thead>
+<tr>
+<th>信道</th>
+<th>推荐输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IM 群聊</td>
+<td>低打扰，只在需要决策或有可用结果时回复</td>
+</tr>
+<tr>
+<td>GitHub PR &#x2F; Issue</td>
+<td>结构化说明背景、改动、风险和验证结果</td>
+</tr>
+<tr>
+<td>邮件</td>
+<td>完整但克制的异步交付</td>
+</tr>
+<tr>
+<td>文档</td>
+<td>可复用的长期信息与决策记录</td>
+</tr>
+</tbody></table>
+<p>Worker 内部可以保留详细推理和工具轨迹，但不应该把这些内容原样倾倒到群聊。Router 需要根据目标信道压缩、组织并选择输出时机。</p>
+<h2 id="十、计算、状态与执行环境分离"><a href="#十、计算、状态与执行环境分离" class="headerlink" title="十、计算、状态与执行环境分离"></a>十、计算、状态与执行环境分离</h2><p>本地 Agent 往往把三件事绑定在一台机器上：</p>
+<ol>
+<li>推进 Agent Loop 的计算；</li>
+<li>需要持久化的 Session 状态；</li>
+<li>代码、依赖、凭据和工具所在的执行环境。</li>
+</ol>
+<p>设备休眠后 Agent 就停止，容器失败后状态可能丢失，也难以跨设备访问真实工作环境。</p>
+<p>Super-agent 分两步解耦：</p>
+<h3 id="第一步：计算与状态分离"><a href="#第一步：计算与状态分离" class="headerlink" title="第一步：计算与状态分离"></a>第一步：计算与状态分离</h3><p>Agent Loop 运行在无状态计算容器中，Session 等持久状态存入数据库。计算容器可以扩缩、重启或替换，新的实例从持久化事件中恢复进度。</p>
+<h3 id="第二步：计算与执行环境分离"><a href="#第二步：计算与执行环境分离" class="headerlink" title="第二步：计算与执行环境分离"></a>第二步：计算与执行环境分离</h3><p>Agent Loop 常驻云端，真实开发机或个人设备保留在原地，只运行一个轻量 daemon。云端 Agent 按需调用端侧环境中的工具，而不必复制未提交修改、内网依赖、硬件工具链和本地配置。</p>
+<p>Anthropic 在 Managed Agents 中采用了相似的“脑手分离”设计：将 Harness、Session 日志和 Sandbox 拆成独立接口，使每个组件都可以独立失败和替换；Session 状态位于 Harness 外部，执行环境则像普通工具一样按需连接。[cite:4]</p>
+<p>两者的侧重点不同：Anthropic 主要讨论托管沙箱和客户 VPC，Super-agent 文章还特别关注间歇在线的个人机器和 BYOM（Bring Your Own Machine）。</p>
+<h2 id="十一、Watchdog：不仅看进程，还要看任务是否前进"><a href="#十一、Watchdog：不仅看进程，还要看任务是否前进" class="headerlink" title="十一、Watchdog：不仅看进程，还要看任务是否前进"></a>十一、Watchdog：不仅看进程，还要看任务是否前进</h2><p>长期运行系统不能只依赖主系统自救，需要外部 Control Loop。</p>
+<p>传统健康检查只能判断进程是否存活，却无法识别 Agent 是否：</p>
+<ul>
+<li>陷入无效循环；</li>
+<li>长时间没有实质进展；</li>
+<li>偏离原始目标；</li>
+<li>因外部偶发故障反复失败；</li>
+<li>给出形式完成但实际未交付的结论。</li>
+</ul>
+<p>因此，原文在主系统外设置独立的 Watchdog Session，由定时消息驱动。它既检查接口错误、状态恢复失败等基础设施问题，也由模型判断 Worker 的任务进展和方向。</p>
+<p>Watchdog 本身拥有工具能力，维护者可以用自然语言查询故障原因、调整 Trigger 规则或修改提示词。但它必须独立于被监控系统，否则主系统发生故障时，监控也会一起失效。</p>
+<h2 id="十二、初步实验说明了什么"><a href="#十二、初步实验说明了什么" class="headerlink" title="十二、初步实验说明了什么"></a>十二、初步实验说明了什么</h2><p>原文使用合成的群聊与 GitHub CI 消息流进行了初步实验。每次约 300 条消息，其中约 20 条是工作请求，其余是闲聊、跟进、停止指令和 CI 消息；每种方案重复运行 5 次。编码任务由只消耗时间的工具替代，因此实验衡量的是调度与协作，而不是编码能力。[cite:1]</p>
+<h3 id="双层架构降低了完成时间长尾"><a href="#双层架构降低了完成时间长尾" class="headerlink" title="双层架构降低了完成时间长尾"></a>双层架构降低了完成时间长尾</h3><p>Super-agent 的任务完成时间：</p>
+<ul>
+<li>p50：12.4 分钟；</li>
+<li>p95：15.7 分钟。</li>
+</ul>
+<p>中性提示下的单 Session 从未调用 Subagent，任务持续被新消息打断，p95 达到 29.5 分钟。即使通过提示词要求优先委派，模型仍可能临场决定亲自执行“小任务”，形成不稳定长尾。</p>
+<p>这个结果支持一个工程判断：关键调度约束应该落实在系统结构中，而不是只依赖模型遵守提示词。</p>
+<h3 id="直通机制主要节省-Router-开销"><a href="#直通机制主要节省-Router-开销" class="headerlink" title="直通机制主要节省 Router 开销"></a>直通机制主要节省 Router 开销</h3><p>移除 Thread 直通后，任务完成时间与完整方案基本一致，但 Router 决策次数增加约 30%，总读缓存 token 从 2323 万增加到 3177 万，增幅约 37%。[cite:1]</p>
+<p>直通没有直接改善实验中的完成速度，却显著减少了全局 Router 的推理负担。</p>
+<h3 id="Router-批处理吸收突发事件"><a href="#Router-批处理吸收突发事件" class="headerlink" title="Router 批处理吸收突发事件"></a>Router 批处理吸收突发事件</h3><p>当待决策 Trigger 的到达速率从每分钟约 1 条提升到约 40 条时：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th align="right">低负载</th>
+<th align="right">高负载</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>平均 batch 大小</td>
+<td align="right">1.0</td>
+<td align="right">2.8</td>
+</tr>
+<tr>
+<td>单次请求耗时</td>
+<td align="right">2.5 秒</td>
+<td align="right">3.9 秒</td>
+</tr>
+<tr>
+<td>单个决定分摊推理时间</td>
+<td align="right">6.4 秒</td>
+<td align="right">1.6 秒</td>
+</tr>
+</tbody></table>
+<p>积压事件在下一轮合并进入模型，Prefill 可以并行处理长输入，因此单次请求耗时的增长慢于 batch 大小。</p>
+<p>这些数据只能视为架构方向的初步证据。实验使用合成负载、简化执行工具且样本较少，不能直接推导生产环境的吞吐上限或成本收益。</p>
+<h2 id="十三、落地时最容易忽略的边界"><a href="#十三、落地时最容易忽略的边界" class="headerlink" title="十三、落地时最容易忽略的边界"></a>十三、落地时最容易忽略的边界</h2><h3 id="原型不等于完整实现"><a href="#原型不等于完整实现" class="headerlink" title="原型不等于完整实现"></a>原型不等于完整实现</h3><p>开源的 <code>dsh-superagent-prototype</code> 是面向单个 GitHub 仓库的主动式 Coding Agent，可监听 GitHub，并可选接入飞书；它将工作拆成独立 Session 和目录，再回到原始对话交付结果。[cite:2]</p>
+<p>仓库明确说明：</p>
+<ul>
+<li>它是研究代码，不是生产级软件；</li>
+<li>发布版本与内部实现并不完全相同；</li>
+<li>文章中的部分设计仍是未来方向；</li>
+<li>使用前必须自行审查和适配。</li>
+</ul>
+<h3 id="主动性会扩大安全风险"><a href="#主动性会扩大安全风险" class="headerlink" title="主动性会扩大安全风险"></a>主动性会扩大安全风险</h3><p>事件驱动意味着 Agent 会持续接触不可信消息、评论和文档。云端 Agent 又可能连接包含私有代码、敏感数据和凭据的端侧设备。</p>
+<p>一旦提示词注入或服务端入侵控制 Agent Loop，所有连接设备都可能暴露。仅靠“限制 Prompt”无法解决这一问题，还需要：</p>
+<ul>
+<li>最小权限与明确授权范围；</li>
+<li>将凭据保留在模型无法读取的位置；</li>
+<li>对工具和资源进行策略代理；</li>
+<li>隔离不同组织和用户的上下文；</li>
+<li>对主动行动设置审批、预算和审计；</li>
+<li>允许随时中止并撤销访问。</li>
+</ul>
+<p>Anthropic 的架构同样强调凭据不能出现在运行模型生成代码的 Sandbox 中，而应通过外部 Vault、代理和资源绑定完成授权。[cite:4]</p>
+<h3 id="长期记忆仍然没有通用答案"><a href="#长期记忆仍然没有通用答案" class="headerlink" title="长期记忆仍然没有通用答案"></a>长期记忆仍然没有通用答案</h3><p>引用图与链式召回适合近期任务，但跨月甚至更长周期的记忆仍然困难。如何决定压缩什么、保留什么、何时遗忘，以及如何在不同权限边界间共享信息，仍是开放问题。</p>
+<h2 id="十四、适合团队采用的渐进路线"><a href="#十四、适合团队采用的渐进路线" class="headerlink" title="十四、适合团队采用的渐进路线"></a>十四、适合团队采用的渐进路线</h2><p>不必一次搭建完整 Super-agent。更稳妥的落地顺序是：</p>
+<h3 id="阶段一：把任务与-Session-解耦"><a href="#阶段一：把任务与-Session-解耦" class="headerlink" title="阶段一：把任务与 Session 解耦"></a>阶段一：把任务与 Session 解耦</h3><p>建立独立任务 ID、状态和交付记录，让 Session 可以重建，而不是把所有进度只留在聊天历史中。</p>
+<h3 id="阶段二：引入-Router-Worker-边界"><a href="#阶段二：引入-Router-Worker-边界" class="headerlink" title="阶段二：引入 Router&#x2F;Worker 边界"></a>阶段二：引入 Router&#x2F;Worker 边界</h3><p>Router 只分派和沟通，Worker 隔离执行。先限制并发数，并为每个 Worker 分配独立目录或 worktree。</p>
+<h3 id="阶段三：接入单一事件源"><a href="#阶段三：接入单一事件源" class="headerlink" title="阶段三：接入单一事件源"></a>阶段三：接入单一事件源</h3><p>从 GitHub Issue 或 PR 开始。先做白名单和明确请求，再逐步增加语义判断，不要一开始监听所有群消息。</p>
+<h3 id="阶段四：建立-Thread-订阅"><a href="#阶段四：建立-Thread-订阅" class="headerlink" title="阶段四：建立 Thread 订阅"></a>阶段四：建立 Thread 订阅</h3><p>让后续评论直达已有 Worker，减少 Router 重复判断。保留重新路由和取消订阅能力。</p>
+<h3 id="阶段五：异步执行与持久状态"><a href="#阶段五：异步执行与持久状态" class="headerlink" title="阶段五：异步执行与持久状态"></a>阶段五：异步执行与持久状态</h3><p>将长任务改为后台运行，执行结果以事件回注；把 Session 日志、任务状态和审计信息保存到外部存储。</p>
+<h3 id="阶段六：增加-Watchdog-与安全门禁"><a href="#阶段六：增加-Watchdog-与安全门禁" class="headerlink" title="阶段六：增加 Watchdog 与安全门禁"></a>阶段六：增加 Watchdog 与安全门禁</h3><p>同时监控基础设施与任务进展。对写操作、跨设备访问、外部消息和凭据使用建立清晰的授权策略。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Super-agent 的关键变化，是把 Agent 从“一个对话窗口里的循环”重新定义为“一个持续运行的系统”。</p>
+<p>Router&#x2F;Worker 双层架构解决连续性与并发的冲突，事件过滤和 Thread 订阅控制主动响应的成本，Inline &amp; Spill 管理有限上下文，异步 ReAct Loop 将交互与后台执行解耦，计算、状态和环境分离提供持久性，Watchdog 则补上长期运行所需的外部控制回路。</p>
+<p>这套设计并没有发明全新的计算机科学概念。它的价值恰恰在于把 Fast&#x2F;Slow Path、缓存、局部性、投机执行、存算分离和 Control Loop 等成熟系统思想，重新应用到 Agent 架构中。</p>
+<p>模型越能独立完成任务，人的工作就越应该从管理 Session 和盯执行过程，上移到定义目标、设置边界、处理例外与验收结果。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg">DeepSeek Harness 团队：Super-agent 设计探索——迈向更自主的 Agent 系统</a></p>
+<p>[cite:2] <a href="https://github.com/deepseek-ai/dsh-superagent-prototype">GitHub：deepseek-ai&#x2F;dsh-superagent-prototype</a></p>
+<p>[cite:3] <a href="https://deepseek.com/harness/en/">DeepSeek Harness Developer Preview</a></p>
+<p>[cite:4] <a href="https://www.anthropic.com/engineering/managed-agents">Anthropic：Scaling Managed Agents - Decoupling the brain from the hands</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Agent/" rel="tag"># Agent</a>
+              <a href="/tags/Super-agent/" rel="tag"># Super-agent</a>
+              <a href="/tags/DeepSeek-Harness/" rel="tag"># DeepSeek Harness</a>
+              <a href="/tags/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93/" rel="tag"># 多智能体</a>
+              <a href="/tags/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/" rel="tag"># 系统架构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/11/14/AI-Coding%E4%BB%8E%E4%B8%80%E5%8F%A5%E8%AF%9D%E9%9C%80%E6%B1%82%E5%88%B0%E5%8F%AF%E9%AA%8C%E8%AF%81%E4%BA%A4%E4%BB%98-SpecDD%E4%B8%8ETDD%E5%AE%9E%E6%88%98/" rel="prev" title="AI Coding 从一句话需求到可验证交付：SpecDD 与 TDD 实战">
+                  <i class="fa fa-angle-left"></i> AI Coding 从一句话需求到可验证交付：SpecDD 与 TDD 实战
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2016 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Andrew Yu</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
