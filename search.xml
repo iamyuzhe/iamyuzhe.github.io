@@ -1080,24 +1080,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Android开发中的空指针异常</title>
-    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
-    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
-
-<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
-]]></content>
-      <categories>
-        <category>mobile development</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>空指针异常</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>C#使用</title>
     <url>/2016/10/15/C-%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h2 id="1-模拟登陆"><a href="#1-模拟登陆" class="headerlink" title="1. 模拟登陆"></a>1. 模拟登陆</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">HttpWebRequest request = <span class="literal">null</span>;  <span class="comment">//提供 WebRequest 类的 HTTP 特定的实现。</span></span><br><span class="line">HttpWebResponse response = <span class="literal">null</span>;    <span class="comment">//提供 WebResponse 类的 HTTP 特定的实现</span></span><br><span class="line"><span class="keyword">try</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//提交的信息，包括用户名和密码等信息</span></span><br><span class="line">    <span class="built_in">string</span> postdata = <span class="string">&quot;uid=&quot;</span> + account + <span class="string">&quot;&amp;pwd=&quot;</span> + password;</span><br><span class="line">    <span class="comment">//抽象类的静态方法可直接调用,初始化新的WebRequest实例化web访问类</span></span><br><span class="line">    request = (HttpWebRequest)WebRequest.Create(loginUrl);</span><br><span class="line">    <span class="comment">//request.Credentials:获取或设置请求的身份验证信息;</span></span><br><span class="line">    <span class="comment">//CredentialCache.DefaultCredentials:获取应用程序的系统凭据,</span></span><br><span class="line">    <span class="comment">//对于 ASP.NET应用程序，默认凭据是已登录的用户或正被模拟的用户的用户凭据。</span></span><br><span class="line">    request.Credentials = CredentialCache.DefaultCredentials;</span><br><span class="line">    request.Method = <span class="string">&quot;POST&quot;</span>;<span class="comment">//数据提交方式为POST</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//request.ContentType:获取或设置传入请求的 MIME 内容类型。</span></span><br><span class="line">    request.ContentType = <span class="string">&quot;application/x-www-form-urlencoded&quot;</span>;    <span class="comment">//模拟头 </span></span><br><span class="line">    <span class="comment">//request.AllowAutoRedirect：获取或设置一个值，该值指示请求是否应跟随重定向响应；</span></span><br><span class="line">    <span class="comment">//如果请求应自动跟随 Internet 资源的重定向响应，则为 true，否则为 false。默认值为 true。</span></span><br><span class="line">    request.AllowAutoRedirect = <span class="literal">false</span>;   <span class="comment">// 不用需自动跳转</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//必须设置CookieContainer存储请求返回的Cookies</span></span><br><span class="line">    <span class="keyword">if</span> (CookieContainer != <span class="literal">null</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        request.CookieContainer = <span class="keyword">new</span> CookieContainer();</span><br><span class="line">        CookieContainer = request.CookieContainer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//保持TCP连接</span></span><br><span class="line">    request.KeepAlive = <span class="literal">true</span>;</span><br><span class="line">    <span class="comment">//提交请求  </span></span><br><span class="line">    <span class="built_in">byte</span>[] postdatabytes = Encoding.UTF8.GetBytes(postdata); <span class="comment">//对指定字符集进行编码</span></span><br><span class="line">    request.ContentLength = postdatabytes.Length;</span><br><span class="line">    Stream stream;</span><br><span class="line">    stream = request.GetRequestStream();  <span class="comment">//返回一个数据流为HttpWebRequest发送数据</span></span><br><span class="line">    <span class="comment">//设置POST 数据，向当前流中写入postdatabytes字节序列，其中0为postdatabytes从0开始的字节偏移量</span></span><br><span class="line">    <span class="comment">//postdatabytes.Length要写入当前流的字节数。</span></span><br><span class="line">    stream.Write(postdatabytes, <span class="number">0</span>, postdatabytes.Length); </span><br><span class="line">    stream.Close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//接收响应</span></span><br><span class="line">    response = (HttpWebResponse)request.GetResponse(); <span class="comment">//返回对 Internet 请求的响应。</span></span><br><span class="line">    <span class="comment">//获取包含与特定 URI（request.RequestUri） 关联的 Cookie 实例的 CookieCollection。</span></span><br><span class="line">    response.Cookies = request.CookieContainer.GetCookies(request.RequestUri);</span><br><span class="line">    CookieCollection cook = response.Cookies;</span><br><span class="line">    <span class="comment">//返回一个 HTTP Cookie 标头，其中包含表示由分号分隔的与特定 URI 关联的Cookie 实例的字符串。</span></span><br><span class="line">    <span class="built_in">string</span> strcookieheader = request.CookieContainer.GetCookieHeader(request.RequestUri);</span><br><span class="line">    CookiesString = strcookieheader;</span><br><span class="line">    <span class="comment">//取下一次GET跳转地址  </span></span><br><span class="line">    <span class="comment">//实现一个 TextReader，使其以gb2312编码从字节流中读取字符。</span></span><br><span class="line">    StreamReader sr = <span class="keyword">new</span> StreamReader(response.GetResponseStream(), Encoding.GetEncoding(<span class="string">&quot;gb2312&quot;</span>));</span><br><span class="line">    <span class="built_in">string</span> content = sr.ReadToEnd(); <span class="comment">//读取来自流的当前位置到结尾的所有字符。</span></span><br><span class="line">    sr.Close(); <span class="comment">//关闭 StreamReader 对象和基础流，并释放与读取器关联的所有系统资源</span></span><br><span class="line">    request.Abort();    <span class="comment">//取消对 Internet 资源的请求。</span></span><br><span class="line">    response.Close();   <span class="comment">//Close 方法关闭响应流，并通过其他请求将释放与重复使用的资源的连接。</span></span><br><span class="line">    <span class="comment">//依据登陆成功后返回的Page信息，求出下次请求的url</span></span><br><span class="line">    <span class="comment">//每个网站登陆后加载的Url和顺序不尽相同，以下两步需根据实际情况做特殊处理，从而得到下次请求的URL</span></span><br><span class="line">    <span class="built_in">string</span>[] substr = content.Split(<span class="keyword">new</span> <span class="built_in">char</span>[] &#123; <span class="string">&#x27;&quot;&#x27;</span> &#125;);</span><br><span class="line">    NextRequestUrl = <span class="string">&quot;http://zcgl.wzu.edu.cn/plat/&quot;</span> + substr[<span class="number">1</span>];   </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (WebException ex)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox.Show(<span class="built_in">string</span>.Format(<span class="string">&quot;登陆时出错，详细信息：&#123;0&#125;&quot;</span>, ex.Message));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1155,6 +1137,24 @@
         <tag>ListView</tag>
         <tag>正則匹配</tag>
         <tag>ZXing</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android开发中的空指针异常</title>
+    <url>/2016/11/20/Android%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8/</url>
+    <content><![CDATA[<h2 id="常见空指针异常"><a href="#常见空指针异常" class="headerlink" title="常见空指针异常"></a>常见空指针异常</h2><h2 id="不易发现的空指针异常"><a href="#不易发现的空指针异常" class="headerlink" title="不易发现的空指针异常"></a>不易发现的空指针异常</h2><h3 id="1-TextView-设置内容为整型"><a href="#1-TextView-设置内容为整型" class="headerlink" title="1. TextView 设置内容为整型"></a>1. TextView 设置内容为整型</h3><p>可能原因：在适配器中(如BaseQuickAdapter)，为TextView设置内容为整型。<br>如下為TextView方法簽名：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">public final void setText(int resid) &#123;</span><br><span class="line">    throw new RuntimeException(&quot;Stub!&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>儅該方法接收int型参数时，系统会去R文件里面找int值匹配的String值，在R文件里找不到这个值，所以可能会报如下异常：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">E/AndroidRuntime: FATAL EXCEPTION: main</span><br><span class="line">	 Process: com.zhefish.androidtest, PID: 13193</span><br><span class="line">	 android.content.res.Resources$NotFoundException: String resource ID #0x0</span><br><span class="line">	     at android.content.res.Resources.getText(Resources.java:312)</span><br><span class="line">	     at android.widget.TextView.setText(TextView.java:4417)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseViewHolder.setText(BaseViewHolder.java:102)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:24)</span><br><span class="line">	     at com.zhefish.androidtest.adapter.TestAdapter.convert(TestAdapter.java:16)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:607)</span><br><span class="line">	     at com.chad.library.adapter.base.BaseQuickAdapter.onBindViewHolder(BaseQuickAdapter.java:57)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.onBindViewHolder(RecyclerView.java:6067)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Adapter.bindViewHolder(RecyclerView.java:6100)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5282)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5158)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2061)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1445)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1408)</span><br><span class="line">	     at android.support.v7.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:580)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayoutStep2(RecyclerView.java:3379)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.dispatchLayout(RecyclerView.java:3188)</span><br><span class="line">	     at android.support.v7.widget.RecyclerView.onLayout(RecyclerView.java:3632)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.RelativeLayout.onLayout(RelativeLayout.java:1079)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.support.v7.widget.ActionBarOverlayLayout.onLayout(ActionBarOverlayLayout.java:437)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1743)</span><br><span class="line">	     at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1586)</span><br><span class="line">	     at android.widget.LinearLayout.onLayout(LinearLayout.java:1495)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.widget.FrameLayout.layoutChildren(FrameLayout.java:336)</span><br><span class="line">	     at android.widget.FrameLayout.onLayout(FrameLayout.java:273)</span><br><span class="line">	     at com.android.internal.policy.PhoneWindow$DecorView.onLayout(PhoneWindow.java:2678)</span><br><span class="line">	     at android.view.View.layout(View.java:16630)</span><br><span class="line">	     at android.view.ViewGroup.layout(ViewGroup.java:5437)</span><br><span class="line">	     at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2171)</span><br><span class="line">	     at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:1931)</span><br><span class="line">	     at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1107)</span><br><span class="line">	     at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6013)</span><br><span class="line">	     at android.view.Choreographer$CallbackRecord.run(Choreographer.java:858)</span><br><span class="line">	     at android.view.Choreographer.doCallbacks(Choreographer.java:670)</span><br><span class="line">	     at android.view.Choreographer.doFrame(Choreographer.java:606)</span><br><span class="line">	     at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:844)</span><br><span class="line">	     at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">	     at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">	     at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">	     at android.app.ActivityThread.main(ActivityThread.java:5417)</span><br><span class="line">	 	at java.lang.reflect.Method.invoke(Native </span><br></pre></td></tr></table></figure>
+
+<p>有时候在做项目时，可能由于项目框架的问题导致该错误会报空指针异常，让你丈二的和尚，摸不着头脑。此时如果真的去找空指针异常，可能就会南辕北辙了。这时，我们应该做减法，将代码一点一点的注释掉进行测试，最终定位到出错的代码，才能以最快的速度找到问题的答案。</p>
+]]></content>
+      <categories>
+        <category>mobile development</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>空指针异常</tag>
       </tags>
   </entry>
   <entry>
@@ -1375,19 +1375,271 @@
       </tags>
   </entry>
   <entry>
-    <title>Fiddler常見問題</title>
-    <url>/2016/10/16/Fiddler%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C/</url>
-    <content><![CDATA[<h2 id="无法显示会话结果"><a href="#无法显示会话结果" class="headerlink" title="无法显示会话结果"></a>无法显示会话结果</h2><p>可能是编码原因，一般Fiddler也会提示：</p>
+    <title>Claude Opus、Sonnet、Haiku 怎么选：从基准测试到分层路由</title>
+    <url>/2026/11/14/Claude-Opus-Sonnet-Haiku%E6%80%8E%E4%B9%88%E9%80%89-%E4%BB%8E%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95%E5%88%B0%E5%88%86%E5%B1%82%E8%B7%AF%E7%94%B1/</url>
+    <content><![CDATA[<p>Claude 的 Opus、Sonnet 和 Haiku 并不是简单的“高、中、低配”。在真实工程中，模型选型更像一个成本与风险的路由问题：</p>
+<ul>
+<li>哪些任务可以交给便宜模型批量处理？</li>
+<li>哪些任务需要更稳定的默认模型？</li>
+<li>什么情况下值得为 Opus 支付更高成本？</li>
+</ul>
+<p>OpenRouter 用同一批编码任务测试了 Claude Opus 5.5、Sonnet 5.5 和 Haiku 5.5。结果很有启发性：三档模型全部通过测试，但单任务成本最多相差约 30 倍。[cite:1]</p>
+<p>不过，这不等于“Haiku 已经全面替代 Opus”。短小、定义清晰的测试，无法覆盖长时间、开放式、错误代价高的任务。真正可靠的结论是：<strong>默认使用 Sonnet，批量明确任务下沉到 Haiku，复杂高风险任务升级到 Opus，再用自己的评测集校准边界。</strong></p>
+<span id="more"></span>
+
+<h2 id="一、先看三档模型的定位"><a href="#一、先看三档模型的定位" class="headerlink" title="一、先看三档模型的定位"></a>一、先看三档模型的定位</h2><p>截至 2026 年 11 月公开信息，Claude 5.5 家族可以这样理解：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>官方定位</th>
+<th>更适合的任务</th>
+<th>每百万输入 &#x2F; 输出 Token</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Opus 5.5</td>
+<td>复杂工作、持续判断和长时间 Agent 任务</td>
+<td>架构决策、疑难排障、开放式研究、高风险变更</td>
+<td>$4 &#x2F; $20</td>
+</tr>
+<tr>
+<td>Sonnet 5.5</td>
+<td>速度、能力和成本的平衡</td>
+<td>日常编码、修复 Bug、文档与常规 Agent 工作</td>
+<td>$2 &#x2F; $10</td>
+</tr>
+<tr>
+<td>Haiku 5.5</td>
+<td>高吞吐、低成本、低延迟</td>
+<td>分类、抽取、摘要、查询、子 Agent、批量任务</td>
+<td>$0.10 &#x2F; $0.50</td>
+</tr>
+</tbody></table>
+<p>表中 Haiku 的价格适用于不超过 10 万 Token 的提示词；超过 10 万 Token 后，输入与输出价格分别为 $0.50 和 $2.50。Anthropic 还将 Haiku 5.5 定位为目前最快的小模型，特别强调摘要、上下文压缩、数据库查询、分类、在线客服和浏览器操作等场景。[cite:4]</p>
+<p>Anthropic 对 Sonnet 5.5 的描述是 Opus 5.5 的低成本、快速补充：它擅长边界清晰的日常任务、Bug 修复以及文档、幻灯片和表格制作；Opus 则用于需要持续判断的复杂开放任务。[cite:2][cite:3]</p>
+<p>因此，模型名称本身已经暗示了一种分工：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Haiku：执行明确、重复、可快速验证的任务</span><br><span class="line">Sonnet：承担大多数日常主流程</span><br><span class="line">Opus：处理模糊、复杂、失败代价高的任务</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、OpenRouter-的测试得出了什么"><a href="#二、OpenRouter-的测试得出了什么" class="headerlink" title="二、OpenRouter 的测试得出了什么"></a>二、OpenRouter 的测试得出了什么</h2><p>OpenRouter 做了两组编码测试。第一组要求模型按规格实现 Python 函数，并用隐藏测试验证；第二组让 Claude Code 修复一个包含三个 Bug 的小型发票项目。[cite:1]</p>
+<h3 id="1-25-次隐藏测试全部通过"><a href="#1-25-次隐藏测试全部通过" class="headerlink" title="1. 25 次隐藏测试全部通过"></a>1. 25 次隐藏测试全部通过</h3><p>测试包含 8 个日常任务和 3 个困难任务，例如：</p>
+<ul>
+<li>区间合并、LRU 缓存和表达式计算；</li>
+<li>Cron 下一次运行时间与语义化版本排序；</li>
+<li>不使用 <code>re</code> 模块实现正则引擎；</li>
+<li>处理 SQL 的三值 NULL 逻辑；</li>
+<li>跨时区和夏令时计算空闲日程。</li>
+</ul>
+<p>每个模型共执行 25 次，结果都是 25&#x2F;25 通过。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th align="right">Opus 5.5</th>
+<th align="right">Sonnet 5.5</th>
+<th align="right">Haiku 5.5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>通过次数</td>
+<td align="right">25&#x2F;25</td>
+<td align="right">25&#x2F;25</td>
+<td align="right">25&#x2F;25</td>
+</tr>
+<tr>
+<td>日常任务平均成本</td>
+<td align="right">$0.0211</td>
+<td align="right">$0.0112</td>
+<td align="right">$0.0007</td>
+</tr>
+<tr>
+<td>困难任务平均成本</td>
+<td align="right">$0.0739</td>
+<td align="right">$0.0380</td>
+<td align="right">$0.0027</td>
+</tr>
+<tr>
+<td>困难任务平均耗时</td>
+<td align="right">32.1 秒</td>
+<td align="right">25.7 秒</td>
+<td align="right">22.6 秒</td>
+</tr>
+</tbody></table>
+<p>在这组任务里，模型能力没有拉开差距，成本却明显不同。Haiku 的困难任务成本约为 Opus 的 1&#x2F;27，而且平均完成时间更短。[cite:1]</p>
+<h3 id="2-Claude-Code-修复任务也全部通过"><a href="#2-Claude-Code-修复任务也全部通过" class="headerlink" title="2. Claude Code 修复任务也全部通过"></a>2. Claude Code 修复任务也全部通过</h3><p>发票项目中有三个问题：</p>
+<ol>
+<li>金额计算错误地使用了银行家舍入；</li>
+<li>CSV 解析器错误拆分了引号内的逗号；</li>
+<li>汇总逻辑覆盖数量，而不是累加数量。</li>
+</ol>
+<p>每个模型各运行三次，九次运行全部修复三个 Bug。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th align="right">Opus 5.5</th>
+<th align="right">Sonnet 5.5</th>
+<th align="right">Haiku 5.5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>完整修复</td>
+<td align="right">3&#x2F;3</td>
+<td align="right">3&#x2F;3</td>
+<td align="right">3&#x2F;3</td>
+</tr>
+<tr>
+<td>单次会话成本中位数</td>
+<td align="right">$0.098</td>
+<td align="right">$0.062</td>
+<td align="right">$0.0052</td>
+</tr>
+<tr>
+<td>对话轮数</td>
+<td align="right">5</td>
+<td align="right">5</td>
+<td align="right">6～8</td>
+</tr>
+<tr>
+<td>总耗时</td>
+<td align="right">24～30 秒</td>
+<td align="right">18～25 秒</td>
+<td align="right">22～31 秒</td>
+</tr>
+</tbody></table>
+<p>Haiku 用了更多轮次，但会话成本仍只有 Sonnet 的约 1&#x2F;12、Opus 的约 1&#x2F;19。[cite:1]</p>
+<p>这说明<strong>单 Token 价格不能直接等同于单任务成本</strong>。便宜模型可能需要更多推理 Token、更多轮次或更多重试，所以工程上应该统计完整任务的成功率、总成本和总耗时。</p>
+<h2 id="三、为什么不能据此认为-Haiku-等于-Opus"><a href="#三、为什么不能据此认为-Haiku-等于-Opus" class="headerlink" title="三、为什么不能据此认为 Haiku 等于 Opus"></a>三、为什么不能据此认为 Haiku 等于 Opus</h2><p>OpenRouter 的测试有两个明确限制：</p>
+<ul>
+<li>任务规模小；</li>
+<li>输入和验收标准清晰。</li>
+</ul>
+<p>这正好是 Haiku 的优势区间。测试没有覆盖大型代码库迁移、跨模块设计、需求不完整的排障、数小时 Agent 运行，或一次错误会造成较大损失的变更。</p>
+<p>Anthropic 的官方评测给出了另一面：Opus 5.5 重点面向 Agent 编码、计算机操作和知识工作；Sonnet 5.5 在部分基准和较高 effort 下可以接近 Opus，但 Anthropic 的内部测试和外部试用仍认为 Opus 在复杂、开放、需要持续判断的任务上更强。[cite:2][cite:3]</p>
+<p>这两组结果并不矛盾：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">OpenRouter 回答：在一组短小明确的任务中，模型表现是否有差距？</span><br><span class="line">Anthropic 回答：面对更长、更复杂、更开放的任务，模型上限在哪里？</span><br></pre></td></tr></table></figure>
+
+<p>所以，不能用一次小型编码测试证明高端模型没有价值，也不能因为 Opus 的能力上限更高，就让所有简单任务都承担 Opus 的成本。</p>
+<h2 id="四、实际项目应该怎样选"><a href="#四、实际项目应该怎样选" class="headerlink" title="四、实际项目应该怎样选"></a>四、实际项目应该怎样选</h2><h3 id="默认模型：Sonnet"><a href="#默认模型：Sonnet" class="headerlink" title="默认模型：Sonnet"></a>默认模型：Sonnet</h3><p>如果只能选一个模型，Sonnet 5.5 是更稳妥的默认值：</p>
+<ul>
+<li>OpenRouter 的两组编码测试中，它与 Opus 同样全部通过；</li>
+<li>每 Token 价格是 Opus 的一半；</li>
+<li>官方定位覆盖日常编码、Bug 修复和常规内容生产；</li>
+<li>相比 Haiku，它更适合需求存在一定歧义、需要多步推理的主流程。[cite:1][cite:3]</li>
+</ul>
+<p>对大多数团队来说，Sonnet 应该先成为基线模型，再根据评测结果向上下两档分流。</p>
+<h3 id="高吞吐任务：Haiku"><a href="#高吞吐任务：Haiku" class="headerlink" title="高吞吐任务：Haiku"></a>高吞吐任务：Haiku</h3><p>以下任务通常适合优先尝试 Haiku：</p>
+<ul>
+<li>文本分类、结构化抽取和路由判断；</li>
+<li>摘要、压缩与字段规范化；</li>
+<li>大批量、规则清晰的代码修改；</li>
+<li>主 Agent 拆出的独立子任务；</li>
+<li>可以用测试、Schema 或规则快速验收的工作；</li>
+<li>对响应延迟敏感的客服和浏览器操作。</li>
+</ul>
+<p>关键不是“任务看起来简单”，而是<strong>任务是否边界清晰且结果可验证</strong>。如果失败可以被自动测试发现，Haiku 的成本优势更容易安全兑现。</p>
+<h3 id="高风险复杂任务：Opus"><a href="#高风险复杂任务：Opus" class="headerlink" title="高风险复杂任务：Opus"></a>高风险复杂任务：Opus</h3><p>以下情况更值得升级到 Opus：</p>
+<ul>
+<li>需求模糊，需要先澄清目标和约束；</li>
+<li>涉及跨模块架构、复杂迁移或疑难根因分析；</li>
+<li>Agent 需要长时间自主执行并保持上下文；</li>
+<li>缺少确定性验收标准，需要依赖判断质量；</li>
+<li>错误可能带来生产事故、数据损坏或大量返工。</li>
+</ul>
+<p>此时应比较的不是 Token 单价，而是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">模型增量成本</span><br><span class="line">vs.</span><br><span class="line">错误概率 × 错误损失</span><br></pre></td></tr></table></figure>
+
+<p>当错误代价远高于推理成本时，直接使用 Opus 往往比“便宜模型失败后再返工”更经济。</p>
+<h2 id="五、比固定选型更有效的是分层路由"><a href="#五、比固定选型更有效的是分层路由" class="headerlink" title="五、比固定选型更有效的是分层路由"></a>五、比固定选型更有效的是分层路由</h2><p>成熟系统通常不会把所有请求固定到同一个模型，而是建立三级路由：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">请求进入</span><br><span class="line">  │</span><br><span class="line">  ├─ 明确、重复、可自动验收 ──&gt; Haiku</span><br><span class="line">  │</span><br><span class="line">  ├─ 常规开发与知识工作 ─────&gt; Sonnet</span><br><span class="line">  │</span><br><span class="line">  └─ 模糊、复杂、高风险 ─────&gt; Opus</span><br><span class="line">                                 │</span><br><span class="line">失败、低置信度或验收不通过 &lt;────┘</span><br><span class="line">        向上升级模型</span><br></pre></td></tr></table></figure>
+
+<p>可以把路由规则设计为：</p>
+<table>
+<thead>
+<tr>
+<th>判断维度</th>
+<th>Haiku</th>
+<th>Sonnet</th>
+<th>Opus</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需求清晰度</td>
+<td>高</td>
+<td>中高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>任务长度</td>
+<td>短</td>
+<td>中等</td>
+<td>长</td>
+</tr>
+<tr>
+<td>验收自动化</td>
+<td>完整</td>
+<td>部分</td>
+<td>较弱</td>
+</tr>
+<tr>
+<td>错误代价</td>
+<td>低</td>
+<td>中</td>
+<td>高</td>
+</tr>
+<tr>
+<td>调用规模</td>
+<td>很高</td>
+<td>中等</td>
+<td>较低</td>
+</tr>
+</tbody></table>
+<p>Claude Code 也支持按角色配置模型。官方文档中的 <code>haiku</code>、<code>sonnet</code>、<code>opus</code> 别名分别指向对应档位，<code>opusplan</code> 可以在规划阶段使用 Opus、执行阶段切换到 Sonnet。[cite:5]</p>
+<p>一种实用配置是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">主 Agent：Sonnet</span><br><span class="line">计划与疑难升级：Opus</span><br><span class="line">搜索、抽取、格式化和独立子任务：Haiku</span><br></pre></td></tr></table></figure>
+
+<p>这样既能保留复杂任务的能力上限，也能避免每一步都支付最高档价格。</p>
+<h2 id="六、最终决策要基于自己的评测集"><a href="#六、最终决策要基于自己的评测集" class="headerlink" title="六、最终决策要基于自己的评测集"></a>六、最终决策要基于自己的评测集</h2><p>OpenRouter 文章最重要的提醒不是某个模型赢了，而是：<strong>他们的任务不是你的任务。</strong>[cite:1]</p>
+<p>团队可以从历史工作中抽取 20～50 个代表性任务，建立最小评测集：</p>
+<ol>
+<li>覆盖简单、中等、复杂三种难度；</li>
+<li>保留真实输入、工具和上下文长度；</li>
+<li>使用相同提示词分别运行三个模型；</li>
+<li>优先采用单元测试、结构化规则或人工盲评；</li>
+<li>记录成功率、总 Token、总成本、耗时和重试次数；</li>
+<li>对失败任务分析原因，而不只比较平均分。</li>
+</ol>
+<p>推荐使用“质量门槛优先”的决策方法：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">先排除达不到质量门槛的模型</span><br><span class="line">再从通过门槛的模型中选择总成本最低者</span><br></pre></td></tr></table></figure>
+
+<p>如果 Haiku 在某类任务中稳定通过，就把这类请求下沉；如果 Sonnet 在复杂任务中频繁需要重试，就将该类任务直接升级到 Opus。模型路由应该是评测结果，而不是品牌偏好。</p>
+<h2 id="七、结论"><a href="#七、结论" class="headerlink" title="七、结论"></a>七、结论</h2><p>Claude 三档模型的合理分工可以概括为：</p>
+<ul>
+<li><strong>Sonnet 作为默认模型</strong>：覆盖多数日常编码和知识工作；</li>
+<li><strong>Haiku 负责规模化执行</strong>：处理明确、重复、低风险、可验证的任务；</li>
+<li><strong>Opus 负责能力上限</strong>：承担长时间、开放式、高风险且错误昂贵的任务。</li>
+</ul>
+<p>OpenRouter 的测试证明了一个重要事实：在边界清晰的任务上，小模型可能以低得多的成本达到相同结果。[cite:1] Anthropic 的官方资料则提醒我们，复杂、开放和持续判断仍是 Opus 的核心价值。[cite:2][cite:3]</p>
+<p>因此，最好的问题不是“哪个模型最强”，而是：</p>
 <blockquote>
-<p>“Response body is encoded. Click to decoded”</p>
+<p>在满足当前任务质量门槛的模型中，哪一个总成本最低？</p>
 </blockquote>
-<p>只需点击提示按钮即可显示get到的信息，或者选择对应的Session，右击选择“decode selected session”即可。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] OpenRouter, <a href="https://openrouter.ai/blog/insights/claude-opus-vs-sonnet-vs-haiku/">Claude Opus vs Sonnet vs Haiku: Which Should You Use?</a>, 2026-10-30.</p>
+<p>[cite:2] Anthropic, <a href="https://www.anthropic.com/claude-opus-5-5">Introducing Claude Opus 5.5</a>, 2026-09-22.</p>
+<p>[cite:3] Anthropic, <a href="https://www.anthropic.com/claude-sonnet-5-5">Introducing Claude Sonnet 5.5</a>, 2026-09-28.</p>
+<p>[cite:4] Anthropic, <a href="https://www.anthropic.com/claude-haiku-5-5">Introducing Claude Haiku 5.5</a>, 2026-10-07.</p>
+<p>[cite:5] Anthropic, <a href="https://code.claude.com/docs/en/model-config">Claude Code: Model configuration</a>, accessed 2026-11-14.</p>
 ]]></content>
       <categories>
-        <category>tools</category>
+        <category>ai-engineering</category>
       </categories>
       <tags>
-        <tag>Fiddler</tag>
+        <tag>Claude</tag>
+        <tag>Opus</tag>
+        <tag>Sonnet</tag>
+        <tag>Haiku</tag>
+        <tag>Claude Code</tag>
+        <tag>LLM Routing</tag>
       </tags>
   </entry>
   <entry>
@@ -1459,6 +1711,54 @@
       </tags>
   </entry>
   <entry>
+    <title>Fiddler常見問題</title>
+    <url>/2016/10/16/Fiddler%E5%B8%B8%E8%A6%8B%E5%95%8F%E9%A1%8C/</url>
+    <content><![CDATA[<h2 id="无法显示会话结果"><a href="#无法显示会话结果" class="headerlink" title="无法显示会话结果"></a>无法显示会话结果</h2><p>可能是编码原因，一般Fiddler也会提示：</p>
+<blockquote>
+<p>“Response body is encoded. Click to decoded”</p>
+</blockquote>
+<p>只需点击提示按钮即可显示get到的信息，或者选择对应的Session，右击选择“decode selected session”即可。</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Fiddler</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Markdown 常见问题</title>
+    <url>/2016/10/15/Markdown%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h2><ol>
+<li>方法一</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">center</span>&gt;</span></span></span><br><span class="line"><span class="code">	![图片说明](https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg &quot;金鱼&quot;)</span></span><br><span class="line"><span class="code">&lt;/center&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>方法二</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">align</span>=<span class="string">&quot;center&quot;</span>&gt;</span></span> </span><br><span class="line"><span class="code">	&lt;img src=&quot;https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg&quot; alt=&quot;CSDN图标&quot; /&gt;</span></span><br><span class="line"><span class="code">&lt;/div&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h2><ul>
+<li><code>&lt;p&gt;</code>:换行并加一行空白行</li>
+<li>连续两个空格会变成一个 <code>&lt;br&gt;</code></li>
+</ul>
+<p><a href="http://lutaf.com/markdown-simple-usage.htm">参考链接</a></p>
+<h2 id="Markdown哲学"><a href="#Markdown哲学" class="headerlink" title="Markdown哲学"></a>Markdown哲学</h2><p>内容與樣式分開，让思绪自由流畅不受阻，让创作回归内容本身。</p>
+<h2 id="使用感悟"><a href="#使用感悟" class="headerlink" title="使用感悟"></a>使用感悟</h2><ul>
+<li>格式越简单越好</li>
+</ul>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>Markdown</tag>
+        <tag>图片</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hexo搭建個人博客</title>
     <url>/2016/10/15/Hexo%E6%90%AD%E5%BB%BA%E5%80%8B%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
     <content><![CDATA[<h2 id="搭建個人博客"><a href="#搭建個人博客" class="headerlink" title="搭建個人博客"></a>搭建個人博客</h2><h3 id="環境配置"><a href="#環境配置" class="headerlink" title="環境配置"></a>環境配置</h3><h4 id="安裝Git"><a href="#安裝Git" class="headerlink" title="安裝Git"></a>安裝Git</h4><h4 id="安裝node-js"><a href="#安裝node-js" class="headerlink" title="安裝node.js"></a>安裝node.js</h4><h3 id="配置Github"><a href="#配置Github" class="headerlink" title="配置Github"></a>配置Github</h3><h3 id="安裝Hexo"><a href="#安裝Hexo" class="headerlink" title="安裝Hexo"></a>安裝Hexo</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ npm install hexo-cli -g</span><br><span class="line">$ hexo init blog</span><br><span class="line">$ cd blog</span><br><span class="line">$ npm install</span><br></pre></td></tr></table></figure>
@@ -1522,38 +1822,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Markdown 常见问题</title>
-    <url>/2016/10/15/Markdown%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="添加图片"><a href="#添加图片" class="headerlink" title="添加图片"></a>添加图片</h2><ol>
-<li>方法一</li>
-</ol>
-<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">center</span>&gt;</span></span></span><br><span class="line"><span class="code">	![图片说明](https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg &quot;金鱼&quot;)</span></span><br><span class="line"><span class="code">&lt;/center&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-<ol start="2">
-<li>方法二</li>
-</ol>
-<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">align</span>=<span class="string">&quot;center&quot;</span>&gt;</span></span> </span><br><span class="line"><span class="code">	&lt;img src=&quot;https://cdn.jsdelivr.net/gh/iamyuzhe/images@master/goldfish.jpg&quot; alt=&quot;CSDN图标&quot; /&gt;</span></span><br><span class="line"><span class="code">&lt;/div&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h2><ul>
-<li><code>&lt;p&gt;</code>:换行并加一行空白行</li>
-<li>连续两个空格会变成一个 <code>&lt;br&gt;</code></li>
-</ul>
-<p><a href="http://lutaf.com/markdown-simple-usage.htm">参考链接</a></p>
-<h2 id="Markdown哲学"><a href="#Markdown哲学" class="headerlink" title="Markdown哲学"></a>Markdown哲学</h2><p>内容與樣式分開，让思绪自由流畅不受阻，让创作回归内容本身。</p>
-<h2 id="使用感悟"><a href="#使用感悟" class="headerlink" title="使用感悟"></a>使用感悟</h2><ul>
-<li>格式越简单越好</li>
-</ul>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>Markdown</tag>
-        <tag>图片</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>RecyclerView的使用</title>
     <url>/2016/11/20/RecyclerView%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="Rendering-Problems"><a href="#Rendering-Problems" class="headerlink" title="Rendering Problems"></a>Rendering Problems</h3><p>在布局文件中添加 RecyclerView,会出现 Rendering Problems,具体问题如下图所示：</p>
@@ -1579,6 +1847,26 @@
       <tags>
         <tag>RecyclerView</tag>
         <tag>Exception</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows常见问题</title>
+    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
+<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
+<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
+<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
+<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
+<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
+<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
+<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
+      <tags>
+        <tag>windows</tag>
+        <tag>win10</tag>
       </tags>
   </entry>
   <entry>
@@ -1703,26 +1991,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Windows常见问题</title>
-    <url>/2016/10/16/Windows%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="winxp"><a href="#winxp" class="headerlink" title="winxp"></a>winxp</h2><p>Windows XP Professional with Service Pack 2 (Simplified Chinese)<br>【key】<code>RT4H2-8WYHG-QKK6K-WWHJ2-9427X</code>(亲测可用)</p>
-<p><a href="http://infosec.blog.51cto.com/226250/322152">windows XP SP2 各种版本序列号</a></p>
-<h2 id="Win-7"><a href="#Win-7" class="headerlink" title="Win 7"></a>Win 7</h2><p>Windows 7 Professional with Service Pack 1 (x64) - DVD (Chinese-Simplified)<br>【key】<code>YKHFT-KW986-GK4PY-FDWYH-7TP9F</code>(亲测可用)</p>
-<p><a href="https://zhidao.baidu.com/question/2117879197329625547.html">win7 激活密钥</a></p>
-<h2 id="win10"><a href="#win10" class="headerlink" title="win10"></a>win10</h2><h3 id="自带中文输入法變繁体了"><a href="#自带中文输入法變繁体了" class="headerlink" title="自带中文输入法變繁体了"></a>自带中文输入法變繁体了</h3><p>解決方案：Ctrl + Shift + F 快速切换简体和繁体 參考自<a href="http://bbs.pcbeta.com/forum.php?mod=viewthread&tid=1705417&highlight=">微软极客社区</a></p>
-<h3 id="aam-updates-notifier自启"><a href="#aam-updates-notifier自启" class="headerlink" title="aam updates notifier自启"></a>aam updates notifier自启</h3><p>将Adobe的更新程序启动禁用后，每次开机之后，还是会看到Adobe的更新程序，感觉很是不爽，但又不舍得将软件卸载，很是纠结。后来在网上找到了一篇文章，给了我灵感，原来Adobe有一个任务计划程序，在win10搜索框中输入“任务”2个字，选择任务计划程序，果然有一个名为AdobeAAMUpdater的任务计划，右击将其禁用即可。重启电脑，你会发现该程序不再出现了，顿时觉得整个世界都清静多了(●’◡’●)</p>
-<p><a href="http://tvdv.blog.163.com/blog/static/772399920121051159183/">参考自网易博客 - 竹乐谷的日志</a></p>
-<h3 id="批量删除文件名中的空格"><a href="#批量删除文件名中的空格" class="headerlink" title="批量删除文件名中的空格"></a>批量删除文件名中的空格</h3><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off&amp;<span class="built_in">setlocal</span> enabledelayedexpansion</span><br><span class="line"><span class="keyword">for</span> /f &quot;delims=&quot; <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /s/b *.*&#x27;) <span class="keyword">do</span> (</span><br><span class="line">    <span class="built_in">set</span> &quot;foo=<span class="variable">%%~</span>nxi&quot;</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">set</span> foo=!foo: =!</span><br><span class="line">    <span class="built_in">ren</span> &quot;<span class="variable">%%~</span>fi&quot; &quot;<span class="variable">!foo!</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
-      <tags>
-        <tag>windows</tag>
-        <tag>win10</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Word常见问题</title>
     <url>/2017/03/06/Word%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h2 id="Word-2016"><a href="#Word-2016" class="headerlink" title="Word 2016"></a>Word 2016</h2><h3 id="文字重叠"><a href="#文字重叠" class="headerlink" title="文字重叠"></a>文字重叠</h3><p>【Reason】计算机中没有相应的字体  </p>
@@ -1812,7 +2080,7 @@
 </ul>
 <ol>
 <li>先输入$ git remote rm origin</li>
-<li>再输入$ git remote add origin <a href="mailto:&#x67;&#105;&#116;&#64;&#99;&#x6e;&#98;&#x2e;&#x63;&#x6f;&#111;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
+<li>再输入$ git remote add origin <a href="mailto:&#x67;&#x69;&#116;&#64;&#99;&#x6e;&#98;&#46;&#x63;&#x6f;&#x6f;&#x6c;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
 </ol>
 <h3 id="2-warning-LF-will-be-replaced-by-CRLF"><a href="#2-warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="2. warning: LF will be replaced by CRLF"></a>2. warning: LF will be replaced by CRLF</h3><p>运行如下命令时；</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">warning: LF will be replaced by CRLF in _config.yml.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br></pre></td></tr></table></figure>
@@ -1865,15 +2133,6 @@
         <tag>git</tag>
         <tag>命令</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>test</title>
-    <url>/2016/10/23/test/</url>
-    <content><![CDATA[<p>測試博客</p>
-]]></content>
-      <categories>
-        <category>tools</category>
-      </categories>
   </entry>
   <entry>
     <title>在华为昇腾上部署 DeepSeek V4，并接入本地 Claude Code</title>
@@ -2093,10 +2352,10 @@
         <category>ai-engineering</category>
       </categories>
       <tags>
+        <tag>Claude Code</tag>
         <tag>DeepSeek</tag>
         <tag>华为昇腾</tag>
         <tag>vLLM</tag>
-        <tag>Claude Code</tag>
         <tag>大模型部署</tag>
       </tags>
   </entry>
@@ -2139,6 +2398,15 @@
         <tag>book</tag>
         <tag>reading</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>test</title>
+    <url>/2016/10/23/test/</url>
+    <content><![CDATA[<p>測試博客</p>
+]]></content>
+      <categories>
+        <category>tools</category>
+      </categories>
   </entry>
   <entry>
     <title>把 Agent 接进飞书：从消息回调到可扩展 Gateway</title>
@@ -2421,6 +2689,202 @@
       <tags>
         <tag>诗词</tag>
         <tag>life</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>雅思口语从 6 分到 7 分：先判断你卡在哪里</title>
+    <url>/2026/11/01/%E9%9B%85%E6%80%9D%E5%8F%A3%E8%AF%AD%E4%BB%8E6%E5%88%86%E5%88%B07%E5%88%86/</url>
+    <content><![CDATA[<p>有些考生第一次拿到雅思口语 6.5，一个月后再考变成 6，再过一段时间还是 6.5。投入了更多时间，成绩却始终没有突破。</p>
+<p>问题可能不是“不够努力”，而是没有判断清楚自己究竟卡在哪里。</p>
+<p>Keith 在 <strong>IELTS Speaking from 6 to 7: Why you are stuck at Band 6</strong> 中提出了一个很实用的诊断模型：雅思分数不是几个孤立的点，而是一个个有宽度的区间。同样拿到 6 分的两个人，真实水平可能处在这个区间的两端，需要采用完全不同的学习策略。[cite:1][cite:2]</p>
+<span id="more"></span>
+
+<h2 id="分数是区间，不是一个点"><a href="#分数是区间，不是一个点" class="headerlink" title="分数是区间，不是一个点"></a>分数是区间，不是一个点</h2><p>很多人会把雅思分数理解成一条刻度线：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">6.0 -------- 7.0 -------- 8.0</span><br></pre></td></tr></table></figure>
+
+<p>仿佛从 6 分到 7 分，只需要沿着这条线前进一步。但实际情况更接近三个相邻的区间：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">|------ Band 6 ------|------ Band 7 ------|------ Band 8 ------|</span><br></pre></td></tr></table></figure>
+
+<p>一个人可能刚刚进入 Band 6，另一个人可能已经接近 Band 7。两个人的成绩单都写着 6，但提分距离完全不同。</p>
+<ul>
+<li><strong>Band 6 区间底部</strong>：核心问题通常是实际口语能力不足。</li>
+<li><strong>Band 6 区间顶部</strong>：语言能力可能已经接近要求，主要问题更可能是考试认知、答题方法或练习不足。</li>
+</ul>
+<p>因此，“怎样从 6 分提高到 7 分”并没有一个适用于所有人的答案。第一步不是背更多单词，而是先确定自己的位置。</p>
+<h2 id="判断自己属于哪一种情况"><a href="#判断自己属于哪一种情况" class="headerlink" title="判断自己属于哪一种情况"></a>判断自己属于哪一种情况</h2><h3 id="情况一：语言能力还没有达到要求"><a href="#情况一：语言能力还没有达到要求" class="headerlink" title="情况一：语言能力还没有达到要求"></a>情况一：语言能力还没有达到要求</h3><p>如果经常提出下面的问题，通常说明基础语言能力仍是主要瓶颈：</p>
+<ul>
+<li>这个答案应该使用哪一种时态？</li>
+<li>这里应该使用哪个介词？</li>
+<li>我知道这个词，但说话时总是想不起来。</li>
+<li>一开口就要先在脑中翻译中文。</li>
+<li>换一个不熟悉的话题就无法持续表达。</li>
+</ul>
+<p>这类考生即使反复刷雅思题，也可能只是在重复暴露同一个问题：语法、词汇和表达还没有转化为自动化的口语能力。</p>
+<h3 id="情况二：应试技巧限制了真实水平"><a href="#情况二：应试技巧限制了真实水平" class="headerlink" title="情况二：应试技巧限制了真实水平"></a>情况二：应试技巧限制了真实水平</h3><p>如果更关心下面的问题，说明可能已经接近 Band 7，但还不够熟悉考试：</p>
+<ul>
+<li>为什么考官总是打断我？</li>
+<li>为什么考官不让我继续说？</li>
+<li>Part 2 只说了一分钟怎么办？</li>
+<li>Part 1 应该说多长？</li>
+<li>Part 3 怎样展开观点？</li>
+</ul>
+<p>考官打断回答不一定意味着表现不好，也可能只是需要控制考试节奏。Part 2 没有说满两分钟，则说明对题卡组织和计时练习还不熟悉。</p>
+<p>这类考生仍然需要提升语言，但复习重点应该更多地转向考试结构、限时表达和模拟练习。</p>
+<h2 id="路径一：先提高真实口语能力"><a href="#路径一：先提高真实口语能力" class="headerlink" title="路径一：先提高真实口语能力"></a>路径一：先提高真实口语能力</h2><p>如果处在 Band 6 的底部，Keith 给出的建议非常直接：<strong>暂时停止刷雅思题，用大约两个月学习通用英语。</strong></p>
+<p>这不是停止学习，而是暂时离开分数压力，把注意力重新放回英语本身。只练雅思题，就像足球运动员只练射门，却不练传球、带球、跑位和临场反应。熟悉题目不等于真正提高了交流能力。</p>
+<h3 id="减少工具，而不是不断收集工具"><a href="#减少工具，而不是不断收集工具" class="headerlink" title="减少工具，而不是不断收集工具"></a>减少工具，而不是不断收集工具</h3><p>常见误区是同时使用十几本书、多个网站和大量 App，最后时间都花在寻找资源、切换平台和比较课程上。</p>
+<p>更有效的做法是只保留一两个主要工具：</p>
+<ul>
+<li>一本系统语法书；</li>
+<li>一本按主题组织的词汇书；</li>
+<li>一个带字幕、查词和生词收藏功能的视频工具；</li>
+<li>一个稳定的口语练习渠道。</li>
+</ul>
+<p>视频中推荐的具体应用可能随着时间变化，但选择工具的原则没有变：它应该让人能够在真实语境中听到表达、理解含义、保存内容并立即练习，而不是不断把注意力带到新的推荐页面。</p>
+<h3 id="用固定线索建立学习习惯"><a href="#用固定线索建立学习习惯" class="headerlink" title="用固定线索建立学习习惯"></a>用固定线索建立学习习惯</h3><p>学习习惯需要一个清晰的触发线索，可以是时间，也可以是地点：</p>
+<ul>
+<li>每天早餐后练习 30 分钟；</li>
+<li>每天下班到家后立即开始；</li>
+<li>坐到固定书桌前，就只做英语练习。</li>
+</ul>
+<p>重点不在于某一天学了多久，而在于能否稳定重复。语言能力来自长期积累，规律、耐心和持续性比偶尔进行一次长时间突击更重要。</p>
+<p>同时，学习内容应该尽量与个人兴趣相关。喜欢科技、电影或旅行，就围绕这些内容听、读和表达。越愿意主动接触，练习越容易持续。</p>
+<h3 id="用“冰箱练习法”提高流利度"><a href="#用“冰箱练习法”提高流利度" class="headerlink" title="用“冰箱练习法”提高流利度"></a>用“冰箱练习法”提高流利度</h3><p>视频介绍了一种来自记忆游戏的练习方法，可以称为 <strong>Fridge Technique</strong>。</p>
+<p>传统游戏会不断重复并增加冰箱里的物品：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">In my fridge, there is a bottle of milk.</span><br><span class="line"></span><br><span class="line">In my fridge, there is a bottle of milk and a slice of cheese.</span><br><span class="line"></span><br><span class="line">In my fridge, there is a bottle of milk, a slice of cheese and some mustard.</span><br></pre></td></tr></table></figure>
+
+<p>口语练习也可以采用相同方式：每次重复已有句子，再增加一个新的短语或从句。</p>
+<p>例如，回答 <code>Where are you from?</code>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I&#x27;m from Manchester.</span><br><span class="line"></span><br><span class="line">I&#x27;m from Manchester, which is in the north of England.</span><br><span class="line"></span><br><span class="line">I&#x27;m from Manchester, which is in the north of England,</span><br><span class="line">a beautiful part of the country, by the way.</span><br></pre></td></tr></table></figure>
+
+<p>回答 <code>What do you like about your hometown?</code>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I think it&#x27;s a lovely place.</span><br><span class="line"></span><br><span class="line">I think it&#x27;s a lovely place because it&#x27;s not far from the sea.</span><br><span class="line"></span><br><span class="line">I think it&#x27;s a lovely place because it&#x27;s not far from the sea,</span><br><span class="line">and quite a few tourists visit it.</span><br></pre></td></tr></table></figure>
+
+<p>每轮只增加一个信息单元，通常扩展到三个层次即可。这个过程同时训练了三件事：</p>
+<ol>
+<li>在不重新构思全部内容的情况下继续说话；</li>
+<li>将短句自然连接成长句；</li>
+<li>通过重复降低提取词汇和句型的负担。</li>
+</ol>
+<h3 id="用-Listen、Repeat、Use-激活词汇"><a href="#用-Listen、Repeat、Use-激活词汇" class="headerlink" title="用 Listen、Repeat、Use 激活词汇"></a>用 Listen、Repeat、Use 激活词汇</h3><p>认识一个单词，不代表能在对话中使用它。阅读和听力属于输入能力，口语则要求在有限时间内主动提取语言。</p>
+<p>视频给出的词汇练习循环很简单：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Listen → Repeat → Use</span><br></pre></td></tr></table></figure>
+
+<p>具体可以这样执行：</p>
+<ol>
+<li>从视频、播客或真实对话中听到一个表达；</li>
+<li>模仿语音、重音和上下文，完整重复；</li>
+<li>立即用自己的经历造两到三个句子；</li>
+<li>记录表达，并在之后定期复习；</li>
+<li>在新的话题中再次使用。</li>
+</ol>
+<p>词汇应该在语境中学习，并覆盖不同话题。只背孤立的中文释义，很难建立搭配、语气和使用场景。</p>
+<h2 id="路径二：集中提高考试技巧"><a href="#路径二：集中提高考试技巧" class="headerlink" title="路径二：集中提高考试技巧"></a>路径二：集中提高考试技巧</h2><p>如果已经处于 Band 6 的顶部，继续扩大语言能力当然有帮助，但更高效的做法是系统掌握考试规则。</p>
+<h3 id="理解三个部分的任务差异"><a href="#理解三个部分的任务差异" class="headerlink" title="理解三个部分的任务差异"></a>理解三个部分的任务差异</h3><table>
+<thead>
+<tr>
+<th>部分</th>
+<th>核心任务</th>
+<th>常见问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Part 1</td>
+<td>对个人和熟悉话题作出自然回答</td>
+<td>回答过短，或把简单问题讲成演讲</td>
+</tr>
+<tr>
+<td>Part 2</td>
+<td>根据题卡连续表达一到两分钟</td>
+<td>故事过于复杂，时态失控，没有计时训练</td>
+</tr>
+<tr>
+<td>Part 3</td>
+<td>讨论抽象问题并展开观点</td>
+<td>只有结论，没有原因、例子、比较或结果</td>
+</tr>
+</tbody></table>
+<p>IELTS Speaking 不是知识竞赛。遇到建筑、科学或历史等陌生话题时，不需要给出专家观点。考官评估的是能否用英语清楚表达和发展想法。</p>
+<h3 id="使用官方材料建立正确认知"><a href="#使用官方材料建立正确认知" class="headerlink" title="使用官方材料建立正确认知"></a>使用官方材料建立正确认知</h3><p>应优先完成以下练习：</p>
+<ol>
+<li>阅读官方考试格式和评分标准；</li>
+<li>使用官方样题了解问题类型；</li>
+<li>完成一次严格计时的完整模拟；</li>
+<li>分别练习 Part 1、Part 2 和 Part 3；</li>
+<li>回听录音，定位停顿、重复、语法失控和发音问题；</li>
+<li>根据反馈决定下一阶段练什么。</li>
+</ol>
+<p>模拟考试的价值不是得到一个模糊的预估分，而是判断问题来自语言能力、考试技巧，还是两者的组合。</p>
+<h2 id="官方标准中的-Band-6-与-Band-7"><a href="#官方标准中的-Band-6-与-Band-7" class="headerlink" title="官方标准中的 Band 6 与 Band 7"></a>官方标准中的 Band 6 与 Band 7</h2><p>IELTS Speaking 从四个维度评分，每项权重相同，都是 25%：流利度与连贯性、词汇资源、语法范围与准确性、发音。[cite:3][cite:4]</p>
+<table>
+<thead>
+<tr>
+<th>评分维度</th>
+<th>Band 6 的典型表现</th>
+<th>Band 7 的关键提升</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>流利度与连贯性</td>
+<td>愿意持续表达，但重复、自我修正或停顿有时影响连贯</td>
+<td>能较轻松地持续表达，并灵活使用连接和话语标记</td>
+</tr>
+<tr>
+<td>词汇资源</td>
+<td>词汇足以展开话题，也能改述，但存在不恰当用词</td>
+<td>能灵活讨论不同话题，并较自然地使用部分习语和搭配</td>
+</tr>
+<tr>
+<td>语法范围与准确性</td>
+<td>能混合简单和复杂结构，但灵活性有限、错误较多</td>
+<td>经常使用复杂结构，整体控制较好，仍允许出现少量错误</td>
+</tr>
+<tr>
+<td>发音</td>
+<td>大体可以听懂，但语音特征控制不稳定</td>
+<td>整体容易理解，能够较稳定地运用重音、节奏和语调</td>
+</tr>
+</tbody></table>
+<p>这个对比说明，Band 7 并不要求完美：</p>
+<ul>
+<li>仍然可以出现停顿；</li>
+<li>仍然可以犯语法错误；</li>
+<li>仍然可能读错个别单词；</li>
+<li>不需要每句话都使用复杂词汇。</li>
+</ul>
+<p>真正的差异是更强的<strong>持续表达、灵活运用和整体控制</strong>。因此，刻意塞入生僻词、背诵长答案或强行使用复杂句，未必能够提高成绩，反而可能损害自然度和准确性。</p>
+<h2 id="一套可执行的自测方法"><a href="#一套可执行的自测方法" class="headerlink" title="一套可执行的自测方法"></a>一套可执行的自测方法</h2><p>先录制三段回答：</p>
+<ol>
+<li>Part 1：回答一个熟悉话题，持续约 20 秒；</li>
+<li>Part 2：准备一分钟后，连续表达一到两分钟；</li>
+<li>Part 3：对一个抽象问题给出观点、原因和例子。</li>
+</ol>
+<p>回听时不要只问“听起来好不好”，而要逐项记录：</p>
+<ul>
+<li>是否因为想词或组织语法而频繁停顿；</li>
+<li>是否能够换一种方式解释不会的词；</li>
+<li>是否只会使用简单句；</li>
+<li>错误是否反复出现在同一种结构中；</li>
+<li>发音是否影响理解；</li>
+<li>是否真正回答并展开了问题；</li>
+<li>是否熟悉三个部分的节奏。</li>
+</ul>
+<p>如果大部分问题发生在语言生成过程中，应先走“通用英语”路径；如果日常对话比较流畅，但考试中经常答非所问、时间失控或无法展开，则应优先走“考试技巧”路径。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从雅思口语 6 分到 7 分，最重要的不是找到更多资料，而是做出正确诊断。</p>
+<p>处在 Band 6 底部时，应暂时放下刷题，通过规律学习、真实输入、重复模仿、主动使用和互动交流提升整体口语能力。处在 Band 6 顶部时，则应集中理解考试结构，进行限时模拟，并针对三个部分练习不同的回答策略。</p>
+<p>分数只是结果。真正需要提升的是四项可观察的能力：能否持续表达，能否灵活选词，能否较准确地使用多样句型，以及能否让对方轻松听懂。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://www.bilibili.com/video/BV1fK421C7yr/?p=54">Bilibili：IELTS Speaking from 6 to 7，第 54 集</a></p>
+<p>[cite:2] <a href="https://www.youtube.com/watch?v=DUbkdsSK6kk">English Speaking Success：IELTS Speaking from 6 to 7: Why you are stuck at Band 6</a></p>
+<p>[cite:3] <a href="https://ielts.org/news-and-insights/differences-between-ielts-6-and-7-for-productive-skills">IELTS：Differences between IELTS 6 and 7 for productive skills</a></p>
+<p>[cite:4] <a href="https://takeielts.britishcouncil.org/results/how-is-ielts-assessed">British Council：IELTS Assessment Criteria &amp; Band Score Descriptors</a></p>
+]]></content>
+      <categories>
+        <category>english-learning</category>
+      </categories>
+      <tags>
+        <tag>IELTS</tag>
+        <tag>雅思口语</tag>
+        <tag>英语学习</tag>
       </tags>
   </entry>
   <entry>
@@ -2788,202 +3252,6 @@
         <tag>雅思口语</tag>
         <tag>英语学习</tag>
         <tag>News</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>雅思口语从 6 分到 7 分：先判断你卡在哪里</title>
-    <url>/2026/11/01/%E9%9B%85%E6%80%9D%E5%8F%A3%E8%AF%AD%E4%BB%8E6%E5%88%86%E5%88%B07%E5%88%86/</url>
-    <content><![CDATA[<p>有些考生第一次拿到雅思口语 6.5，一个月后再考变成 6，再过一段时间还是 6.5。投入了更多时间，成绩却始终没有突破。</p>
-<p>问题可能不是“不够努力”，而是没有判断清楚自己究竟卡在哪里。</p>
-<p>Keith 在 <strong>IELTS Speaking from 6 to 7: Why you are stuck at Band 6</strong> 中提出了一个很实用的诊断模型：雅思分数不是几个孤立的点，而是一个个有宽度的区间。同样拿到 6 分的两个人，真实水平可能处在这个区间的两端，需要采用完全不同的学习策略。[cite:1][cite:2]</p>
-<span id="more"></span>
-
-<h2 id="分数是区间，不是一个点"><a href="#分数是区间，不是一个点" class="headerlink" title="分数是区间，不是一个点"></a>分数是区间，不是一个点</h2><p>很多人会把雅思分数理解成一条刻度线：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">6.0 -------- 7.0 -------- 8.0</span><br></pre></td></tr></table></figure>
-
-<p>仿佛从 6 分到 7 分，只需要沿着这条线前进一步。但实际情况更接近三个相邻的区间：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">|------ Band 6 ------|------ Band 7 ------|------ Band 8 ------|</span><br></pre></td></tr></table></figure>
-
-<p>一个人可能刚刚进入 Band 6，另一个人可能已经接近 Band 7。两个人的成绩单都写着 6，但提分距离完全不同。</p>
-<ul>
-<li><strong>Band 6 区间底部</strong>：核心问题通常是实际口语能力不足。</li>
-<li><strong>Band 6 区间顶部</strong>：语言能力可能已经接近要求，主要问题更可能是考试认知、答题方法或练习不足。</li>
-</ul>
-<p>因此，“怎样从 6 分提高到 7 分”并没有一个适用于所有人的答案。第一步不是背更多单词，而是先确定自己的位置。</p>
-<h2 id="判断自己属于哪一种情况"><a href="#判断自己属于哪一种情况" class="headerlink" title="判断自己属于哪一种情况"></a>判断自己属于哪一种情况</h2><h3 id="情况一：语言能力还没有达到要求"><a href="#情况一：语言能力还没有达到要求" class="headerlink" title="情况一：语言能力还没有达到要求"></a>情况一：语言能力还没有达到要求</h3><p>如果经常提出下面的问题，通常说明基础语言能力仍是主要瓶颈：</p>
-<ul>
-<li>这个答案应该使用哪一种时态？</li>
-<li>这里应该使用哪个介词？</li>
-<li>我知道这个词，但说话时总是想不起来。</li>
-<li>一开口就要先在脑中翻译中文。</li>
-<li>换一个不熟悉的话题就无法持续表达。</li>
-</ul>
-<p>这类考生即使反复刷雅思题，也可能只是在重复暴露同一个问题：语法、词汇和表达还没有转化为自动化的口语能力。</p>
-<h3 id="情况二：应试技巧限制了真实水平"><a href="#情况二：应试技巧限制了真实水平" class="headerlink" title="情况二：应试技巧限制了真实水平"></a>情况二：应试技巧限制了真实水平</h3><p>如果更关心下面的问题，说明可能已经接近 Band 7，但还不够熟悉考试：</p>
-<ul>
-<li>为什么考官总是打断我？</li>
-<li>为什么考官不让我继续说？</li>
-<li>Part 2 只说了一分钟怎么办？</li>
-<li>Part 1 应该说多长？</li>
-<li>Part 3 怎样展开观点？</li>
-</ul>
-<p>考官打断回答不一定意味着表现不好，也可能只是需要控制考试节奏。Part 2 没有说满两分钟，则说明对题卡组织和计时练习还不熟悉。</p>
-<p>这类考生仍然需要提升语言，但复习重点应该更多地转向考试结构、限时表达和模拟练习。</p>
-<h2 id="路径一：先提高真实口语能力"><a href="#路径一：先提高真实口语能力" class="headerlink" title="路径一：先提高真实口语能力"></a>路径一：先提高真实口语能力</h2><p>如果处在 Band 6 的底部，Keith 给出的建议非常直接：<strong>暂时停止刷雅思题，用大约两个月学习通用英语。</strong></p>
-<p>这不是停止学习，而是暂时离开分数压力，把注意力重新放回英语本身。只练雅思题，就像足球运动员只练射门，却不练传球、带球、跑位和临场反应。熟悉题目不等于真正提高了交流能力。</p>
-<h3 id="减少工具，而不是不断收集工具"><a href="#减少工具，而不是不断收集工具" class="headerlink" title="减少工具，而不是不断收集工具"></a>减少工具，而不是不断收集工具</h3><p>常见误区是同时使用十几本书、多个网站和大量 App，最后时间都花在寻找资源、切换平台和比较课程上。</p>
-<p>更有效的做法是只保留一两个主要工具：</p>
-<ul>
-<li>一本系统语法书；</li>
-<li>一本按主题组织的词汇书；</li>
-<li>一个带字幕、查词和生词收藏功能的视频工具；</li>
-<li>一个稳定的口语练习渠道。</li>
-</ul>
-<p>视频中推荐的具体应用可能随着时间变化，但选择工具的原则没有变：它应该让人能够在真实语境中听到表达、理解含义、保存内容并立即练习，而不是不断把注意力带到新的推荐页面。</p>
-<h3 id="用固定线索建立学习习惯"><a href="#用固定线索建立学习习惯" class="headerlink" title="用固定线索建立学习习惯"></a>用固定线索建立学习习惯</h3><p>学习习惯需要一个清晰的触发线索，可以是时间，也可以是地点：</p>
-<ul>
-<li>每天早餐后练习 30 分钟；</li>
-<li>每天下班到家后立即开始；</li>
-<li>坐到固定书桌前，就只做英语练习。</li>
-</ul>
-<p>重点不在于某一天学了多久，而在于能否稳定重复。语言能力来自长期积累，规律、耐心和持续性比偶尔进行一次长时间突击更重要。</p>
-<p>同时，学习内容应该尽量与个人兴趣相关。喜欢科技、电影或旅行，就围绕这些内容听、读和表达。越愿意主动接触，练习越容易持续。</p>
-<h3 id="用“冰箱练习法”提高流利度"><a href="#用“冰箱练习法”提高流利度" class="headerlink" title="用“冰箱练习法”提高流利度"></a>用“冰箱练习法”提高流利度</h3><p>视频介绍了一种来自记忆游戏的练习方法，可以称为 <strong>Fridge Technique</strong>。</p>
-<p>传统游戏会不断重复并增加冰箱里的物品：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">In my fridge, there is a bottle of milk.</span><br><span class="line"></span><br><span class="line">In my fridge, there is a bottle of milk and a slice of cheese.</span><br><span class="line"></span><br><span class="line">In my fridge, there is a bottle of milk, a slice of cheese and some mustard.</span><br></pre></td></tr></table></figure>
-
-<p>口语练习也可以采用相同方式：每次重复已有句子，再增加一个新的短语或从句。</p>
-<p>例如，回答 <code>Where are you from?</code>：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I&#x27;m from Manchester.</span><br><span class="line"></span><br><span class="line">I&#x27;m from Manchester, which is in the north of England.</span><br><span class="line"></span><br><span class="line">I&#x27;m from Manchester, which is in the north of England,</span><br><span class="line">a beautiful part of the country, by the way.</span><br></pre></td></tr></table></figure>
-
-<p>回答 <code>What do you like about your hometown?</code>：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">I think it&#x27;s a lovely place.</span><br><span class="line"></span><br><span class="line">I think it&#x27;s a lovely place because it&#x27;s not far from the sea.</span><br><span class="line"></span><br><span class="line">I think it&#x27;s a lovely place because it&#x27;s not far from the sea,</span><br><span class="line">and quite a few tourists visit it.</span><br></pre></td></tr></table></figure>
-
-<p>每轮只增加一个信息单元，通常扩展到三个层次即可。这个过程同时训练了三件事：</p>
-<ol>
-<li>在不重新构思全部内容的情况下继续说话；</li>
-<li>将短句自然连接成长句；</li>
-<li>通过重复降低提取词汇和句型的负担。</li>
-</ol>
-<h3 id="用-Listen、Repeat、Use-激活词汇"><a href="#用-Listen、Repeat、Use-激活词汇" class="headerlink" title="用 Listen、Repeat、Use 激活词汇"></a>用 Listen、Repeat、Use 激活词汇</h3><p>认识一个单词，不代表能在对话中使用它。阅读和听力属于输入能力，口语则要求在有限时间内主动提取语言。</p>
-<p>视频给出的词汇练习循环很简单：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Listen → Repeat → Use</span><br></pre></td></tr></table></figure>
-
-<p>具体可以这样执行：</p>
-<ol>
-<li>从视频、播客或真实对话中听到一个表达；</li>
-<li>模仿语音、重音和上下文，完整重复；</li>
-<li>立即用自己的经历造两到三个句子；</li>
-<li>记录表达，并在之后定期复习；</li>
-<li>在新的话题中再次使用。</li>
-</ol>
-<p>词汇应该在语境中学习，并覆盖不同话题。只背孤立的中文释义，很难建立搭配、语气和使用场景。</p>
-<h2 id="路径二：集中提高考试技巧"><a href="#路径二：集中提高考试技巧" class="headerlink" title="路径二：集中提高考试技巧"></a>路径二：集中提高考试技巧</h2><p>如果已经处于 Band 6 的顶部，继续扩大语言能力当然有帮助，但更高效的做法是系统掌握考试规则。</p>
-<h3 id="理解三个部分的任务差异"><a href="#理解三个部分的任务差异" class="headerlink" title="理解三个部分的任务差异"></a>理解三个部分的任务差异</h3><table>
-<thead>
-<tr>
-<th>部分</th>
-<th>核心任务</th>
-<th>常见问题</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Part 1</td>
-<td>对个人和熟悉话题作出自然回答</td>
-<td>回答过短，或把简单问题讲成演讲</td>
-</tr>
-<tr>
-<td>Part 2</td>
-<td>根据题卡连续表达一到两分钟</td>
-<td>故事过于复杂，时态失控，没有计时训练</td>
-</tr>
-<tr>
-<td>Part 3</td>
-<td>讨论抽象问题并展开观点</td>
-<td>只有结论，没有原因、例子、比较或结果</td>
-</tr>
-</tbody></table>
-<p>IELTS Speaking 不是知识竞赛。遇到建筑、科学或历史等陌生话题时，不需要给出专家观点。考官评估的是能否用英语清楚表达和发展想法。</p>
-<h3 id="使用官方材料建立正确认知"><a href="#使用官方材料建立正确认知" class="headerlink" title="使用官方材料建立正确认知"></a>使用官方材料建立正确认知</h3><p>应优先完成以下练习：</p>
-<ol>
-<li>阅读官方考试格式和评分标准；</li>
-<li>使用官方样题了解问题类型；</li>
-<li>完成一次严格计时的完整模拟；</li>
-<li>分别练习 Part 1、Part 2 和 Part 3；</li>
-<li>回听录音，定位停顿、重复、语法失控和发音问题；</li>
-<li>根据反馈决定下一阶段练什么。</li>
-</ol>
-<p>模拟考试的价值不是得到一个模糊的预估分，而是判断问题来自语言能力、考试技巧，还是两者的组合。</p>
-<h2 id="官方标准中的-Band-6-与-Band-7"><a href="#官方标准中的-Band-6-与-Band-7" class="headerlink" title="官方标准中的 Band 6 与 Band 7"></a>官方标准中的 Band 6 与 Band 7</h2><p>IELTS Speaking 从四个维度评分，每项权重相同，都是 25%：流利度与连贯性、词汇资源、语法范围与准确性、发音。[cite:3][cite:4]</p>
-<table>
-<thead>
-<tr>
-<th>评分维度</th>
-<th>Band 6 的典型表现</th>
-<th>Band 7 的关键提升</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>流利度与连贯性</td>
-<td>愿意持续表达，但重复、自我修正或停顿有时影响连贯</td>
-<td>能较轻松地持续表达，并灵活使用连接和话语标记</td>
-</tr>
-<tr>
-<td>词汇资源</td>
-<td>词汇足以展开话题，也能改述，但存在不恰当用词</td>
-<td>能灵活讨论不同话题，并较自然地使用部分习语和搭配</td>
-</tr>
-<tr>
-<td>语法范围与准确性</td>
-<td>能混合简单和复杂结构，但灵活性有限、错误较多</td>
-<td>经常使用复杂结构，整体控制较好，仍允许出现少量错误</td>
-</tr>
-<tr>
-<td>发音</td>
-<td>大体可以听懂，但语音特征控制不稳定</td>
-<td>整体容易理解，能够较稳定地运用重音、节奏和语调</td>
-</tr>
-</tbody></table>
-<p>这个对比说明，Band 7 并不要求完美：</p>
-<ul>
-<li>仍然可以出现停顿；</li>
-<li>仍然可以犯语法错误；</li>
-<li>仍然可能读错个别单词；</li>
-<li>不需要每句话都使用复杂词汇。</li>
-</ul>
-<p>真正的差异是更强的<strong>持续表达、灵活运用和整体控制</strong>。因此，刻意塞入生僻词、背诵长答案或强行使用复杂句，未必能够提高成绩，反而可能损害自然度和准确性。</p>
-<h2 id="一套可执行的自测方法"><a href="#一套可执行的自测方法" class="headerlink" title="一套可执行的自测方法"></a>一套可执行的自测方法</h2><p>先录制三段回答：</p>
-<ol>
-<li>Part 1：回答一个熟悉话题，持续约 20 秒；</li>
-<li>Part 2：准备一分钟后，连续表达一到两分钟；</li>
-<li>Part 3：对一个抽象问题给出观点、原因和例子。</li>
-</ol>
-<p>回听时不要只问“听起来好不好”，而要逐项记录：</p>
-<ul>
-<li>是否因为想词或组织语法而频繁停顿；</li>
-<li>是否能够换一种方式解释不会的词；</li>
-<li>是否只会使用简单句；</li>
-<li>错误是否反复出现在同一种结构中；</li>
-<li>发音是否影响理解；</li>
-<li>是否真正回答并展开了问题；</li>
-<li>是否熟悉三个部分的节奏。</li>
-</ul>
-<p>如果大部分问题发生在语言生成过程中，应先走“通用英语”路径；如果日常对话比较流畅，但考试中经常答非所问、时间失控或无法展开，则应优先走“考试技巧”路径。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从雅思口语 6 分到 7 分，最重要的不是找到更多资料，而是做出正确诊断。</p>
-<p>处在 Band 6 底部时，应暂时放下刷题，通过规律学习、真实输入、重复模仿、主动使用和互动交流提升整体口语能力。处在 Band 6 顶部时，则应集中理解考试结构，进行限时模拟，并针对三个部分练习不同的回答策略。</p>
-<p>分数只是结果。真正需要提升的是四项可观察的能力：能否持续表达，能否灵活选词，能否较准确地使用多样句型，以及能否让对方轻松听懂。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://www.bilibili.com/video/BV1fK421C7yr/?p=54">Bilibili：IELTS Speaking from 6 to 7，第 54 集</a></p>
-<p>[cite:2] <a href="https://www.youtube.com/watch?v=DUbkdsSK6kk">English Speaking Success：IELTS Speaking from 6 to 7: Why you are stuck at Band 6</a></p>
-<p>[cite:3] <a href="https://ielts.org/news-and-insights/differences-between-ielts-6-and-7-for-productive-skills">IELTS：Differences between IELTS 6 and 7 for productive skills</a></p>
-<p>[cite:4] <a href="https://takeielts.britishcouncil.org/results/how-is-ielts-assessed">British Council：IELTS Assessment Criteria &amp; Band Score Descriptors</a></p>
-]]></content>
-      <categories>
-        <category>english-learning</category>
-      </categories>
-      <tags>
-        <tag>IELTS</tag>
-        <tag>雅思口语</tag>
-        <tag>英语学习</tag>
       </tags>
   </entry>
   <entry>
