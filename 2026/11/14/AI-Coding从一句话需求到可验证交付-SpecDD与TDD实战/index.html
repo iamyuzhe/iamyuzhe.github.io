@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/goldfish.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/goldfish.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha256-4Lad8m4ZWW1Lgb9+sMVLYEfnIh7BjV1NQMEe79Pviks=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"iamyuzhe.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.29.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null,"show_result":true},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="根据知乎知学堂课程的完整实战，整理如何把模糊的一句话需求转成可持续管理的 Spec，再以测试约束 Coding Agent，形成从定义、实现到验收的闭环。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI Coding 从一句话需求到可验证交付：SpecDD 与 TDD 实战">
+<meta property="og:url" content="https://iamyuzhe.github.io/2026/11/14/AI-Coding%E4%BB%8E%E4%B8%80%E5%8F%A5%E8%AF%9D%E9%9C%80%E6%B1%82%E5%88%B0%E5%8F%AF%E9%AA%8C%E8%AF%81%E4%BA%A4%E4%BB%98-SpecDD%E4%B8%8ETDD%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:site_name" content="Andrew 的个人博客">
+<meta property="og:description" content="根据知乎知学堂课程的完整实战，整理如何把模糊的一句话需求转成可持续管理的 Spec，再以测试约束 Coding Agent，形成从定义、实现到验收的闭环。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-14T15:20:00.000Z">
+<meta property="article:modified_time" content="2026-11-14T15:17:58.887Z">
+<meta property="article:author" content="Andrew Yu">
+<meta property="article:tag" content="AI Coding">
+<meta property="article:tag" content="Coding Agent">
+<meta property="article:tag" content="SpecDD">
+<meta property="article:tag" content="TDD">
+<meta property="article:tag" content="软件工程">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://iamyuzhe.github.io/2026/11/14/AI-Coding%E4%BB%8E%E4%B8%80%E5%8F%A5%E8%AF%9D%E9%9C%80%E6%B1%82%E5%88%B0%E5%8F%AF%E9%AA%8C%E8%AF%81%E4%BA%A4%E4%BB%98-SpecDD%E4%B8%8ETDD%E5%AE%9E%E6%88%98/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://iamyuzhe.github.io/2026/11/14/AI-Coding%E4%BB%8E%E4%B8%80%E5%8F%A5%E8%AF%9D%E9%9C%80%E6%B1%82%E5%88%B0%E5%8F%AF%E9%AA%8C%E8%AF%81%E4%BA%A4%E4%BB%98-SpecDD%E4%B8%8ETDD%E5%AE%9E%E6%88%98/","path":"2026/11/14/AI-Coding从一句话需求到可验证交付-SpecDD与TDD实战/","title":"AI Coding 从一句话需求到可验证交付：SpecDD 与 TDD 实战"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>AI Coding 从一句话需求到可验证交付：SpecDD 与 TDD 实战 | Andrew 的个人博客</title>
+  
+
+
+
+
+
+
+
+
+  
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="Andrew 的个人博客" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-search popup-trigger" aria-label="搜索" role="button">
+      <i class="fa fa-search fa-fw fa-lg"></i>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Andrew 的个人博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">技术与生活</p>
+  </div>
+
+  <div class="site-nav-toggle" aria-label="切换导航栏" role="button">
+      <i class="fa fa-ellipsis fa-fw fa-lg"></i>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-项目"><a href="/project/" rel="section"><i class="fa fa-code fa-fw"></i>项目</a></li><li class="menu-item menu-item-友链"><a href="/link/" rel="section"><i class="fa fa-link fa-fw"></i>友链</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  
+  <template id="search-popup-template"><div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div></template>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81AI-Coding-%E7%9A%84%E7%93%B6%E9%A2%88%E5%B7%B2%E7%BB%8F%E4%BB%8E%E7%94%9F%E6%88%90%E8%BD%AC%E5%90%91%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">一、AI Coding 的瓶颈已经从生成转向定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Plan-%E4%B8%8D%E7%AD%89%E4%BA%8E-Spec"><span class="nav-number">2.</span> <span class="nav-text">二、Plan 不等于 Spec</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AE%A1%E6%9F%A5%E9%95%BF-Plan-%E6%97%B6%EF%BC%8C%E5%85%88%E6%89%BE%E4%B8%89%E4%BB%B6%E4%BA%8B"><span class="nav-number">3.</span> <span class="nav-text">三、审查长 Plan 时，先找三件事</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Spec-%E8%B4%9F%E8%B4%A3%E4%BA%8B%E5%89%8D%E6%AD%A3%E7%A1%AE%EF%BC%8CTest-%E8%B4%9F%E8%B4%A3%E4%BA%8B%E5%90%8E%E6%AD%A3%E7%A1%AE"><span class="nav-number">4.</span> <span class="nav-text">四、Spec 负责事前正确，Test 负责事后正确</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%B5%8B%E8%AF%95%E4%BC%98%E5%85%88%E7%BA%A7%E4%B8%8D%E6%98%AF%E8%B6%8A%E5%A4%9A%E8%B6%8A%E5%A5%BD"><span class="nav-number">5.</span> <span class="nav-text">五、测试优先级不是越多越好</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%AE%9E%E7%8E%B0%E5%92%8C%E6%B5%8B%E8%AF%95%E5%8F%AF%E4%BB%A5%E5%B9%B6%E8%A1%8C%EF%BC%8C%E4%BD%86%E5%86%99%E5%85%A5%E8%BE%B9%E7%95%8C%E5%BF%85%E9%A1%BB%E5%88%86%E7%A6%BB"><span class="nav-number">6.</span> <span class="nav-text">六、实现和测试可以并行，但写入边界必须分离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E4%B8%8D%E8%A6%81%E8%AE%A9-Agent-%E9%9D%A0%E5%AF%B9%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E8%AE%B0%E4%BD%8F%E4%BB%BB%E5%8A%A1"><span class="nav-number">7.</span> <span class="nav-text">七、不要让 Agent 靠对话上下文记住任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E7%8E%B0%E5%9C%BA%E6%BC%94%E7%A4%BA%E6%9C%80%E6%9C%89%E4%BB%B7%E5%80%BC%E7%9A%84%E9%83%A8%E5%88%86%EF%BC%8C%E6%98%AF%E5%AE%83%E6%B2%A1%E6%9C%89%E4%B8%80%E6%AC%A1%E6%88%90%E5%8A%9F"><span class="nav-number">8.</span> <span class="nav-text">八、现场演示最有价值的部分，是它没有一次成功</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E4%B8%80%E5%A5%97%E5%8F%AF%E4%BB%A5%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="nav-number">9.</span> <span class="nav-text">九、一套可以直接使用的工作流</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%86%99%E6%B8%85%E5%8E%9F%E5%A7%8B%E7%9B%AE%E6%A0%87"><span class="nav-number">9.1.</span> <span class="nav-text">1. 写清原始目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%94%A8-Plan-%E6%A8%A1%E5%BC%8F%E6%BE%84%E6%B8%85"><span class="nav-number">9.2.</span> <span class="nav-text">2. 用 Plan 模式澄清</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B0%86%E7%BB%93%E8%AE%BA%E4%BF%9D%E5%AD%98%E4%B8%BA-Spec"><span class="nav-number">9.3.</span> <span class="nav-text">3. 将结论保存为 Spec</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BA%BA%E5%B7%A5%E5%AE%A1%E6%9F%A5%E5%85%B3%E9%94%AE%E7%82%B9"><span class="nav-number">9.4.</span> <span class="nav-text">4. 人工审查关键点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E4%BB%8E-Spec-%E6%B4%BE%E7%94%9F%E6%B5%8B%E8%AF%95"><span class="nav-number">9.5.</span> <span class="nav-text">5. 从 Spec 派生测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%8B%86%E5%88%86%E7%8B%AC%E7%AB%8B%E4%BB%BB%E5%8A%A1"><span class="nav-number">9.6.</span> <span class="nav-text">6. 拆分独立任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E8%AE%A9-Agent-%E8%87%AA%E5%B7%B1%E9%AA%8C%E8%AF%81"><span class="nav-number">9.7.</span> <span class="nav-text">7. 让 Agent 自己验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E5%81%9A%E7%9C%9F%E5%AE%9E%E7%AB%AF%E5%88%B0%E7%AB%AF%E9%AA%8C%E6%94%B6"><span class="nav-number">9.8.</span> <span class="nav-text">8. 做真实端到端验收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-%E6%8A%8A%E5%A4%B1%E8%B4%A5%E5%86%99%E5%9B%9E%E7%B3%BB%E7%BB%9F"><span class="nav-number">9.9.</span> <span class="nav-text">9. 把失败写回系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">11.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Andrew Yu"
+      src="/images/goldfish.jpg">
+  <p class="site-author-name" itemprop="name">Andrew Yu</p>
+  <div class="site-description" itemprop="description">分享技术，记录生活……</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/category/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tag/">
+        <span class="site-state-item-count">77</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iamyuzhe" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iamyuzhe" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://iamyuzhe.github.io/2026/11/14/AI-Coding%E4%BB%8E%E4%B8%80%E5%8F%A5%E8%AF%9D%E9%9C%80%E6%B1%82%E5%88%B0%E5%8F%AF%E9%AA%8C%E8%AF%81%E4%BA%A4%E4%BB%98-SpecDD%E4%B8%8ETDD%E5%AE%9E%E6%88%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/goldfish.jpg">
+      <meta itemprop="name" content="Andrew Yu">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew 的个人博客">
+      <meta itemprop="description" content="分享技术，记录生活……">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="AI Coding 从一句话需求到可验证交付：SpecDD 与 TDD 实战 | Andrew 的个人博客">
+      <meta itemprop="description" content="根据知乎知学堂课程的完整实战，整理如何把模糊的一句话需求转成可持续管理的 Spec，再以测试约束 Coding Agent，形成从定义、实现到验收的闭环。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AI Coding 从一句话需求到可验证交付：SpecDD 与 TDD 实战
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-11-14 23:20:00" itemprop="dateCreated datePublished" datetime="2026-11-14T23:20:00+08:00">2026-11-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/software-engineering/" itemprop="url" rel="index"><span itemprop="name">software-engineering</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+            <div class="post-description">根据知乎知学堂课程的完整实战，整理如何把模糊的一句话需求转成可持续管理的 Spec，再以测试约束 Coding Agent，形成从定义、实现到验收的闭环。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Coding Agent 已经可以根据一句话生成一个应用，但“一句话能生成”不等于“一句话足以交付”。</p>
+<p>贪吃蛇、俄罗斯方块这类需求之所以看起来简单，不是因为模型真正解决了需求分析，而是这些名称本身就是高密度的通识表达：规则、交互和失败条件早已形成广泛共识。真实业务中的“直播间评论助手”“订单管理系统”或“运营分析工具”没有这种幸运，同一个名称背后可能对应完全不同的产品。</p>
+<p>这篇文章整理自知乎知学堂课程 <strong>《大厂优秀工程师使用 AI Coding 的最新方法与经验》</strong>。课程用一个“抖音直播间评论助手”的现场开发，完整演示了如何通过 SpecDD 和 TDD，把模糊目标变成可审查、可执行、可验证的工程约束。[cite:1]</p>
+<span id="more"></span>
+
+<h2 id="一、AI-Coding-的瓶颈已经从生成转向定义"><a href="#一、AI-Coding-的瓶颈已经从生成转向定义" class="headerlink" title="一、AI Coding 的瓶颈已经从生成转向定义"></a>一、AI Coding 的瓶颈已经从生成转向定义</h2><p>课程先让学员解释“直播间评论助手”是什么，答案很快分叉：</p>
+<ul>
+<li>抓取评论并转成语音；</li>
+<li>用 AI 自动回复；</li>
+<li>统计评论量与情绪；</li>
+<li>对评论分类；</li>
+<li>识别违规内容；</li>
+<li>管理用户和拉黑账号。</li>
+</ul>
+<p>这些答案都合理，却不属于同一个产品。问题不在 Coding Agent 能不能写代码，而在于它应该写哪一种代码。</p>
+<p>因此，课程把初始需求改写成：</p>
+<blockquote>
+<p>用户提供一个抖音直播间的 Web 地址，系统监听直播期间的观众评论；监听一段时间后，用户可以让 AI 助理根据已经收集的评论记录回答问题。</p>
+</blockquote>
+<p>这段描述仍不是完整 Spec，但已经回答了五个关键问题：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>直播间评论助手示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>场景</td>
+<td>抖音直播间正在产生观众评论</td>
+</tr>
+<tr>
+<td>输入</td>
+<td>一个可访问的直播间 Web 地址</td>
+</tr>
+<tr>
+<td>功能</td>
+<td>监听评论，并提供基于评论记录的 AI 问答</td>
+</tr>
+<tr>
+<td>输出</td>
+<td>实时评论流和问题答案</td>
+</tr>
+<tr>
+<td>限制</td>
+<td>先只支持抖音 Web 直播间</td>
+</tr>
+</tbody></table>
+<p>这也是 AI Coding 时代最重要的能力迁移：编码成本下降后，定义问题、缩小范围和判断价值反而成为瓶颈。</p>
+<h2 id="二、Plan-不等于-Spec"><a href="#二、Plan-不等于-Spec" class="headerlink" title="二、Plan 不等于 Spec"></a>二、Plan 不等于 Spec</h2><p>大多数 Coding Agent 都有 Plan 模式。它会阅读需求、追问缺失信息、选择技术方案，并生成一份执行计划。</p>
+<p>但课程强调：</p>
+<blockquote>
+<p>没有保存进项目、不能持续更新的 Plan，还不能称为 Spec。</p>
+</blockquote>
+<p>Plan 是一次交互过程中的临时产物；Spec 则是项目资产。它必须进入仓库，接受版本管理，并在开发过程中持续修订。</p>
+<p>例如可以在仓库中建立：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">spec/</span><br><span class="line">├── overview.md</span><br><span class="line">├── requirements.md</span><br><span class="line">├── architecture.md</span><br><span class="line">└── acceptance.md</span><br></pre></td></tr></table></figure>
+
+<p>Spec 同时服务两个受众：</p>
+<ol>
+<li><strong>给 Agent 使用</strong>：约束后续实现，减少上下文丢失和自由发散。</li>
+<li><strong>给人使用</strong>：理解产品定义、技术决策、执行进度和验收标准。</li>
+</ol>
+<p>Anthropic 的 Claude Code 最佳实践也建议：先给 Agent 足够的上下文，复杂任务先使用 Plan 模式，明确什么结果才算正确，并为 Agent 提供可以自行运行的验证方式。[cite:2]</p>
+<p>所以 SpecDD，也就是 Specification-Driven Development，不是“写一篇很长的文档”，而是让稳定、可审查的规格持续驱动开发。</p>
+<h2 id="三、审查长-Plan-时，先找三件事"><a href="#三、审查长-Plan-时，先找三件事" class="headerlink" title="三、审查长 Plan 时，先找三件事"></a>三、审查长 Plan 时，先找三件事</h2><p>Agent 生成的计划往往很长。课程没有要求逐字阅读，而是按角色和任务阶段提取重点。</p>
+<p>对于一个全新功能，首先检查：</p>
+<ol>
+<li><strong>功能定义是否正确</strong></li>
+<li><strong>还有哪些问题没有澄清</strong></li>
+<li><strong>达到什么条件才算完成</strong></li>
+</ol>
+<p>非技术人员应先判断核心行为是否与业务目标一致。资深工程师再继续审查技术栈、系统边界、数据流、安全风险和实现路线。</p>
+<p>对于旧功能升级或 Bug 修复，还要增加：</p>
+<ul>
+<li>问题定义是否准确；</li>
+<li>根因和证据是否充分；</li>
+<li>修改会影响哪些既有行为；</li>
+<li>技术路线是否只是绕过问题；</li>
+<li>哪些回归测试必须保留。</li>
+</ul>
+<p>重点不是读完 Agent 输出的每一个字，而是在正确阶段审查正确的信息。</p>
+<h2 id="四、Spec-负责事前正确，Test-负责事后正确"><a href="#四、Spec-负责事前正确，Test-负责事后正确" class="headerlink" title="四、Spec 负责事前正确，Test 负责事后正确"></a>四、Spec 负责事前正确，Test 负责事后正确</h2><p>只有 Spec，仍然无法知道最终实现是否符合约定；只做一次人工验收，也无法保证下一次修改不会破坏原有功能。</p>
+<p>课程用一句话概括 TDD 的底层逻辑：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">先定义预期</span><br><span class="line">    ↓</span><br><span class="line">运行测试，观察现实</span><br><span class="line">    ↓</span><br><span class="line">分析差距并修改实现</span><br><span class="line">    ↓</span><br><span class="line">直到现实与预期一致</span><br></pre></td></tr></table></figure>
+
+<p>严格 TDD 要求先写测试，再写实现，并经历 Red-Green-Refactor 循环。课程并不要求所有项目机械遵循顺序，而是区分了两种方式：</p>
+<ul>
+<li><strong>严格 TDD</strong>：测试先于实现，失败测试直接驱动开发；</li>
+<li><strong>宽松 TDD</strong>：不强制先后顺序，但必须持续沉淀测试，并用测试约束当前和后续实现。</li>
+</ul>
+<p>在 AI Coding 场景中，真正重要的是“预期必须可执行”，而不是流程名称。</p>
+<p>DORA 对 AI 辅助开发的研究指出，代码生成速度提升并不会自动带来交付质量提升；当验证能力跟不上时，节省的生成时间会转移为评审、返工和稳定性成本。[cite:3] 因此测试不是 AI 生成后的附加步骤，而是 Agent 工作流的一部分。</p>
+<h2 id="五、测试优先级不是越多越好"><a href="#五、测试优先级不是越多越好" class="headerlink" title="五、测试优先级不是越多越好"></a>五、测试优先级不是越多越好</h2><p>课程把测试设计分成三个优先级：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">核心功能</span><br><span class="line">  &gt; 主要流程稳定运行</span><br><span class="line">    &gt; 边界情况</span><br></pre></td></tr></table></figure>
+
+<p>以直播间评论助手为例，第一层必须验证：</p>
+<ul>
+<li>可以输入任意抖音直播间地址；</li>
+<li>可以开始和停止监听；</li>
+<li>页面能够展示实时评论；</li>
+<li>AI 助理只基于已收集评论回答问题。</li>
+</ul>
+<p>第二层验证主要流程：</p>
+<ul>
+<li>没有评论时给出明确状态；</li>
+<li>模型 API 未配置时正确报错；</li>
+<li>网络超时后可以恢复；</li>
+<li>停止监听后不会继续写入数据。</li>
+</ul>
+<p>第三层再覆盖边界情况：</p>
+<ul>
+<li>地址无效或直播已经结束；</li>
+<li>评论量突然激增；</li>
+<li>评论中含有异常字符；</li>
+<li>用户的问题超出已有评论范围。</li>
+</ul>
+<p>测试不是为了制造一个看起来很完整的数字，而是先锁住最不能变化的业务价值。</p>
+<h2 id="六、实现和测试可以并行，但写入边界必须分离"><a href="#六、实现和测试可以并行，但写入边界必须分离" class="headerlink" title="六、实现和测试可以并行，但写入边界必须分离"></a>六、实现和测试可以并行，但写入边界必须分离</h2><p>现场演示中，Agent 根据同一份 Spec 同时推进两件事：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">                 ┌─ 实现功能</span><br><span class="line">Spec ────────────┤</span><br><span class="line">                 └─ 设计测试</span><br></pre></td></tr></table></figure>
+
+<p>这两个任务共享只读输入，却写入不同对象，因此可以并行。判断能否并行的关键不是任务名称，而是：</p>
+<ol>
+<li>两个任务是否会修改同一批文件；</li>
+<li>一个任务是否依赖另一个任务尚未产生的结果；</li>
+<li>是否可能反向修改共同的上游约束；</li>
+<li>失败后能否独立回滚和重试。</li>
+</ol>
+<p>Anthropic 对长时间运行 Agent 的实践也建议，将大型任务拆成清晰的小批次，记录未完成事项，让不同 Agent 在隔离环境中工作，并在每个阶段保留可恢复的 Git 状态。[cite:4]</p>
+<p>并行的价值不是同时打开更多会话，而是在不增加冲突的前提下缩短反馈周期。</p>
+<h2 id="七、不要让-Agent-靠对话上下文记住任务"><a href="#七、不要让-Agent-靠对话上下文记住任务" class="headerlink" title="七、不要让 Agent 靠对话上下文记住任务"></a>七、不要让 Agent 靠对话上下文记住任务</h2><p>课程在问答环节分享了一个很实用的做法：复杂任务不一定要机械套用某个 TDD Skill，但不要让 Agent 只靠上下文记忆目标。</p>
+<p>更稳妥的方式是在仓库中维护行动记录：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">## 待处理</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> [ ] 监听任意直播间地址</span><br><span class="line"><span class="bullet">-</span> [ ] 展示实时评论流</span><br><span class="line"><span class="bullet">-</span> [ ] 基于评论回答问题</span><br><span class="line"><span class="bullet">-</span> [ ] 补充无评论场景测试</span><br><span class="line"><span class="bullet">-</span> [ ] 验证模型配置缺失时的错误提示</span><br><span class="line"></span><br><span class="line"><span class="section">## 完成条件</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> 所有核心测试通过</span><br><span class="line"><span class="bullet">-</span> 真实浏览器流程验证通过</span><br><span class="line"><span class="bullet">-</span> 已知限制写入 Spec</span><br></pre></td></tr></table></figure>
+
+<p>Agent 每完成一项就更新状态，只有完成条件全部满足才允许结束任务。</p>
+<p>这与 Anthropic 的长任务 Harness 方法一致：使用结构化功能清单、进度文件、自动测试和 Git 历史，让新会话可以从明确状态继续，而不是重新猜测上一轮做了什么。[cite:4]</p>
+<h2 id="八、现场演示最有价值的部分，是它没有一次成功"><a href="#八、现场演示最有价值的部分，是它没有一次成功" class="headerlink" title="八、现场演示最有价值的部分，是它没有一次成功"></a>八、现场演示最有价值的部分，是它没有一次成功</h2><p>实战最终做出了可用页面：</p>
+<ul>
+<li>能监听真实直播间评论；</li>
+<li>评论流会实时刷新；</li>
+<li>AI 可以概括出镜人物、主要内容、互动和人气。</li>
+</ul>
+<p>但当讲师追问“哪一段时间表现更出色”时，系统没有给出可靠答案，因为采集结果缺少足够的时间信息。</p>
+<p>这次失败说明了三个问题：</p>
+<ol>
+<li>页面能运行，不代表业务目标已经达成；</li>
+<li>测试通过，不代表测试覆盖了真正重要的语义；</li>
+<li>只有在真实场景中追问，才会暴露 Spec 遗漏。</li>
+</ol>
+<p>正确处理方式不是临时修改 Prompt，而是把发现写回工程闭环：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">真实验收发现缺少时间信息</span><br><span class="line">    ↓</span><br><span class="line">更新 Spec：评论记录必须包含可查询时间</span><br><span class="line">    ↓</span><br><span class="line">增加失败测试</span><br><span class="line">    ↓</span><br><span class="line">修改采集与存储结构</span><br><span class="line">    ↓</span><br><span class="line">重新进行端到端验证</span><br></pre></td></tr></table></figure>
+
+<p>GitHub 将这种工作方式概括为 agentic engineering：工程师的职责从逐行生产代码，转向定义任务、提供上下文、建立反馈回路、审查结果和管理多个执行单元。[cite:5]</p>
+<h2 id="九、一套可以直接使用的工作流"><a href="#九、一套可以直接使用的工作流" class="headerlink" title="九、一套可以直接使用的工作流"></a>九、一套可以直接使用的工作流</h2><p>结合课程实战与官方实践，可以把一次 AI Coding 任务整理成九步：</p>
+<h3 id="1-写清原始目标"><a href="#1-写清原始目标" class="headerlink" title="1. 写清原始目标"></a>1. 写清原始目标</h3><p>说明用户、场景、输入、核心行为、输出和限制。暂时无法确认的内容明确标为问题，不要让 Agent 自行补齐业务事实。</p>
+<h3 id="2-用-Plan-模式澄清"><a href="#2-用-Plan-模式澄清" class="headerlink" title="2. 用 Plan 模式澄清"></a>2. 用 Plan 模式澄清</h3><p>让 Agent 阅读代码和需求，提出问题、识别风险并给出实现路线。此阶段只规划，不修改代码。</p>
+<h3 id="3-将结论保存为-Spec"><a href="#3-将结论保存为-Spec" class="headerlink" title="3. 将结论保存为 Spec"></a>3. 将结论保存为 Spec</h3><p>把功能定义、非目标、技术约束和验收条件写入仓库，纳入 Git 管理。</p>
+<h3 id="4-人工审查关键点"><a href="#4-人工审查关键点" class="headerlink" title="4. 人工审查关键点"></a>4. 人工审查关键点</h3><p>新功能先看功能定义、问题清单和达成标准；改造任务再看根因、影响面和回归风险。</p>
+<h3 id="5-从-Spec-派生测试"><a href="#5-从-Spec-派生测试" class="headerlink" title="5. 从 Spec 派生测试"></a>5. 从 Spec 派生测试</h3><p>先覆盖核心功能，再覆盖主要流程，最后补边界情况。能自动化的验收条件尽量变成可执行测试。</p>
+<h3 id="6-拆分独立任务"><a href="#6-拆分独立任务" class="headerlink" title="6. 拆分独立任务"></a>6. 拆分独立任务</h3><p>按文件、模块或职责划分写入边界。只有互不冲突的任务才并行执行，必要时使用独立 worktree。</p>
+<h3 id="7-让-Agent-自己验证"><a href="#7-让-Agent-自己验证" class="headerlink" title="7. 让 Agent 自己验证"></a>7. 让 Agent 自己验证</h3><p>提供测试命令、类型检查、Lint、构建命令、浏览器或运行日志，让 Agent 能看到动作结果。</p>
+<h3 id="8-做真实端到端验收"><a href="#8-做真实端到端验收" class="headerlink" title="8. 做真实端到端验收"></a>8. 做真实端到端验收</h3><p>不要只读最终总结。亲自走一遍核心用户路径，并用真实数据提出业务问题。</p>
+<h3 id="9-把失败写回系统"><a href="#9-把失败写回系统" class="headerlink" title="9. 把失败写回系统"></a>9. 把失败写回系统</h3><p>将遗漏更新到 Spec，将故障变成测试，将关键决策写入项目文档。下一次任务应从更高的信息基线开始。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>AI Coding 的核心能力，不是把 Prompt 写得更花哨，而是建立一套稳定的约束和反馈系统。</p>
+<p>Spec 负责把模糊目标变成可管理的预期，测试负责把预期变成可执行的判断，真实验收负责发现文档和测试都没有覆盖的问题。三者共同形成闭环：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">需求 → Spec → 实现 → Test → 真实验收</span><br><span class="line">        ↑                         │</span><br><span class="line">        └──────── 反馈与修订 ──────┘</span><br></pre></td></tr></table></figure>
+
+<p>当生成代码不再稀缺，工程质量取决于能否正确回答三个问题：我们究竟要做什么，怎样证明它做对了，以及下一次修改时如何确保它仍然正确。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[cite:1] <a href="https://www.zhihu.com/xen/market/training/training-video/2043036294981357731/2043037357138604200">知乎知学堂：大厂优秀工程师使用 AI Coding 的最新方法与经验</a></p>
+<p>[cite:2] <a href="https://code.claude.com/docs/en/best-practices">Claude Code Docs：Best practices for Claude Code</a></p>
+<p>[cite:3] <a href="https://dora.dev/insights/balancing-ai-tensions/">DORA：Balancing AI tensions</a></p>
+<p>[cite:4] <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Anthropic：Effective harnesses for long-running agents</a></p>
+<p>[cite:5] <a href="https://github.blog/ai-and-ml/github-copilot/beyond-code-generation-a-developers-guide-to-agentic-engineering/">GitHub：Beyond code generation - a developer’s guide to agentic engineering</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI-Coding/" rel="tag"># AI Coding</a>
+              <a href="/tags/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/" rel="tag"># 软件工程</a>
+              <a href="/tags/SpecDD/" rel="tag"># SpecDD</a>
+              <a href="/tags/TDD/" rel="tag"># TDD</a>
+              <a href="/tags/Coding-Agent/" rel="tag"># Coding Agent</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/11/14/KV-Cache%E4%B8%8EPrompt-Caching-%E4%B8%BA%E4%BB%80%E4%B9%88%E7%A8%B3%E5%AE%9A%E5%89%8D%E7%BC%80%E8%83%BD%E9%99%8D%E4%BD%8EAgent%E6%88%90%E6%9C%AC/" rel="prev" title="KV Cache 与 Prompt Caching：为什么稳定前缀能降低 Agent 成本">
+                  <i class="fa fa-angle-left"></i> KV Cache 与 Prompt Caching：为什么稳定前缀能降低 Agent 成本
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2016 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Andrew Yu</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

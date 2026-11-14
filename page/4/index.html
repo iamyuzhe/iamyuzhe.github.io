@@ -166,7 +166,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -177,7 +177,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tag/">
-        <span class="site-state-item-count">74</span>
+        <span class="site-state-item-count">77</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -199,6 +199,197 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://iamyuzhe.github.io/2016/10/14/git%E4%B9%8B%E6%97%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/goldfish.jpg">
+      <meta itemprop="name" content="Andrew Yu">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew 的个人博客">
+      <meta itemprop="description" content="分享技术，记录生活……">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | Andrew 的个人博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2016/10/14/git%E4%B9%8B%E6%97%85/" class="post-title-link" itemprop="url">Git之旅</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-10-14 16:03:34" itemprop="dateCreated datePublished" datetime="2016-10-14T16:03:34+08:00">2016-10-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="git-diff-探究"><a href="#git-diff-探究" class="headerlink" title="git diff 探究"></a>git diff 探究</h2><blockquote>
+<p>git提交的三大部分：  </p>
+<ol>
+<li>working directory(工作目錄，每當修改后，工作目錄的狀態都會改變)  </li>
+<li>stage&#x2F;index file(索引文件，暂存区域块，連接 working directory 和 commit 的橋梁，使用 <code>git add</code> 命令登記后，index file 内容就會改變，與 working directory 同步了)  </li>
+<li>commit file(<code>git commit</code> 將 index file 中的内容提交到 commit 中。commit 之後，代碼才進入 git 倉庫)<br>其中 1 屬於工作區，后兩者屬於版本庫<br>版本控制系统 git 使用的是合并格式 diff 的变体</li>
+</ol>
+</blockquote>
+<h3 id="1-git-diff"><a href="#1-git-diff" class="headerlink" title="1. git diff"></a>1. git diff</h3><blockquote>
+<p>显示 working directory 與 index file 的差別</p>
+</blockquote>
+<p><em><strong>注：diff 後面可添加完整“文件路徑+文件名”，可查看某一文件内容額變化，如 <code>git diff ./source/_posts/git之旅.md</code></strong></em></p>
+<h3 id="2-git-diff-–cached"><a href="#2-git-diff-–cached" class="headerlink" title="2. git diff –cached"></a>2. git diff –cached</h3><blockquote>
+<p>顯示 index file 與 commit 的差別                  </p>
+</blockquote>
+<h3 id="3-git-diff-HEAD"><a href="#3-git-diff-HEAD" class="headerlink" title="3. git diff HEAD"></a>3. git diff HEAD</h3><blockquote>
+<p>顯示 working directory 與 commit 的差別，這些内容可在執行<code>git commit -a</code>命令時被提交(HEAD 表示當下分支最新的 commit 的版本)</p>
+</blockquote>
+<h3 id="4-git-diff-HEAD-–-lib"><a href="#4-git-diff-HEAD-–-lib" class="headerlink" title="4. git diff HEAD – .&#x2F;lib"></a>4. git diff HEAD – .&#x2F;lib</h3><blockquote>
+<p>顯示 working directory 的lib目錄與 commit 之間的差別(當前分支)</p>
+</blockquote>
+<p><em><strong>注：<code>--</code> 前後都有空格</strong></em></p>
+<h3 id="5-git-diff-test"><a href="#5-git-diff-test" class="headerlink" title="5. git diff test"></a>5. git diff test</h3><blockquote>
+<p>顯示 working directory 與”test”分支的差別。可加路徑限定符比較某一文件或目錄</p>
+</blockquote>
+<h3 id="6-git-diff-–stat"><a href="#6-git-diff-–stat" class="headerlink" title="6. git diff –stat"></a>6. git diff –stat</h3><blockquote>
+<p>不看每个文件的详细差别，只统计被改动的文件和行数等</p>
+</blockquote>
+<h2 id="git-diff-结果如何查看？"><a href="#git-diff-结果如何查看？" class="headerlink" title="git diff 结果如何查看？"></a>git diff 结果如何查看？</h2><blockquote>
+<ul>
+<li>第一行 <code>diff --git a/file b/file</code> 表示结果为 git 格式的 diff ，進行比較的是 a 版本(變動前，源文件)的 file 和 b 版本(變動后，目標文件)的 file</li>
+<li>第二行 <code>index e69de29..1747b05 100644</code> 表示兩個版本的 git 哈希值(index 區域的 e69de29 對象與工作目錄區域的 1747b05 對象進行比較，最後 6 位是對象的模式，普通文件， 644 權限)</li>
+<li>—代表源文件</li>
+<li>+++代表目标文件(通常 working directory 中的文件是目标文件)</li>
+<li>空格开头的行是源文件和目标文件中都出现的行</li>
+<li>差异按照差异小结进行组织，每个差异小结的第一行都是定位语句，由<code>@@</code>开头和结尾(如 <code>@@ -0,0 +1,117 @@</code> 表示源文件从第0行开始的0行和目标文件从第1行开始的117行构成一个差异小结)</li>
+</ul>
+</blockquote>
+<h2 id="git-撤销修改"><a href="#git-撤销修改" class="headerlink" title="git 撤销修改"></a>git 撤销修改</h2><p><code>git checkout -- file</code> :直接丢弃工作区某个文件的修改</p>
+<p><a href="http://blog.csdn.net/baple/article/details/39640129">参考网址:Git 撤销修改</a></p>
+<h2 id="git-取消-commit"><a href="#git-取消-commit" class="headerlink" title="git 取消 commit"></a>git 取消 commit</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard &lt;commit_id&gt;</span><br><span class="line">git push origin HEAD --force</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li><code>git reset --mixed</code> : 默認方式，等同于不帶任何參數的 <code>git reset</code> ,回退到某個版本，只保留源碼，回退 commit 和 index 信息</li>
+<li><code>git reset --soft</code> : 回退到某個版本，只回退 commit 信息，不恢復 index file 一級。若想再次提交，直接 commit</li>
+<li><code>git reset --hard</code> : 徹底回退到某個版本，本地源碼也會變爲上一版本的内容</li>
+</ul>
+</blockquote>
+<p><strong>注：</strong></p>
+<ol>
+<li>HEAD 最近一次提交；</li>
+<li>HEAD^(或HEAD<del>1,一次類推，上100個版本，即HEAD</del>100) 上一次提交；</li>
+<li><commit_id> 是每次 commit 的 SHA 值，可用 <code>git log</code> 查看</li>
+</ol>
+<h2 id="git查看全局配置信息"><a href="#git查看全局配置信息" class="headerlink" title="git查看全局配置信息"></a>git查看全局配置信息</h2><p>【命令】：<code>git config -l</code></p>
+<h2 id="git常见问题"><a href="#git常见问题" class="headerlink" title="git常见问题"></a>git常见问题</h2><h3 id="1-fatal-remote-origin-already-exists"><a href="#1-fatal-remote-origin-already-exists" class="headerlink" title="1. fatal: remote origin already exists"></a>1. fatal: remote origin already exists</h3><p>运行如下命令时；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git remote add origin git@cnb.cool:iamyuzhe/blog/blog.git</span><br><span class="line">fatal: remote origin already exists.</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>问题描述：远程origin仓库已经存在</p>
+</li>
+<li><p>原因：在仓库创建之后，已经执行过此操作</p>
+</li>
+<li><p>解决方案：<a href="http://blog.csdn.net/dengjianqiang2011/article/details/9260435">参考网址</a></p>
+</li>
+</ul>
+<ol>
+<li>先输入$ git remote rm origin</li>
+<li>再输入$ git remote add origin <a href="mailto:&#x67;&#x69;&#x74;&#x40;&#x63;&#x6e;&#98;&#46;&#x63;&#x6f;&#111;&#108;">git@cnb.cool</a>:iamyuzhe&#x2F;blog&#x2F;blog.git</li>
+</ol>
+<h3 id="2-warning-LF-will-be-replaced-by-CRLF"><a href="#2-warning-LF-will-be-replaced-by-CRLF" class="headerlink" title="2. warning: LF will be replaced by CRLF"></a>2. warning: LF will be replaced by CRLF</h3><p>运行如下命令时；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">warning: LF will be replaced by CRLF in _config.yml.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>原因分析：<br>CRLF – Carriage-Return Line-Feed 回车换行<br>就是回车(CR, ASCII 13, \r) 换行(LF, ASCII 10, \n)。<br>这两个ACSII字符不会在屏幕有任何输出，但在Windows中广泛使用来标识一行的结束。而在Linux&#x2F;UNIX系统中只有换行符。<br>也就是说在windows中的换行符为 CRLF， 而在linux下的换行符为：LF<br>当使用git来生成一个工程后，文件中的换行符为LF， 当执行git add .时，系统提示：LF 将被转换成 CRLF</p>
+</li>
+<li><p>解决方案：<a href="http://blog.csdn.net/u011935939/article/details/50624791">参考网址</a><br>运行如下命令时；</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config core.autocrlf false</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-如何退出編輯模式"><a href="#3-如何退出編輯模式" class="headerlink" title="3. 如何退出編輯模式"></a>3. 如何退出編輯模式</h3><p>命令模式下输入“ZZ”命令即可</p>
+<h3 id="4-執行push命令時出現錯誤"><a href="#4-執行push命令時出現錯誤" class="headerlink" title="4. 執行push命令時出現錯誤"></a>4. 執行push命令時出現錯誤</h3><p>具體錯誤:</p>
+<blockquote>
+<p>Updates were rejected because the remote contains work that you do</p>
+</blockquote>
+<p>原因：远程仓库比本地版本更新，所以需要先git pull,然后才能git push</p>
+<h3 id="5-git-diff-无任何結果輸出"><a href="#5-git-diff-无任何結果輸出" class="headerlink" title="5. git diff 无任何結果輸出"></a>5. git diff 无任何結果輸出</h3><p>【原因】当前分支没有内容需要提交（排除工作目录内容与暂存区内容相同）。如下，输入 <code>git status</code> 命令，虽然存在 <code>untracked file</code>, 但 <code>nothing added to commit</code>, 即没有需要提交的内容，此情况出现在刚添加一个新文件，且从未对该文件执行 <code>git add</code> 命令。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ git status</span><br><span class="line">On branch master</span><br><span class="line">Your branch is up-to-date with &#x27;origin/master&#x27;.</span><br><span class="line">Untracked files:</span><br><span class="line">  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)</span><br><span class="line"></span><br><span class="line">        others/test.md</span><br><span class="line"></span><br><span class="line">nothing added to commit but untracked files present (use &quot;git add&quot; to track)</span><br></pre></td></tr></table></figure>
+
+<p>【注】一般执行 <code>git commit</code> 命令之后，<code>git diff</code> 命令不会有任何输出。执行 <code>git status</code> 命令，会有如下输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nothing to commit, working directory clean</span><br></pre></td></tr></table></figure>
+
+<p>即工作目录是干净的，没有任何内容需要提交。</p>
+<p><a href="http://www.oschina.net/question/1428681_139293?sort=time">参考网址:我用windows msysgit 。在git bash命令窗口中输入git diff 命令为什么没有信息输出</a></p>
+<h3 id="6-git-status-输出结果中文乱码"><a href="#6-git-status-输出结果中文乱码" class="headerlink" title="6. git status 输出结果中文乱码"></a>6. git status 输出结果中文乱码</h3><p>【Reason】在默认设置下，中文文件名在工作区状态输出，查看历史更改概要，以及在补丁文件中，文件名的中文不能正确地显示，而是显示为八进制的字符编码</p>
+<p>配置变量 core.quotepath 设置为 false 可解决问题，具体命令为 <code>git config --global core.quotepath false</code></p>
+<h3 id="7-git-pull-进入vim窗口"><a href="#7-git-pull-进入vim窗口" class="headerlink" title="7. git pull 进入vim窗口"></a>7. git pull 进入vim窗口</h3><p>【解决步骤】</p>
+<blockquote>
+<ul>
+<li>esc 键退出编辑状态</li>
+<li>shift+;(即输入冒号)</li>
+<li>wq!(保存并退出)&#x2F;q!(不保存直接退出) + 回车</li>
+</ul>
+</blockquote>
+<p>【建议】<br>编辑代码之前先 <code>pull</code> 一下，<code>push</code> 前也 <code>pull</code> 一下，减少不必要的麻烦；<br>也可先保存操作， <code>pull</code> 之后，在回复保存的内容，具体操作如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git stash</span><br><span class="line">$ git pull</span><br><span class="line">$ git stash pop stash@&#123;0&#125;</span><br></pre></td></tr></table></figure>
+
+<p>【PS】 <code>git stash list</code> 可查看保存的信息,输出如 <code>stash@{0}: WIP on master: d9b4a59 更新了hexo搭建个人博客</code> ,其中 stash@{0} 为保存的标记</p>
+<p><a href="http://www.qingpingshan.com/pc/fwq/132173.html">git pull时出现vim窗口的解决办法</a></p>
+<h3 id="8-git-diff-输出结果为中文乱码"><a href="#8-git-diff-输出结果为中文乱码" class="headerlink" title="8. git diff 输出结果为中文乱码"></a>8. git diff 输出结果为中文乱码</h3><p>如果大部分文件 <code>git diff</code> 结果中文显示正常，只是某些文件中文乱码，最可能的原因是这些文件文字编码有问题，而不是因为某些设置有问题。</p>
+<h2 id="更新本地代码"><a href="#更新本地代码" class="headerlink" title="更新本地代码"></a>更新本地代码</h2><p><code>git pull</code> 拉取代码并合并 &#x3D; <code>git fech</code> + <code>git merge</code></p>
+<h2 id="旅途感想"><a href="#旅途感想" class="headerlink" title="旅途感想"></a>旅途感想</h2><h3 id="2017年1月22日"><a href="#2017年1月22日" class="headerlink" title="2017年1月22日"></a>2017年1月22日</h3><p>使用 git 工具，應該勤提交代碼，不然有的時候我們修改了多處代碼，一次性 add 進入索引區，在 <code>git commit</code> 時候，使用 <code>-m</code> 參數很難進行準確描述,即使描述清楚了，也會顯得冗長，對於修改的文件來説，描述也不夠專注準確</p>
+<h3 id="2017年2月7日"><a href="#2017年2月7日" class="headerlink" title="2017年2月7日"></a>2017年2月7日</h3><p>积累的过程真快乐^O^ </p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
